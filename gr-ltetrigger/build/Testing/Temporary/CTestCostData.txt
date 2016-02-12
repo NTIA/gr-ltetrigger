@@ -1,3 +1,0 @@
-test_ltetrigger 4 0.000593781
-qa_ltetrigger 2 0.376786
----

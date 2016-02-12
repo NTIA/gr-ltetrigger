@@ -1,1 +1,0 @@
-/usr/bin/c++  -fPIC -g  -shared -Wl,-soname,libgnuradio-ltetrigger.so -o libgnuradio-ltetrigger.so CMakeFiles/gnuradio-ltetrigger.dir/ltetrigger_impl.cc.o -lboost_filesystem -lboost_system /usr/local/lib/libgnuradio-runtime.so /usr/local/lib/libgnuradio-pmt.so -Wl,-rpath,/usr/local/lib: 

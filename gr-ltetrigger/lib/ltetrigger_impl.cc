@@ -25,6 +25,8 @@
 #include <gnuradio/io_signature.h>
 #include <pmt/pmt.h>
 
+#include <srslte/srslte.h>
+
 #include "ltetrigger_impl.h"
 
 namespace gr {
@@ -33,8 +35,7 @@ namespace gr {
     ltetrigger::sptr
     ltetrigger::make()
     {
-      return gnuradio::get_initial_sptr
-        (new ltetrigger_impl());
+      return gnuradio::get_initial_sptr(new ltetrigger_impl());
     }
 
     /*
