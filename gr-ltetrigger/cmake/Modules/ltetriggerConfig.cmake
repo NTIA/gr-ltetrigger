@@ -1,0 +1,30 @@
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(PC_LTETRIGGER ltetrigger)
+
+FIND_PATH(
+    LTETRIGGER_INCLUDE_DIRS
+    NAMES ltetrigger/api.h
+    HINTS $ENV{LTETRIGGER_DIR}/include
+        ${PC_LTETRIGGER_INCLUDEDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/include
+          /usr/local/include
+          /usr/include
+)
+
+FIND_LIBRARY(
+    LTETRIGGER_LIBRARIES
+    NAMES gnuradio-ltetrigger
+    HINTS $ENV{LTETRIGGER_DIR}/lib
+        ${PC_LTETRIGGER_LIBDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/lib
+          ${CMAKE_INSTALL_PREFIX}/lib64
+          /usr/local/lib
+          /usr/local/lib64
+          /usr/lib
+          /usr/lib64
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LTETRIGGER DEFAULT_MSG LTETRIGGER_LIBRARIES LTETRIGGER_INCLUDE_DIRS)
+MARK_AS_ADVANCED(LTETRIGGER_LIBRARIES LTETRIGGER_INCLUDE_DIRS)
+
