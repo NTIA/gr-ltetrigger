@@ -23,6 +23,9 @@
 
 #include <pmt/pmt.h>
 
+#include <srslte/srslte.h>
+#include <srslte/rf/rf_utils.h>
+
 #include <ltetrigger/ltetrigger.h>
 
 namespace gr {
@@ -32,6 +35,30 @@ namespace gr {
     {
     private:
       const pmt::pmt_t port_id = pmt::mp("trigger");
+
+      cell_search_cfg_t config = {
+        50,   // maximum number of 5ms frames to capture for MIB decoding
+        50,   // maximum number of 5ms frames to capture for PSS correlation
+        4.0,  // early-stops cell detection if mean PSR is above this value
+        0     // 0 or negative to disable AGC
+      };
+
+      struct cells {
+        srslte_cell_t cell;
+        float freq;
+        int dl_earfcn;
+        float power;
+      };
+
+      struct cells results[1024];
+
+      int max_frames = SRSLTE_CS_DEFAULT_MAXFRAMES_TOTAL;
+
+      srslte_ue_cellsearch_t cs;
+
+      srslte_ue_cellsearch_result_t found_cells[3];
+
+      srslte_cell_t cell;
 
     public:
       ltetrigger_impl();
