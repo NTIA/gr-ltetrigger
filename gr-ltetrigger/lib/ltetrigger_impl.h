@@ -52,7 +52,11 @@ namespace gr {
 
       struct cells results[1024];
 
-      int max_frames = SRSLTE_CS_DEFAULT_MAXFRAMES_TOTAL;
+      int max_frames_total = SRSLTE_CS_DEFAULT_MAXFRAMES_TOTAL;
+      int max_frames_per_call = 2;
+      const uint32_t samples_per_slot = 960;
+      const uint32_t slots_per_frame = 20;
+      const uint32_t samples_per_frame = samples_per_slot * slots_per_frame;
 
       srslte_ue_cellsearch_t cs;
 
@@ -64,7 +68,6 @@ namespace gr {
       ltetrigger_impl();
       ~ltetrigger_impl();
 
-      // Where all the action really happens
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,
                gr_vector_void_star &output_items);

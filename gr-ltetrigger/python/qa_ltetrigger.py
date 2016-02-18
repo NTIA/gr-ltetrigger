@@ -47,9 +47,10 @@ class qa_ltetrigger(gr_unittest.TestCase):
         # - Transport block size: 904
         # - Cell ID: 369
         enodeb_data = np.fromfile(data_fname, dtype=np.complexfloating)
-        vsrc = blocks.vector_source_c(enodeb_data, repeat=False)
+        vsrc = blocks.vector_source_c(enodeb_data, repeat=True)
+        head = blocks.head(gr.sizeof_gr_complex, 100000)
         ltetrig = ltetrigger.ltetrigger()
-        self.tb.connect(vsrc, ltetrig)
+        self.tb.connect(vsrc, head, ltetrig)
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
