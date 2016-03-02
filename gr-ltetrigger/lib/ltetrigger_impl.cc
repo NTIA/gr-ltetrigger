@@ -46,8 +46,6 @@ cf_t dummy[MAX_TIME_OFFSET];
 
 
 static int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer) {
-
-
   if (srslte_sync_sss_detected(&q->sfind)) {
     /* Get the subframe index (0 or 5) */
     q->sf_idx = srslte_sync_get_sf_idx(&q->sfind) + q->nof_recv_sf;
@@ -82,7 +80,6 @@ static int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer) {
     q->strack.cfo_i    = q->sfind.cfo_i;
   }
 
-
   return 0;
 }
 
@@ -114,6 +111,7 @@ static int track_peak_ok(srslte_ue_sync_t *q, uint32_t track_idx) {
 
     SRSLTE_DEBUG("Positive time offset %d samples. Mean time offset %f.\n", q->time_offset, q->mean_time_offset);
 
+    // FIXME!!
     if (q->recv_callback(q->stream, dummy, (uint32_t) q->time_offset, &q->last_timestamp) < 0) {
       fprintf(stderr, "Error receiving from USRP\n");
       return SRSLTE_ERROR;
@@ -148,6 +146,7 @@ static int track_peak_no(srslte_ue_sync_t *q) {
 int ue_sync_buffer(srslte_ue_sync_t *q) {
   int ret = SRSLTE_ERROR_INVALID_INPUTS;
   uint32_t track_idx;
+
 
   if (q               != NULL   &&
       q->input_buffer != NULL)
@@ -370,9 +369,8 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(0, 0, 0))
     {
-      message_port_register_out(port_id);
-
-      set_output_multiple(samples_per_frame);
+      srslte_verbose += 2;
+      assert(SRSLTE_VERBOSE_ISDEBUG());
 
       // srsLTE initialization below this line:
 
@@ -398,7 +396,6 @@ namespace gr {
         );
 
       // Init ue_sync
-      // https://github.com/srsLTE/srsLTE/blob/master/srslte/lib/ue/src/ue_sync.c
       std::memset(&cs.ue_sync, 0, sizeof(srslte_ue_sync_t));
       cs.ue_sync.cell = cell;
       cs.ue_sync.fft_size = srslte_symbol_sz(cs.ue_sync.cell.nof_prb);
@@ -458,12 +455,20 @@ namespace gr {
         exit(-1);
       }
 
+      srslte_ue_sync_reset(&cs.ue_sync);
+
       if (config.max_frames_pss && config.max_frames_pss <= cs.max_frames) {
         cs.nof_frames_to_scan = config.max_frames_pss;
       }
       if (config.threshold) {
         cs.detect_threshold = config.threshold;
       }
+
+      // Block-specific init
+
+      set_output_multiple(cs.ue_sync.frame_len);
+
+      message_port_register_out(port_id);
 
     }
 
@@ -482,21 +487,18 @@ namespace gr {
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
 
-      //std::cout << "noutput_items orig: " << noutput_items << std::endl;
+      std::cout << "noutput_items orig: " << noutput_items << std::endl;
 
-      uint32_t frames_available = noutput_items / samples_per_frame;
-      //std::cout << "frames_available: " << frames_available << std::endl;
+      uint32_t frames_available = noutput_items / cs.ue_sync.frame_len;
+      std::cout << "frames_available: " << frames_available << std::endl;
       uint32_t nof_frames_to_scan;
       if (frames_available < max_frames_per_call)
         nof_frames_to_scan = frames_available;
       else
         nof_frames_to_scan = max_frames_per_call;
-      cs.nof_frames_to_scan = nof_frames_to_scan;
-      //std::cout << "nof_frames_to_scan: " << cs.nof_frames_to_scan << std::endl;
 
-      // drop scanned samples off input buffer
-      noutput_items = nof_frames_to_scan * samples_per_frame;
-      //std::cout << "noutput_items final: " << noutput_items << std::endl;
+      cs.nof_frames_to_scan = nof_frames_to_scan;
+      std::cout << "nof_frames_to_scan: " << cs.nof_frames_to_scan << std::endl;
 
       // copy the desired number of frames to a buffer srsLTE can work with
       memcpy(cs.ue_sync.input_buffer, in, sizeof(cf_t) * noutput_items);
@@ -520,13 +522,24 @@ namespace gr {
         // }
       }
 
-      std::cout << "nof_detected_cells: " << nof_detected_cells << std::endl;
+      if (nof_detected_cells) {
+        // Report detected cell
+        // TODO: use more srslte facilities to extract this information
+        pmt::pmt_t msg = pmt::make_dict();
+        msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
+        msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp(369));
 
-      pmt::pmt_t msg = pmt::make_dict();
-      msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
-      msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp(369));
+        message_port_pub(port_id, msg);
 
-      message_port_pub(port_id, msg);
+        // A negative time offset means there are samples in buffer for the next subframe,
+        if (cs.ue_sync.time_offset < 0) {
+          cs.ue_sync.time_offset = -cs.ue_sync.time_offset;
+        }
+
+        // drop scanned samples off input buffer
+        noutput_items = nof_frames_to_scan * cs.ue_sync.frame_len - cs.ue_sync.time_offset;
+        std::cout << "noutput_items final: " << noutput_items << std::endl;
+      }
 
       // Tell runtime system how many output items we produced.
       return noutput_items;
