@@ -44,7 +44,6 @@ cf_t dummy[MAX_TIME_OFFSET];
 #define TRACK_FRAME_SIZE        32
 #define FIND_NOF_AVG_FRAMES     2
 
-
 static int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer) {
   if (srslte_sync_sss_detected(&q->sfind)) {
     /* Get the subframe index (0 or 5) */

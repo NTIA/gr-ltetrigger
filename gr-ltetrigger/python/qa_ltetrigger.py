@@ -66,8 +66,13 @@ class qa_ltetrigger(gr_unittest.TestCase):
         #  - Modulation type:            QPSK
         #  - Transport block size:        208
         # Type new MCS index and press Enter: Done
-        enodeb_data = np.fromfile(data_fname, dtype=np.complexfloating)
-        vsrc = blocks.vector_source_c(enodeb_data, repeat=True)
+
+        # pdsch_enodeb exports as C type _Complex float -> 2x 32-bit floats,
+        # but vector source doesn't like np.complex64, so first read file as
+        # np.complex64, then cast.
+        enodeb_raw_data = np.fromfile(data_fname, dtype=np.complex64)
+        enodeb_casted_data = np.array(enodeb_raw_data, dtype=np.complexfloating)
+        vsrc = blocks.vector_source_c(enodeb_casted_data, repeat=True)
         head = blocks.head(gr.sizeof_gr_complex, 100000)
         ltetrig = ltetrigger.ltetrigger()
         self.tb.connect(vsrc, head, ltetrig)
