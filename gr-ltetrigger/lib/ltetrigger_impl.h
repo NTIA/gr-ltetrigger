@@ -52,15 +52,15 @@ namespace gr {
 
       struct cells results[1024];
 
-      //int max_frames_total = SRSLTE_CS_DEFAULT_MAXFRAMES_TOTAL;
-      int max_frames_total = -1;
-      int max_frames_per_call = 2;
-
       srslte_ue_cellsearch_t cs;
 
       srslte_ue_cellsearch_result_t found_cells[3];
 
       srslte_cell_t cell;
+
+      uint32_t d_N_id_2 = 0; // 0, 1, or 2
+      uint32_t d_nof_detected_frames = 0;
+      uint32_t d_nof_scanned_frames = 0;
 
     public:
       ltetrigger_impl();

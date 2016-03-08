@@ -58,11 +58,13 @@ static int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer) {
                srslte_sync_get_last_peak_value(&q->sfind), q->cell.id, srslte_cp_string(q->cell.cp));
 
   if (q->frame_find_cnt >= q->nof_avg_find_frames || q->peak_idx < 2*q->fft_size) {
-    SRSLTE_DEBUG("Realigning frame, reading %d samples\n", q->peak_idx+q->sf_len/2);
-    /* Receive the rest of the subframe so that we are subframe aligned*/
-    if (q->recv_callback(q->stream, input_buffer, q->peak_idx+q->sf_len/2, &q->last_timestamp) < 0) {
-      return SRSLTE_ERROR;
-    }
+    /* FIXME: is this handled by the gnuradio scheduler or do I need do something
+              specific to keep frame aligment? */
+    // SRSLTE_DEBUG("Realigning frame, reading %d samples\n", q->peak_idx+q->sf_len/2);
+    // /* Receive the rest of the subframe so that we are subframe aligned*/
+    // if (q->recv_callback(q->stream, input_buffer, q->peak_idx+q->sf_len/2, &q->last_timestamp) < 0) {
+    //   return SRSLTE_ERROR;
+    // }
 
     /* Reset variables */
     q->frame_ok_cnt = 0;
@@ -72,6 +74,7 @@ static int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer) {
     q->mean_time_offset = 0;
 
     /* Goto Tracking state */
+    SRSLTE_DEBUG("Entering tracking state, reading next %d samples\n", q->peak_idx+q->sf_len/2);
     q->state = SF_TRACK;
 
     /* Initialize track state CFO */
@@ -111,10 +114,10 @@ static int track_peak_ok(srslte_ue_sync_t *q, uint32_t track_idx) {
     SRSLTE_DEBUG("Positive time offset %d samples. Mean time offset %f.\n", q->time_offset, q->mean_time_offset);
 
     // FIXME!!
-    if (q->recv_callback(q->stream, dummy, (uint32_t) q->time_offset, &q->last_timestamp) < 0) {
-      fprintf(stderr, "Error receiving from USRP\n");
-      return SRSLTE_ERROR;
-    }
+    // if (q->recv_callback(q->stream, dummy, (uint32_t) q->time_offset, &q->last_timestamp) < 0) {
+    //   fprintf(stderr, "Error receiving from USRP\n");
+    //   return SRSLTE_ERROR;
+    // }
     q->time_offset = 0;
   }
 
@@ -282,74 +285,6 @@ static void get_cell(srslte_ue_cellsearch_t *q,
 }
 
 
-/** Finds a cell for a given N_id_2 and stores ID and CP in the structure pointed by found_cell.
- * Returns 1 if the cell is found, 0 if not or -1 on error
- */
-int ue_cellsearch_scan_N_id_2(srslte_ue_cellsearch_t *q,
-                              uint32_t N_id_2,
-                              srslte_ue_cellsearch_result_t *found_cell)
-{
-  int ret = SRSLTE_ERROR_INVALID_INPUTS;
-  uint32_t nof_detected_frames = 0;
-  uint32_t nof_scanned_frames = 0;
-
-  if (q != NULL)
-  {
-    ret = SRSLTE_SUCCESS;
-
-    srslte_ue_sync_set_N_id_2(&q->ue_sync, N_id_2);
-    srslte_ue_sync_reset(&q->ue_sync);
-    do {
-
-      ret = ue_sync_buffer(&q->ue_sync);
-      if (ret < 0) {
-        fprintf(stderr, "Error calling srslte_ue_sync_work()\n");
-        break;
-      } else if (ret == 1) {
-        /* This means a peak was found and ue_sync is now in tracking state */
-        ret = srslte_sync_get_cell_id(&q->ue_sync.strack);
-        if (ret >= 0) {
-          if (srslte_sync_get_peak_value(&q->ue_sync.strack) > q->detect_threshold) {
-            /* Save cell id, cp and peak */
-            q->candidates[nof_detected_frames].cell_id = (uint32_t) ret;
-            q->candidates[nof_detected_frames].cp = srslte_sync_get_cp(&q->ue_sync.strack);
-            q->candidates[nof_detected_frames].peak = q->ue_sync.strack.pss.peak_value;
-            q->candidates[nof_detected_frames].psr = srslte_sync_get_peak_value(&q->ue_sync.strack);
-            q->candidates[nof_detected_frames].cfo = srslte_ue_sync_get_cfo(&q->ue_sync);
-            // SRSLTE_DEBUG
-            //    ("CELL SEARCH: [%3d/%3d/%d]: Found peak PSR=%.3f, Cell_id: %d CP: %s\n",
-            //     nof_detected_frames, nof_scanned_frames, q->nof_frames_to_scan,
-            //     q->candidates[nof_detected_frames].psr, q->candidates[nof_detected_frames].cell_id,
-            //     srslte_cp_string(q->candidates[nof_detected_frames].cp));
-
-            nof_detected_frames++;
-
-          }
-        }
-      } else if (ret == 0) {
-        /* This means a peak is not yet found and ue_sync is in find state
-         * Do nothing, just wait and increase nof_scanned_frames counter.
-         */
-      }
-
-      nof_scanned_frames++;
-
-    } while (nof_scanned_frames < q->nof_frames_to_scan);
-
-    /* In either case, check if the mean PSR is above the minimum threshold */
-    if (nof_detected_frames > 0) {
-      ret = 1;      // A cell has been found.
-      if (found_cell) {
-        get_cell(q, nof_detected_frames, found_cell);
-      }
-    } else {
-      ret = 0;      // A cell was not found.
-    }
-  }
-
-  return ret;
-}
-
 namespace gr {
   namespace ltetrigger {
 
@@ -374,7 +309,7 @@ namespace gr {
       // srsLTE initialization below this line:
 
       std::memset(&cs, 0, sizeof(srslte_ue_cellsearch_t));
-      cs.max_frames = max_frames_total;
+      cs.max_frames = SRSLTE_CS_DEFAULT_MAXFRAMES_TOTAL;
       cs.nof_frames_to_scan = SRSLTE_CS_DEFAULT_NOFFRAMES_TOTAL;
       cs.detect_threshold = 1.0;
 
@@ -385,13 +320,13 @@ namespace gr {
       cell.nof_prb = SRSLTE_CS_NOF_PRB;
 
       cs.candidates = static_cast<srslte_ue_cellsearch_result_t *>(
-        calloc(max_frames_total, sizeof(srslte_ue_cellsearch_result_t))
+        calloc(cs.max_frames, sizeof(srslte_ue_cellsearch_result_t))
         );
       cs.mode_ntimes = static_cast<uint32_t *>(
-        calloc(max_frames_total, sizeof(uint32_t))
+        calloc(cs.max_frames, sizeof(uint32_t))
         );
       cs.mode_counted = static_cast<uint8_t *>(
-        calloc(max_frames_total, sizeof(uint8_t))
+        calloc(cs.max_frames, sizeof(uint8_t))
         );
 
       // Init ue_sync
@@ -447,13 +382,14 @@ namespace gr {
        * be a huge problem.
        */
       cs.ue_sync.input_buffer = static_cast<cf_t *>(
-        srslte_vec_malloc(2*cs.ue_sync.frame_len * sizeof(cf_t))
+        srslte_vec_malloc(cs.ue_sync.frame_len * sizeof(cf_t))
         );
       if (!cs.ue_sync.input_buffer) {
         std::cerr << "malloc" << std::endl;
         exit(-1);
       }
 
+      srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2); // TODO: consider if correct
       srslte_ue_sync_reset(&cs.ue_sync);
 
       if (config.max_frames_pss && config.max_frames_pss <= cs.max_frames) {
@@ -462,6 +398,8 @@ namespace gr {
       if (config.threshold) {
         cs.detect_threshold = config.threshold;
       }
+
+      cs.nof_frames_to_scan = SRSLTE_CS_DEFAULT_NOFFRAMES_TOTAL;
 
       // Block-specific init
 
@@ -486,42 +424,52 @@ namespace gr {
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
 
-      std::cout << "noutput_items orig: " << noutput_items << std::endl;
+      uint32_t nof_detected_cells = 0;
 
-      uint32_t frames_available = noutput_items / cs.ue_sync.frame_len;
-      std::cout << "frames_available: " << frames_available << std::endl;
-      uint32_t nof_frames_to_scan;
-      if (frames_available < max_frames_per_call)
-        nof_frames_to_scan = frames_available;
-      else
-        nof_frames_to_scan = max_frames_per_call;
+      std::cout << "nitems recvd: " << noutput_items << std::endl;
 
-      cs.nof_frames_to_scan = nof_frames_to_scan;
-      std::cout << "nof_frames_to_scan: " << cs.nof_frames_to_scan << std::endl;
+      // We might get more than 1 frame (half-frame) passed in, but srsLTE
+      // expects exactly one, so this is just for information... we should only
+      // "consume" cs.ue_sync.frame_len samples each call to work
+      uint32_t nof_frames_available = noutput_items / cs.ue_sync.frame_len;
+      std::cout << "frames_available: " << nof_frames_available << std::endl;
 
       // copy the desired number of frames to a buffer srsLTE can work with
       memcpy(cs.ue_sync.input_buffer, in, sizeof(cf_t) * noutput_items);
 
       float max_peak_value = -1.0;
-      uint32_t nof_detected_cells = 0;
-      for (uint32_t N_id_2=0, ret=0; N_id_2<3 && ret >= 0; N_id_2++) {
-        ret = ue_cellsearch_scan_N_id_2(&cs,
-                                        N_id_2,
-                                        &found_cells[N_id_2]);
-        if (ret < 0) {
-          std::cerr << "Error searching cell" << std::endl;
-          return ret;
+
+      int ret = ue_sync_buffer(&cs.ue_sync);
+      if (ret < 0) {
+        fprintf(stderr, "Error calling srslte_ue_sync_work()\n");
+        return 0;
+      } else if (ret == 1) {
+        /* This means a peak was found and ue_sync is now in tracking state */
+        ret = srslte_sync_get_cell_id(&cs.ue_sync.strack);
+        if (ret >= 0) {
+          if (srslte_sync_get_peak_value(&cs.ue_sync.strack) > cs.detect_threshold) {
+            /* Save cell id, cp and peak */
+            cs.candidates[d_nof_detected_frames].cell_id = (uint32_t) ret;
+            cs.candidates[d_nof_detected_frames].cp = srslte_sync_get_cp(&cs.ue_sync.strack);
+            cs.candidates[d_nof_detected_frames].peak = cs.ue_sync.strack.pss.peak_value;
+            cs.candidates[d_nof_detected_frames].psr = srslte_sync_get_peak_value(&cs.ue_sync.strack);
+            cs.candidates[d_nof_detected_frames].cfo = srslte_ue_sync_get_cfo(&cs.ue_sync);
+            SRSLTE_DEBUG
+               ("CELL SEARCH: [%3d/%3d/%d]: Found peak PSR=%.3f, Cell_id: %d CP: %s\n",
+                d_nof_detected_frames, d_nof_scanned_frames, cs.nof_frames_to_scan,
+                cs.candidates[d_nof_detected_frames].psr, cs.candidates[d_nof_detected_frames].cell_id,
+                srslte_cp_string(cs.candidates[d_nof_detected_frames].cp));
+
+            d_nof_detected_frames++;
+          }
         }
-        nof_detected_cells += ret;
-        // if (max_N_id_2) {
-        //   if (found_cells[N_id_2].peak > max_peak_value) {
-        //     max_peak_value = found_cells[N_id_2].peak;
-        //     *max_N_id_2 = N_id_2;
-        //   }
-        // }
       }
+      d_nof_scanned_frames++;
+      nof_detected_cells += ret;
 
       if (nof_detected_cells) {
+        get_cell(&cs, d_nof_detected_frames, &found_cells[d_N_id_2]);
+
         // Report detected cell
         // TODO: use more srslte facilities to extract this information
         pmt::pmt_t msg = pmt::make_dict();
@@ -530,15 +478,28 @@ namespace gr {
 
         message_port_pub(port_id, msg);
 
-        // A negative time offset means there are samples in buffer for the next subframe,
-        if (cs.ue_sync.time_offset < 0) {
-          cs.ue_sync.time_offset = -cs.ue_sync.time_offset;
-        }
-
-        // drop scanned samples off input buffer
-        noutput_items = nof_frames_to_scan * cs.ue_sync.frame_len - cs.ue_sync.time_offset;
-        std::cout << "noutput_items final: " << noutput_items << std::endl;
+        //nof_detected_cells = 0; // FIXME: consider
       }
+
+      if (d_nof_scanned_frames >= cs.nof_frames_to_scan) {
+        d_nof_scanned_frames = 0;
+        d_N_id_2 = ++d_N_id_2 % 3;
+        srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
+        srslte_ue_sync_reset(&cs.ue_sync);
+      }
+
+      // A negative time offset means there are samples in buffer for the next subframe,
+      if (cs.ue_sync.time_offset < 0) {
+        cs.ue_sync.time_offset = -cs.ue_sync.time_offset;
+      }
+
+      // drop scanned samples off input buffer
+      if (cs.ue_sync.state == SF_TRACK)
+        noutput_items = cs.ue_sync.peak_idx + cs.ue_sync.sf_len / 2;
+      else
+        noutput_items = cs.ue_sync.frame_len - cs.ue_sync.time_offset;
+      std::cout << "nitems consumed: " << noutput_items << std::endl;
+
 
       // Tell runtime system how many output items we produced.
       return noutput_items;
