@@ -303,6 +303,7 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(0, 0, 0))
     {
+      // Set debug
       srslte_verbose += 2;
       assert(SRSLTE_VERBOSE_ISDEBUG());
 
@@ -467,7 +468,7 @@ namespace gr {
       d_nof_scanned_frames++;
       nof_detected_cells += ret;
 
-      if (nof_detected_cells) {
+      if (d_nof_detected_frames) {
         get_cell(&cs, d_nof_detected_frames, &found_cells[d_N_id_2]);
 
         // Report detected cell

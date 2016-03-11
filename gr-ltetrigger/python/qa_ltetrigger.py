@@ -84,6 +84,8 @@ class qa_ltetrigger(gr_unittest.TestCase):
         # run enobeb_data through ltetrigger
         self.tb.run()
 
+        print("FINISHED RUN")
+
         nmsgs = msgdebug.num_messages()
         self.assertTrue(nmsgs, msg="No message triggered")
 
