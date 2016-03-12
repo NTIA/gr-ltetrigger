@@ -61,6 +61,10 @@ namespace gr {
       uint32_t d_N_id_2 = 0; // 0, 1, or 2
       uint32_t d_nof_detected_frames = 0;
       uint32_t d_nof_scanned_frames = 0;
+      uint32_t d_nconsumed = 0;
+
+      bool d_initial_tracking_adjust = true;
+
 
     public:
       ltetrigger_impl();

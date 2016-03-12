@@ -73,7 +73,7 @@ class qa_ltetrigger(gr_unittest.TestCase):
         enodeb_raw_data = np.fromfile(data_fname, dtype=np.complex64)
         enodeb_casted_data = np.array(enodeb_raw_data, dtype=np.complexfloating)
         vsrc = blocks.vector_source_c(enodeb_casted_data, repeat=True)
-        head = blocks.head(gr.sizeof_gr_complex, 100000)
+        head = blocks.head(gr.sizeof_gr_complex, 50000)
         ltetrig = ltetrigger.ltetrigger()
         self.tb.connect(vsrc, head, ltetrig)
 
@@ -83,8 +83,6 @@ class qa_ltetrigger(gr_unittest.TestCase):
 
         # run enobeb_data through ltetrigger
         self.tb.run()
-
-        print("FINISHED RUN")
 
         nmsgs = msgdebug.num_messages()
         self.assertTrue(nmsgs, msg="No message triggered")

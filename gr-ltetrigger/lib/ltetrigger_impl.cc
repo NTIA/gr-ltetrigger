@@ -111,7 +111,7 @@ static int track_peak_ok(srslte_ue_sync_t *q, uint32_t track_idx) {
     discard the offseted samples to align next frame */
   if (q->time_offset > 0 && q->time_offset < MAX_TIME_OFFSET) {
 
-    SRSLTE_DEBUG("Positive time offset %d samples. Mean time offset %f.\n", q->time_offset, q->mean_time_offset);
+    SRSLTE_DEBUG("FIXME!! Positive time offset %d samples. Mean time offset %f.\n", q->time_offset, q->mean_time_offset);
 
     // FIXME!!
     // if (q->recv_callback(q->stream, dummy, (uint32_t) q->time_offset, &q->last_timestamp) < 0) {
@@ -383,7 +383,7 @@ namespace gr {
        * be a huge problem.
        */
       cs.ue_sync.input_buffer = static_cast<cf_t *>(
-        srslte_vec_malloc(cs.ue_sync.frame_len * sizeof(cf_t))
+        srslte_vec_malloc(2*cs.ue_sync.frame_len * sizeof(cf_t))
         );
       if (!cs.ue_sync.input_buffer) {
         std::cerr << "malloc" << std::endl;
@@ -404,7 +404,7 @@ namespace gr {
 
       // Block-specific init
 
-      set_output_multiple(cs.ue_sync.frame_len);
+      set_output_multiple(2*cs.ue_sync.frame_len);
 
       message_port_register_out(port_id);
 
@@ -424,7 +424,6 @@ namespace gr {
                           gr_vector_void_star &output_items)
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
-
       uint32_t nof_detected_cells = 0;
 
       std::cout << "nitems recvd: " << noutput_items << std::endl;
@@ -436,7 +435,13 @@ namespace gr {
       std::cout << "frames_available: " << nof_frames_available << std::endl;
 
       // copy the desired number of frames to a buffer srsLTE can work with
-      memcpy(cs.ue_sync.input_buffer, in, sizeof(cf_t) * noutput_items);
+      int offset = cs.ue_sync.time_offset;
+      if (offset < 0)
+        offset = -offset;
+      memcpy(cs.ue_sync.input_buffer, &in[offset], sizeof(cf_t) * (cs.ue_sync.frame_len - offset));
+      std::cout << "input_buffer size: " << cs.ue_sync.frame_len << std::endl;
+      std::cout << "inserting " << (cs.ue_sync.frame_len - offset);
+      std::cout << " objects at index " << offset << std::endl;
 
       float max_peak_value = -1.0;
 
@@ -495,15 +500,23 @@ namespace gr {
       }
 
       // drop scanned samples off input buffer
-      if (cs.ue_sync.state == SF_TRACK)
-        noutput_items = cs.ue_sync.peak_idx + cs.ue_sync.sf_len / 2;
-      else
-        noutput_items = cs.ue_sync.frame_len - cs.ue_sync.time_offset;
-      std::cout << "nitems consumed: " << noutput_items << std::endl;
+      // TODO: handle case of positive offset
+      int adjust = 0;
+      if (cs.ue_sync.state == SF_TRACK) {
+        if (d_initial_tracking_adjust) {
+          adjust = (cs.ue_sync.peak_idx + cs.ue_sync.sf_len / 2);
+          // TODO: d_initial_tracking_adjust must be set by the fn that
+          //       sets SF_TRACK when it's integrated into this class
+          d_initial_tracking_adjust = false;
+        }
+      }
+      d_nconsumed = cs.ue_sync.frame_len + adjust - cs.ue_sync.time_offset;
 
+      std::cout << "nconsumed: " << d_nconsumed << std::endl;
+      assert(d_nconsumed <= noutput_items);
 
       // Tell runtime system how many output items we produced.
-      return noutput_items;
+      return d_nconsumed;
     }
 
   } /* namespace ltetrigger */
