@@ -34,6 +34,16 @@ namespace gr {
     class ltetrigger_impl : public ltetrigger
     {
     private:
+      int ue_sync_buffer(srslte_ue_sync_t *q);
+      void get_cell(srslte_ue_cellsearch_t *q,
+                    uint32_t nof_detected_frames,
+                    srslte_ue_cellsearch_result_t *found_cell);
+      int track_peak_no(srslte_ue_sync_t *q);
+      int track_peak_ok(srslte_ue_sync_t *q, uint32_t track_idx);
+      int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer);
+      int ue_sync_init(srslte_ue_sync_t *q,
+                       srslte_cell_t cell);
+
       const pmt::pmt_t port_id = pmt::mp("trigger");
 
       cell_search_cfg_t config = {
@@ -50,7 +60,7 @@ namespace gr {
         float power;
       };
 
-      struct cells results[1024];
+      struct cells d_results[1024];
 
       srslte_ue_cellsearch_t cs;
 
@@ -58,13 +68,14 @@ namespace gr {
 
       srslte_cell_t cell;
 
+      srslte_ue_mib_t mib;
+
       uint32_t d_N_id_2 = 0; // 0, 1, or 2
       uint32_t d_nof_detected_frames = 0;
       uint32_t d_nof_scanned_frames = 0;
       uint32_t d_nconsumed = 0;
 
-      bool d_initial_tracking_adjust = true;
-
+      bool d_make_tracking_adjustment = true;
 
     public:
       ltetrigger_impl();
