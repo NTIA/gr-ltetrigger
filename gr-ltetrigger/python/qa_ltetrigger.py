@@ -41,30 +41,30 @@ class qa_ltetrigger(gr_unittest.TestCase):
 
         # load 10 lte frames from data:
         # frames were created with the following parameters:
-        # fc - 2400 MHz
+        # fc - 2145 MHz (EARFCN 4500)
         # nframes - 10
         # cell_id - 369
         # nof_prb 6 (1.4 MHz)
 
-        # $ ./pdsch_enodeb -o lte_test_frames -f 2400 MHz -n 10 -c 369 -p 6
+        # $ ./pdsch_enodeb -o lte_test_frames -f 2145 MHz -n 10 -c 369 -p 6
         # linux; GNU C++ version 5.2.1 20151010; Boost_105800; UHD_003.010.git-119-g42a3eeb6
         #
         # Using Volk machine: avx2_64_mmx
-        #  - Resource Allocation Type:        Type 0
-        #    + Resource Block Group Size:        1
-        #    + RBG Bitmap:            0x3f
-        #  - Modulation and coding scheme index:    1
-        #  - HARQ process:            0
-        #  - New data indicator:            No
-        #  - Redundancy version:            0
-        #  - TPC command for PUCCH:        --
+        #  - Resource Allocation Type:		Type 0
+        #    + Resource Block Group Size:		1
+        #    + RBG Bitmap:			0x3f
+        #  - Modulation and coding scheme index:	1
+        #  - HARQ process:			0
+        #  - New data indicator:			No
+        #  - Redundancy version:			0
+        #  - TPC command for PUCCH:		--
         #  - PRB Bitmap Assignment 0st slot:
         # 0, 1, 2, 3, 4, 5,
         #  - PRB Bitmap Assignment 1st slot:
         # 0, 1, 2, 3, 4, 5,
-        #  - Number of PRBs:            6
-        #  - Modulation type:            QPSK
-        #  - Transport block size:        208
+        #  - Number of PRBs:			6
+        #  - Modulation type:			QPSK
+        #  - Transport block size:		208
         # Type new MCS index and press Enter: Done
 
         # pdsch_enodeb exports as C type _Complex float -> 2x 32-bit floats,
@@ -73,14 +73,14 @@ class qa_ltetrigger(gr_unittest.TestCase):
         enodeb_raw_data = np.fromfile(data_fname, dtype=np.complex64)
         enodeb_casted_data = np.array(enodeb_raw_data, dtype=np.complexfloating)
         vsrc = blocks.vector_source_c(enodeb_casted_data, repeat=True)
-        head = blocks.head(gr.sizeof_gr_complex, 50000)
+        head = blocks.head(gr.sizeof_gr_complex, 5000000)
         ltetrig = ltetrigger.ltetrigger()
-        #self.tb.connect(vsrc, head, ltetrig)
-        self.tb.connect(vsrc, ltetrig)
+        self.tb.connect(vsrc, head, ltetrig)
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
         self.tb.msg_connect(ltetrig, 'trigger', msgdebug, 'store')
+        self.tb.msg_connect(ltetrig, 'trigger', msgdebug, 'print')
 
         # run enobeb_data through ltetrigger
         self.tb.run()

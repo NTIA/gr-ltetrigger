@@ -60,7 +60,7 @@ namespace gr {
                              uint32_t *sfn_offset,
                              cf_t *input_buffer);
 
-      uint32_t freq = 2400000000; // Hz, FIXME: this must be set dynamically
+      uint32_t freq = 2145; // MHz, FIXME: this must be set dynamically
 
       enum State
       {
@@ -74,7 +74,7 @@ namespace gr {
 
       // TODO: the early-stop threshold not currently implemented
       cell_search_cfg_t config = {
-        10,   // max_frames_pbch - max nof 5ms frames to capture for MIB decoding
+        50,   // max_frames_pbch - max nof 1ms frames to capture for MIB decoding
         10,   // max_frames_pss - max nof 5ms frames to capture for PSS correlation
         5.0,  // threshold - early-stops cell detection if mean PSR is above this value
         0     // init_agc - 0 or negative to disable AGC
@@ -101,6 +101,9 @@ namespace gr {
 
       srslte_ue_mib_sync_t ue_mib;
       uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN];
+
+      // points to current ue_sync, either cellsearch.ue_sync or ue_mib.ue_sync
+      srslte_ue_sync_t *ue_sync;
 
       static uint32_t d_N_id_2; // 0, 1, or 2
       static uint32_t d_nof_detected_frames;

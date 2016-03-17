@@ -120,6 +120,8 @@ namespace gr {
       srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2); // TODO: consider if correct
       srslte_ue_sync_reset(&cs.ue_sync);
 
+      ue_sync = &cs.ue_sync; // set initial ue_sync as cellsearch.ue_sync
+
       if (config.max_frames_pss && config.max_frames_pss <= cs.max_frames) {
         cs.nof_frames_to_scan = config.max_frames_pss;
       }
@@ -135,6 +137,23 @@ namespace gr {
 
       message_port_register_out(port_id);
 
+      // FIXME: for now, just hard code to match unit test. Eventually this
+      //        will need to be set via MSOD
+      int band = 10;
+      int min_earfcn = -1;
+      int max_earfcn = -1;
+      int nof_freqs = srslte_band_get_fd_band(band,
+                                              channels,
+                                              min_earfcn,
+                                              max_earfcn,
+                                              MAX_EARFCN);
+
+      assert(nof_freqs > 0);
+      for (int i=0; i<nof_freqs; i++)
+        if ((float)channels[i].fd == (float)freq) {
+          freq = i;
+          break;
+        }
     }
 
     /*
@@ -142,6 +161,7 @@ namespace gr {
      */
     ltetrigger_impl::~ltetrigger_impl()
     {
+      // FIXME: raw_pointers -> smart pointers
       srslte_ue_cellsearch_free(&cs);
     }
 
@@ -153,24 +173,20 @@ namespace gr {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
       uint32_t nconsumed = 0;
 
-      // We might get more than 1 frame (half-frame) passed in, but srsLTE
-      // expects exactly one, so this is just for information... we should only
-      // "consume" cs.ue_sync.frame_len samples each call to work
-      uint32_t nof_frames_available = noutput_items / cs.ue_sync.frame_len;
-
-      int offset = cs.ue_sync.time_offset;
-      if (offset < 0)
-        offset = -offset;
-
-      // copy the desired number of frames to a buffer srsLTE can work with
-      memcpy(input_buffer,
-             &in[offset],
-             sizeof(cf_t) * (cs.ue_sync.frame_len - offset));
-
-
       switch (this->state) {
       case ST_CELL_SEARCH_AND_SYNC:
       {
+        ue_sync = &cs.ue_sync;
+
+        int offset = ue_sync->time_offset;
+        if (offset < 0)
+          offset = -offset;
+
+        // copy the desired number of frames to a buffer srsLTE can work with
+        memcpy(input_buffer,
+               &in[offset],
+               sizeof(cf_t) * (ue_sync->frame_len - offset));
+
         uint32_t *max_N_id_2 = NULL;
         this->ue_cellsearch_scan(&cs, found_cells, max_N_id_2, input_buffer);
 
@@ -178,12 +194,24 @@ namespace gr {
           if (d_nof_detected_frames) {
             get_cell(&cs, d_nof_detected_frames, &found_cells[d_N_id_2]);
             if (found_cells[d_N_id_2].psr > config.threshold) {
-              std::cout << "Entering ST_MIB_DECODE: cell_id = "
-                        << found_cells[d_N_id_2].cell_id
-                        << ", psr = " << found_cells[d_N_id_2].psr
-                        << ", threshold = " << config.threshold << std::endl;
+              // std::cout << "Entering ST_MIB_DECODE: cell_id = "
+              //           << found_cells[d_N_id_2].cell_id
+              //           << ", psr = " << found_cells[d_N_id_2].psr
+              //           << ", threshold = " << config.threshold << std::endl;
 
               this->state = ST_MIB_DECODE;
+
+              srslte_cell_t cell;
+              cell.id = found_cells[d_N_id_2].cell_id;
+              cell.cp = found_cells[d_N_id_2].cp;
+
+              if (this->ue_mib_sync_init(&ue_mib, cell.id, cell.cp)) {
+                // TODO: logging, exception
+                std::cerr << "Error initializing ue_mib_sync" << std::endl;
+                exit(-1);
+              }
+              ue_sync = &ue_mib.ue_sync;
+
             }
             d_nof_detected_frames = 0;
           }
@@ -203,23 +231,22 @@ namespace gr {
       } // case ST_CELL_SEARCH_AND_SYNC
       case ST_MIB_DECODE:
       {
-        //std::cout << "Entered ST_MIB_DECODE" << std::endl;
-
-        std::cout << "d_nof_scanned_frames: " << d_nof_scanned_frames << std::endl;
-        std::cout << "d_nof_detected_frames: " << d_nof_detected_frames << std::endl;
-        std::cout << "d_N_id_2: " << d_N_id_2 << std::endl;
-
         srslte_ue_cellsearch_result_t found_cell = found_cells[d_N_id_2];
-        srslte_cell_t cell;
-        cell.id = found_cell.cell_id;
-        cell.cp = found_cell.cp;
 
-        if (this->ue_mib_sync_init(&ue_mib, cell.id, cell.cp)) {
-          // TODO: logging, exception
-          std::cerr << "Error decoding MIB" << std::endl;
-          exit(-1);
-        }
+        int offset = ue_sync->time_offset;
+        if (offset < 0)
+          offset = -offset;
 
+        // copy the desired number of frames to a buffer srsLTE can work with
+        memcpy(input_buffer,
+               &in[offset],
+               sizeof(cf_t) * (ue_sync->frame_len - offset));
+
+        // std::cout << "d_nof_scanned_frames: " << d_nof_scanned_frames << std::endl;
+        // std::cout << "d_nof_detected_frames: " << d_nof_detected_frames << std::endl;
+        // std::cout << "d_N_id_2: " << d_N_id_2 << std::endl;
+
+        srslte_cell_t cell = ue_sync->cell;
         uint32_t *sfn_offset = NULL;
         int mib_ret = this->ue_mib_sync_decode(&ue_mib,
                                                bch_payload,
@@ -234,23 +261,25 @@ namespace gr {
         }
         if (mib_ret == SRSLTE_UE_MIB_FOUND ||
             d_nof_scanned_frames >= config.max_frames_pbch) {
-          std::cout << "Switching back to ST_CELL_SEARCH_AND_SYNC" << std::endl;
           this->state = ST_CELL_SEARCH_AND_SYNC;
           d_N_id_2 = ++d_N_id_2 % 3;
           srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
           srslte_ue_sync_reset(&cs.ue_sync);
 
           if (mib_ret == SRSLTE_UE_MIB_FOUND) {
-            printf("Found CELL ID %d. %d PRB, %d ports\n",
+            printf("Found CELL ID %d at %.1f MHz, EARFCN=%d, %d PRB, %d ports, PSS power=%.1f dBm\n",
                    cell.id,
+                   channels[freq].fd,
+                   channels[freq].id,
                    cell.nof_prb,
-                   cell.nof_ports);
+                   cell.nof_ports,
+                   found_cell.peak);
             if (cell.nof_ports > 0) {
               std::memcpy(&d_results[d_nof_cells_found].cell,
                           &cell,
                           sizeof(srslte_cell_t));
-              d_results[d_nof_cells_found].freq = channels[freq].fd;
-              d_results[d_nof_cells_found].dl_earfcn = channels[freq].id;
+              //d_results[d_nof_cells_found].freq = channels[freq].fd;
+              //d_results[d_nof_cells_found].dl_earfcn = channels[freq].id;
               d_results[d_nof_cells_found].power = found_cell.peak;
               d_nof_cells_found++;
 
@@ -258,7 +287,7 @@ namespace gr {
               // TODO: use more srslte facilities to extract this information
               pmt::pmt_t msg = pmt::make_dict();
               msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
-              msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp(369));
+              msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp((long unsigned)cell.id));
 
               message_port_pub(port_id, msg);
             }
@@ -271,27 +300,21 @@ namespace gr {
       } // case ST_MIB_DECODE
       } // switch
 
-      // if (d_nof_scanned_frames >= cs.nof_frames_to_scan) {
-      //   d_N_id_2 = ++d_N_id_2 % 3;
-      //   srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
-      //   srslte_ue_sync_reset(&cs.ue_sync);
-      // }
-
       // A negative time offset means there are samples in buffer for the next subframe
-      if (cs.ue_sync.time_offset < 0) {
-        cs.ue_sync.time_offset = -cs.ue_sync.time_offset;
+      if (ue_sync->time_offset < 0) {
+        ue_sync->time_offset = -ue_sync->time_offset;
       }
 
       // drop scanned samples off input buffer
       // TODO: handle case of positive offset
       int adjustment = 0;
-      if (cs.ue_sync.state == SF_TRACK) {
+      if (ue_sync->state == SF_TRACK) {
         if (d_make_tracking_adjustment) {
-          adjustment = (cs.ue_sync.peak_idx + cs.ue_sync.sf_len / 2);
+          adjustment = (ue_sync->peak_idx + ue_sync->sf_len / 2);
           d_make_tracking_adjustment = false;
         }
       }
-      nconsumed = cs.ue_sync.frame_len + adjustment - cs.ue_sync.time_offset;
+      nconsumed = ue_sync->frame_len + adjustment - ue_sync->time_offset;
 
       assert(nconsumed <= noutput_items);
 
@@ -331,9 +354,6 @@ namespace gr {
             srslte_ue_mib_reset(&q->ue_mib);
           }
           d_nof_scanned_frames++;
-        } else {
-          // FIXME: do we get to this branch? What does it mean?
-          std::cerr << "ltetrigger_impl::ue_mib_sync_decode: srslte_ue_sync_get_sfidx(&q->ue_sync) != 0, so d_nof_scanned_frames not incremented" << std::endl;
         }
       }
       return mib_ret;
