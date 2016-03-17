@@ -49,6 +49,14 @@ cf_t dummy[MAX_TIME_OFFSET];
 namespace gr {
   namespace ltetrigger {
 
+    // Initialize static variables
+    uint32_t ltetrigger_impl::d_N_id_2 = 0; // 0, 1, or 2
+    uint32_t ltetrigger_impl::d_nof_detected_frames = 0;
+    uint32_t ltetrigger_impl::d_nof_scanned_frames = 0;
+    uint32_t ltetrigger_impl::d_nof_cells_found = 0;
+
+    // Set initialize state
+    ltetrigger_impl::State ltetrigger_impl::state = ST_CELL_SEARCH_AND_SYNC;
 
     ltetrigger::sptr
     ltetrigger::make()
@@ -61,12 +69,12 @@ namespace gr {
      */
     ltetrigger_impl::ltetrigger_impl()
       : gr::sync_block("ltetrigger",
-              gr::io_signature::make(1, 1, sizeof(gr_complex)),
-              gr::io_signature::make(0, 0, 0))
+                       gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                       gr::io_signature::make(0, 0, 0))
     {
       // Set debug
-      srslte_verbose += 2;
-      assert(SRSLTE_VERBOSE_ISDEBUG());
+      //srslte_verbose += 2;
+      //assert(SRSLTE_VERBOSE_ISDEBUG());
 
       // srsLTE initialization below this line:
 
@@ -101,10 +109,10 @@ namespace gr {
        * This could be inefficient for SSE or non-SIMD platforms but shouldn't
        * be a huge problem.
        */
-      cs.ue_sync.input_buffer = static_cast<cf_t *>(
+      input_buffer = static_cast<cf_t *>(
         srslte_vec_malloc(2*cs.ue_sync.frame_len * sizeof(cf_t))
         );
-      if (!cs.ue_sync.input_buffer) {
+      if (!input_buffer) {
         std::cerr << "malloc" << std::endl;
         exit(-1);
       }
@@ -143,7 +151,7 @@ namespace gr {
                           gr_vector_void_star &output_items)
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
-      uint32_t n_found_cells = 0;
+      uint32_t nconsumed = 0;
 
       // We might get more than 1 frame (half-frame) passed in, but srsLTE
       // expects exactly one, so this is just for information... we should only
@@ -155,65 +163,119 @@ namespace gr {
         offset = -offset;
 
       // copy the desired number of frames to a buffer srsLTE can work with
-      memcpy(cs.ue_sync.input_buffer,
+      memcpy(input_buffer,
              &in[offset],
              sizeof(cf_t) * (cs.ue_sync.frame_len - offset));
 
-      float max_peak_value = -1.0;
 
-      int ret = ue_sync_buffer(&cs.ue_sync);
-      if (ret < 0) {
-        fprintf(stderr, "Error calling srslte_ue_sync_work()\n");
-        return 0;
-      } else if (ret == 1) {
-        /* This means a peak was found and ue_sync is now in tracking state */
-        ret = srslte_sync_get_cell_id(&cs.ue_sync.strack);
-        if (ret >= 0) {
-          if (srslte_sync_get_peak_value(&cs.ue_sync.strack) > cs.detect_threshold) {
-            /* Save cell id, cp and peak */
-            srslte_ue_cellsearch_result_t *candidate = &cs.candidates[d_nof_detected_frames];
-            candidate->cell_id = (uint32_t)ret;
-            candidate->cp      = srslte_sync_get_cp(&cs.ue_sync.strack);
-            candidate->peak    = cs.ue_sync.strack.pss.peak_value;
-            candidate->psr     = srslte_sync_get_peak_value(&cs.ue_sync.strack);
-            candidate->cfo     = srslte_ue_sync_get_cfo(&cs.ue_sync);
+      switch (this->state) {
+      case ST_CELL_SEARCH_AND_SYNC:
+      {
+        uint32_t *max_N_id_2 = NULL;
+        this->ue_cellsearch_scan(&cs, found_cells, max_N_id_2, input_buffer);
 
-            SRSLTE_DEBUG("CELL SEARCH: [%3d/%3d/%d]: Found peak PSR=%.3f, Cell_id: %d CP: %s\n",
-                         d_nof_detected_frames,
-                         d_nof_scanned_frames,
-                         cs.nof_frames_to_scan,
-                         candidate->psr,
-                         candidate->cell_id,
-                         srslte_cp_string(candidate->cp));
+        if (d_nof_scanned_frames >= cs.nof_frames_to_scan) {
+          if (d_nof_detected_frames) {
+            get_cell(&cs, d_nof_detected_frames, &found_cells[d_N_id_2]);
+            if (found_cells[d_N_id_2].psr > config.threshold) {
+              std::cout << "Entering ST_MIB_DECODE: cell_id = "
+                        << found_cells[d_N_id_2].cell_id
+                        << ", psr = " << found_cells[d_N_id_2].psr
+                        << ", threshold = " << config.threshold << std::endl;
 
-            d_nof_detected_frames++;
+              this->state = ST_MIB_DECODE;
+            }
+            d_nof_detected_frames = 0;
+          }
+          d_nof_scanned_frames = 0;
+
+          if (this->state != ST_MIB_DECODE) {
+            // Only increment N_id_2 if no cells were found
+            d_N_id_2 = ++d_N_id_2 % 3;
+            // FIXME: does ue_mib.ue_sync need to be updated as well?
+            //        initial look: probably not, ue_mib.ue_sync uses cell_id
+            srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
+            srslte_ue_sync_reset(&cs.ue_sync);
           }
         }
-      }
-      d_nof_scanned_frames++;
 
-      if (d_nof_detected_frames) {
-        get_cell(&cs, d_nof_detected_frames, &found_cells[d_N_id_2]);
+        break;
+      } // case ST_CELL_SEARCH_AND_SYNC
+      case ST_MIB_DECODE:
+      {
+        //std::cout << "Entered ST_MIB_DECODE" << std::endl;
 
-        // Report detected cell
-        // TODO: use more srslte facilities to extract this information
-        pmt::pmt_t msg = pmt::make_dict();
-        msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
-        msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp(369));
+        std::cout << "d_nof_scanned_frames: " << d_nof_scanned_frames << std::endl;
+        std::cout << "d_nof_detected_frames: " << d_nof_detected_frames << std::endl;
+        std::cout << "d_N_id_2: " << d_N_id_2 << std::endl;
 
-        message_port_pub(port_id, msg);
+        srslte_ue_cellsearch_result_t found_cell = found_cells[d_N_id_2];
+        srslte_cell_t cell;
+        cell.id = found_cell.cell_id;
+        cell.cp = found_cell.cp;
 
-        n_found_cells = 0;
-      }
+        if (this->ue_mib_sync_init(&ue_mib, cell.id, cell.cp)) {
+          // TODO: logging, exception
+          std::cerr << "Error decoding MIB" << std::endl;
+          exit(-1);
+        }
 
-      if (d_nof_scanned_frames >= cs.nof_frames_to_scan) {
-        // FIXME: Setting a breakpoint here showed this branch is not exercised
-        //        by the current unit test. It is important.
-        d_nof_scanned_frames = 0;
-        d_N_id_2 = ++d_N_id_2 % 3;
-        srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
-        srslte_ue_sync_reset(&cs.ue_sync);
-      }
+        uint32_t *sfn_offset = NULL;
+        int mib_ret = this->ue_mib_sync_decode(&ue_mib,
+                                               bch_payload,
+                                               &cell.nof_ports,
+                                               sfn_offset,
+                                               input_buffer);
+
+        if (mib_ret < 0) {
+          // TODO: logging, exception
+          std::cerr << "Error decoding MIB" << std::endl;
+          exit(-1);
+        }
+        if (mib_ret == SRSLTE_UE_MIB_FOUND ||
+            d_nof_scanned_frames >= config.max_frames_pbch) {
+          std::cout << "Switching back to ST_CELL_SEARCH_AND_SYNC" << std::endl;
+          this->state = ST_CELL_SEARCH_AND_SYNC;
+          d_N_id_2 = ++d_N_id_2 % 3;
+          srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
+          srslte_ue_sync_reset(&cs.ue_sync);
+
+          if (mib_ret == SRSLTE_UE_MIB_FOUND) {
+            printf("Found CELL ID %d. %d PRB, %d ports\n",
+                   cell.id,
+                   cell.nof_prb,
+                   cell.nof_ports);
+            if (cell.nof_ports > 0) {
+              std::memcpy(&d_results[d_nof_cells_found].cell,
+                          &cell,
+                          sizeof(srslte_cell_t));
+              d_results[d_nof_cells_found].freq = channels[freq].fd;
+              d_results[d_nof_cells_found].dl_earfcn = channels[freq].id;
+              d_results[d_nof_cells_found].power = found_cell.peak;
+              d_nof_cells_found++;
+
+              // Report detected cell
+              // TODO: use more srslte facilities to extract this information
+              pmt::pmt_t msg = pmt::make_dict();
+              msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
+              msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp(369));
+
+              message_port_pub(port_id, msg);
+            }
+          }
+
+          d_nof_scanned_frames = 0;
+          d_nof_detected_frames = 0;
+        }
+        break;
+      } // case ST_MIB_DECODE
+      } // switch
+
+      // if (d_nof_scanned_frames >= cs.nof_frames_to_scan) {
+      //   d_N_id_2 = ++d_N_id_2 % 3;
+      //   srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
+      //   srslte_ue_sync_reset(&cs.ue_sync);
+      // }
 
       // A negative time offset means there are samples in buffer for the next subframe
       if (cs.ue_sync.time_offset < 0) {
@@ -229,24 +291,128 @@ namespace gr {
           d_make_tracking_adjustment = false;
         }
       }
-      d_nconsumed = cs.ue_sync.frame_len + adjustment - cs.ue_sync.time_offset;
+      nconsumed = cs.ue_sync.frame_len + adjustment - cs.ue_sync.time_offset;
 
-      assert(d_nconsumed <= noutput_items);
+      assert(nconsumed <= noutput_items);
 
       // Tell runtime system how many output items we produced.
-      return d_nconsumed;
+      return nconsumed;
     }
 
     int
-    ltetrigger_impl::ue_sync_buffer(srslte_ue_sync_t *q) {
+    ltetrigger_impl::ue_mib_sync_decode(srslte_ue_mib_sync_t *q,
+                                        uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN],
+                                        uint32_t *nof_tx_ports,
+                                        uint32_t *sfn_offset,
+                                        cf_t *input_buffer)
+    {
+      int mib_ret = SRSLTE_UE_MIB_NOTFOUND;
+
+      if (q != NULL)
+      {
+        mib_ret = SRSLTE_UE_MIB_NOTFOUND;
+        // FIXME: should this be cs.ue_sync or q->ue_sync? Does it matter?
+        int ret = this->ue_sync_buffer(&q->ue_sync, input_buffer);
+        if (ret < 0) {
+          fprintf(stderr, "Error calling srslte_ue_sync_work()\n");
+          return -1;
+        }
+
+        if (srslte_ue_sync_get_sfidx(&q->ue_sync) == 0) {
+          if (ret == 1) {
+            mib_ret = srslte_ue_mib_decode(&q->ue_mib,
+                                           input_buffer,
+                                           bch_payload,
+                                           nof_tx_ports,
+                                           sfn_offset);
+          } else {
+            SRSLTE_DEBUG("Resetting PBCH decoder after %d frames\n",
+                         q->ue_mib.frame_cnt);
+            srslte_ue_mib_reset(&q->ue_mib);
+          }
+          d_nof_scanned_frames++;
+        } else {
+          // FIXME: do we get to this branch? What does it mean?
+          std::cerr << "ltetrigger_impl::ue_mib_sync_decode: srslte_ue_sync_get_sfidx(&q->ue_sync) != 0, so d_nof_scanned_frames not incremented" << std::endl;
+        }
+      }
+      return mib_ret;
+    }
+
+    int
+    ltetrigger_impl::ue_mib_sync_init(srslte_ue_mib_sync_t *q,
+                                      uint32_t cell_id,
+                                      srslte_cp_t cp)
+    {
+      srslte_cell_t cell;
+      // If the ports are set to 0, ue_mib goes through 1, 2 and 4 ports to blindly detect nof_ports
+      cell.nof_ports = 0;
+      cell.id = cell_id;
+      cell.cp = cp;
+      cell.nof_prb = SRSLTE_UE_MIB_NOF_PRB;
+
+      if (srslte_ue_mib_init(&q->ue_mib, cell)) {
+        fprintf(stderr, "Error initiating ue_mib\n");
+        return SRSLTE_ERROR;
+      }
+      if (this->ue_sync_init(&q->ue_sync, cell)) {
+        fprintf(stderr, "Error initiating ue_sync\n");
+        srslte_ue_mib_free(&q->ue_mib);
+        return SRSLTE_ERROR;
+      }
+      srslte_ue_sync_decode_sss_on_track(&q->ue_sync, true);
+      return SRSLTE_SUCCESS;
+    }
+
+
+    int
+    ltetrigger_impl::ue_cellsearch_scan(srslte_ue_cellsearch_t *q,
+                                        srslte_ue_cellsearch_result_t found_cells[3],
+                                        uint32_t *max_N_id_2,
+                                        cf_t *input_buffer)
+    {
+      int ret = this->ue_sync_buffer(&q->ue_sync, input_buffer);
+
+      if (ret < 0) {
+        // TODO: logging, exception
+        fprintf(stderr, "Error calling srslte_ue_sync_work()\n");
+        return 0;
+      } else if (ret == 1) {
+        /* This means a peak was found and ue_sync is now in tracking state */
+        ret = srslte_sync_get_cell_id(&q->ue_sync.strack);
+        if (ret >= 0) {
+          if (srslte_sync_get_peak_value(&q->ue_sync.strack) > q->detect_threshold) {
+            /* Save cell id, cp and peak */
+            srslte_ue_cellsearch_result_t *candidate = &q->candidates[d_nof_detected_frames];
+            candidate->cell_id = (uint32_t)ret;
+            candidate->cp      = srslte_sync_get_cp(&q->ue_sync.strack);
+            candidate->peak    = q->ue_sync.strack.pss.peak_value;
+            candidate->psr     = srslte_sync_get_peak_value(&q->ue_sync.strack);
+            candidate->cfo     = srslte_ue_sync_get_cfo(&q->ue_sync);
+
+            SRSLTE_DEBUG("CELL SEARCH: [%3d/%3d/%d]: Found peak PSR=%.3f, Cell_id: %d CP: %s\n",
+                         d_nof_detected_frames,
+                         d_nof_scanned_frames,
+                         q->nof_frames_to_scan,
+                         candidate->psr,
+                         candidate->cell_id,
+                         srslte_cp_string(candidate->cp));
+
+            d_nof_detected_frames++;
+          }
+        }
+      }
+      d_nof_scanned_frames++;
+    }
+
+    int
+    ltetrigger_impl::ue_sync_buffer(srslte_ue_sync_t *q, cf_t *input_buffer) {
       int ret = SRSLTE_ERROR_INVALID_INPUTS;
       uint32_t track_idx;
 
       if (q               != NULL   &&
-          q->input_buffer != NULL)
+          input_buffer    != NULL)
       {
-        cf_t *input_buffer = q->input_buffer;
-
         switch (q->state) {
         case SF_FIND:
           ret = srslte_sync_find(&q->sfind, input_buffer, 0, &q->peak_idx);

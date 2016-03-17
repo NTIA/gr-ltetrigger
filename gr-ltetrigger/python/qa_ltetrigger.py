@@ -75,7 +75,8 @@ class qa_ltetrigger(gr_unittest.TestCase):
         vsrc = blocks.vector_source_c(enodeb_casted_data, repeat=True)
         head = blocks.head(gr.sizeof_gr_complex, 50000)
         ltetrig = ltetrigger.ltetrigger()
-        self.tb.connect(vsrc, head, ltetrig)
+        #self.tb.connect(vsrc, head, ltetrig)
+        self.tb.connect(vsrc, ltetrig)
 
         # connect message passing interface
         msgdebug = blocks.message_debug()

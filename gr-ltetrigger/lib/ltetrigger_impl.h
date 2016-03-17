@@ -28,13 +28,17 @@
 
 #include <ltetrigger/ltetrigger.h>
 
+
+#define MAX_EARFCN 1000
+
+
 namespace gr {
   namespace ltetrigger {
 
     class ltetrigger_impl : public ltetrigger
     {
     private:
-      int ue_sync_buffer(srslte_ue_sync_t *q);
+      int ue_sync_buffer(srslte_ue_sync_t *q, cf_t *input_buffer);
       void get_cell(srslte_ue_cellsearch_t *q,
                     uint32_t nof_detected_frames,
                     srslte_ue_cellsearch_result_t *found_cell);
@@ -43,15 +47,42 @@ namespace gr {
       int find_peak_ok(srslte_ue_sync_t *q, cf_t *input_buffer);
       int ue_sync_init(srslte_ue_sync_t *q,
                        srslte_cell_t cell);
+      int ue_cellsearch_scan(srslte_ue_cellsearch_t * q,
+                             srslte_ue_cellsearch_result_t found_cells[3],
+                             uint32_t *max_N_id_2,
+                             cf_t *input_buffer);
+      int ue_mib_sync_init(srslte_ue_mib_sync_t *q,
+                           uint32_t cell_id,
+                           srslte_cp_t cp);
+      int ue_mib_sync_decode(srslte_ue_mib_sync_t *q,
+                             uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN],
+                             uint32_t *nof_tx_ports,
+                             uint32_t *sfn_offset,
+                             cf_t *input_buffer);
+
+      uint32_t freq = 2400000000; // Hz, FIXME: this must be set dynamically
+
+      enum State
+      {
+        ST_CELL_SEARCH_AND_SYNC,
+        ST_MIB_DECODE
+      };
+
+      static State state;
 
       const pmt::pmt_t port_id = pmt::mp("trigger");
 
+      // TODO: the early-stop threshold not currently implemented
       cell_search_cfg_t config = {
-        50,   // maximum number of 5ms frames to capture for MIB decoding
-        50,   // maximum number of 5ms frames to capture for PSS correlation
-        4.0,  // early-stops cell detection if mean PSR is above this value
-        0     // 0 or negative to disable AGC
+        10,   // max_frames_pbch - max nof 5ms frames to capture for MIB decoding
+        10,   // max_frames_pss - max nof 5ms frames to capture for PSS correlation
+        5.0,  // threshold - early-stops cell detection if mean PSR is above this value
+        0     // init_agc - 0 or negative to disable AGC
       };
+
+      srslte_earfcn_t channels[MAX_EARFCN];
+
+      cf_t *input_buffer;
 
       struct cells {
         srslte_cell_t cell;
@@ -68,12 +99,13 @@ namespace gr {
 
       srslte_cell_t cell;
 
-      srslte_ue_mib_t mib;
+      srslte_ue_mib_sync_t ue_mib;
+      uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN];
 
-      uint32_t d_N_id_2 = 0; // 0, 1, or 2
-      uint32_t d_nof_detected_frames = 0;
-      uint32_t d_nof_scanned_frames = 0;
-      uint32_t d_nconsumed = 0;
+      static uint32_t d_N_id_2; // 0, 1, or 2
+      static uint32_t d_nof_detected_frames;
+      static uint32_t d_nof_scanned_frames;
+      static uint32_t d_nof_cells_found;
 
       bool d_make_tracking_adjustment = true;
 
