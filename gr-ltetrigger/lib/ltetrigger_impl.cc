@@ -220,8 +220,6 @@ namespace gr {
           if (this->state != ST_MIB_DECODE) {
             // Only increment N_id_2 if no cells were found
             d_N_id_2 = ++d_N_id_2 % 3;
-            // FIXME: does ue_mib.ue_sync need to be updated as well?
-            //        initial look: probably not, ue_mib.ue_sync uses cell_id
             srslte_ue_sync_set_N_id_2(&cs.ue_sync, d_N_id_2);
             srslte_ue_sync_reset(&cs.ue_sync);
           }
@@ -315,6 +313,9 @@ namespace gr {
         }
       }
       nconsumed = ue_sync->frame_len + adjustment - ue_sync->time_offset;
+
+      if (nconsumed > noutput_items)
+        nconsumed -= ue_sync->frame_len;
 
       assert(nconsumed <= noutput_items);
 
