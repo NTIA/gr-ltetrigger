@@ -18,5 +18,5 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    ltetrigger_ltetrigger.xml DESTINATION share/gnuradio/grc/blocks
+    ltetrigger_ltetrigger_c.xml DESTINATION share/gnuradio/grc/blocks
 )

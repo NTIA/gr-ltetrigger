@@ -265,13 +265,6 @@ namespace gr {
           srslte_ue_sync_reset(&cs.ue_sync);
 
           if (mib_ret == SRSLTE_UE_MIB_FOUND) {
-            printf("Found CELL ID %d at %.1f MHz, EARFCN=%d, %d PRB, %d ports, PSS power=%.1f dBm\n",
-                   cell.id,
-                   channels[freq].fd,
-                   channels[freq].id,
-                   cell.nof_prb,
-                   cell.nof_ports,
-                   found_cell.peak);
             if (cell.nof_ports > 0) {
               std::memcpy(&d_results[d_nof_cells_found].cell,
                           &cell,
@@ -284,8 +277,14 @@ namespace gr {
               // Report detected cell
               // TODO: use more srslte facilities to extract this information
               pmt::pmt_t msg = pmt::make_dict();
-              msg = pmt::dict_add(msg, pmt::mp("link_type"), pmt::mp("downlink"));
-              msg = pmt::dict_add(msg, pmt::mp("cell_id"), pmt::mp((long unsigned)cell.id));
+              msg = pmt::dict_add(msg, pmt::mp("link_type"),
+                                  pmt::mp("downlink"));
+              msg = pmt::dict_add(msg, pmt::mp("cell_id"),
+                                  pmt::mp((long unsigned)cell.id));
+              msg = pmt::dict_add(msg, pmt::mp("nprb"),
+                                  pmt::mp((long unsigned)cell.nof_prb));
+              msg = pmt::dict_add(msg, pmt::mp("nports"),
+                                  pmt::mp((long unsigned)cell.nof_ports));
 
               message_port_pub(port_id, msg);
             }

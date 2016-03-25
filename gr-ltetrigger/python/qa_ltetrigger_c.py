@@ -46,7 +46,7 @@ class qa_ltetrigger_c(gr_unittest.TestCase):
         # cell_id - 369
         # nof_prb 6 (1.4 MHz)
 
-        # $ ./pdsch_enodeb -o lte_test_frames -f 2145 MHz -n 10 -c 369 -p 6
+        # $ ./pdsch_enodeb -o lte_test_frames -f 2145000000 -n 10 -c 369 -p 6
         # linux; GNU C++ version 5.2.1 20151010; Boost_105800; UHD_003.010.git-119-g42a3eeb6
         #
         # Using Volk machine: avx2_64_mmx
