@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>ltetrigger_msg_accepter</name>
-  <key>ltetrigger_ltetrigger_msg_accepter</key>
+  <name>lte_cell_store</name>
+  <key>ltetrigger_lte_cell_store</key>
   <category>ltetrigger</category>
   <import>import ltetrigger</import>
-  <make>ltetrigger.ltetrigger_msg_accepter()</make>
+  <make>ltetrigger.lte_cell_store()</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name

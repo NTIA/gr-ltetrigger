@@ -27,7 +27,7 @@ from gnuradio import blocks
 
 import pmt
 
-from ltetrigger_msg_accepter import ltetrigger_msg_accepter
+from lte_cell_store import lte_cell_store
 
 
 def create_cell_pmt(cell):
@@ -48,11 +48,11 @@ def create_fc_pmt(fc):
     return f
 
 
-class qa_ltetrigger_msg_accepter(gr_unittest.TestCase):
+class qa_lte_cell_store(gr_unittest.TestCase):
 
     def setUp(self):
         self.tb = gr.top_block()
-        self.msg_accepter = ltetrigger_msg_accepter()
+        self.cell_store = lte_cell_store()
 
     def tearDown(self):
         self.tb = None
@@ -78,58 +78,58 @@ class qa_ltetrigger_msg_accepter(gr_unittest.TestCase):
         # add cell1
         expected_result[fc1][cell1['cell_id']] = cell1
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc1))
-        self.msg_accepter.record_cell(create_cell_pmt(cell1))
+        self.cell_store.set_fc(create_fc_pmt(fc1))
+        self.cell_store.record_cell(create_cell_pmt(cell1))
 
-        self.assertEqual(self.msg_accepter.fc, fc1)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc1)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
         # add cell2
         expected_result[fc2][cell2['cell_id']] = cell2
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc2))
-        self.msg_accepter.record_cell(create_cell_pmt(cell2))
+        self.cell_store.set_fc(create_fc_pmt(fc2))
+        self.cell_store.record_cell(create_cell_pmt(cell2))
 
-        self.assertEqual(self.msg_accepter.fc, fc2)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc2)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
         # add cell3
         expected_result[fc3][cell3['cell_id']] = cell3
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc3))
-        self.msg_accepter.record_cell(create_cell_pmt(cell3))
+        self.cell_store.set_fc(create_fc_pmt(fc3))
+        self.cell_store.record_cell(create_cell_pmt(cell3))
 
-        self.assertEqual(self.msg_accepter.fc, fc3)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc3)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
         # drop cell3
         expected_result[fc3].pop(cell3['cell_id'])
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc3))
-        self.msg_accepter.drop_cell(create_cell_pmt(cell3))
+        self.cell_store.set_fc(create_fc_pmt(fc3))
+        self.cell_store.drop_cell(create_cell_pmt(cell3))
 
-        self.assertEqual(self.msg_accepter.fc, fc3)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc3)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
         # drop cell2
         expected_result[fc2].pop(cell2['cell_id'])
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc2))
-        self.msg_accepter.drop_cell(create_cell_pmt(cell2))
+        self.cell_store.set_fc(create_fc_pmt(fc2))
+        self.cell_store.drop_cell(create_cell_pmt(cell2))
 
-        self.assertEqual(self.msg_accepter.fc, fc2)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc2)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
         # drop cell1
         expected_result[fc1].pop(cell1['cell_id'])
 
-        self.msg_accepter.set_fc(create_fc_pmt(fc1))
-        self.msg_accepter.drop_cell(create_cell_pmt(cell1))
+        self.cell_store.set_fc(create_fc_pmt(fc1))
+        self.cell_store.drop_cell(create_cell_pmt(cell1))
 
-        self.assertEqual(self.msg_accepter.fc, fc1)
-        self.assertEqual(self.msg_accepter.cells, expected_result)
+        self.assertEqual(self.cell_store.fc, fc1)
+        self.assertEqual(self.cell_store.cells, expected_result)
 
 
 if __name__ == '__main__':
     #import pdb; pdb.set_trace()
-    gr_unittest.run(qa_ltetrigger_msg_accepter, "qa_ltetrigger_msg_accepter.xml")
+    gr_unittest.run(qa_lte_cell_store, "qa_lte_cell_store.xml")

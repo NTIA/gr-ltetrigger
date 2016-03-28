@@ -19,5 +19,5 @@
 
 install(FILES
     ltetrigger_ltetrigger_c.xml
-    ltetrigger_ltetrigger_msg_accepter.xml DESTINATION share/gnuradio/grc/blocks
+    ltetrigger_lte_cell_store.xml DESTINATION share/gnuradio/grc/blocks
 )

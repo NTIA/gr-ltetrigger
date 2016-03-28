@@ -25,13 +25,13 @@ import numpy
 from gnuradio import gr
 import pmt
 
-class ltetrigger_msg_accepter(gr.basic_block):
+class lte_cell_store(gr.basic_block):
     """
-    docstring for block ltetrigger_msg_accepter
+    docstring for block lte_cell_store
     """
     def __init__(self):
         gr.basic_block.__init__(self,
-                                name="ltetrigger_msg_accepter",
+                                name="lte_cell_store",
                                 in_sig=None,
                                 out_sig=None)
 

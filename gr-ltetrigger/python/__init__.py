@@ -31,6 +31,6 @@ except ImportError:
         pass
 
 # import any pure python here
-from ltetrigger_msg_accepter import ltetrigger_msg_accepter
+from lte_cell_store import lte_cell_store
 
 #
