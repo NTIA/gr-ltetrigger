@@ -73,8 +73,7 @@ class qa_ltetrigger_c(gr_unittest.TestCase):
         enodeb_raw_data = np.fromfile(data_fname, dtype=np.complex64)
         enodeb_casted_data = np.array(enodeb_raw_data, dtype=np.complexfloating)
         vsrc = blocks.vector_source_c(enodeb_casted_data, repeat=True)
-        #head = blocks.head(gr.sizeof_gr_complex, 5000000)
-        head = blocks.head(gr.sizeof_gr_complex, 50000000)
+        head = blocks.head(gr.sizeof_gr_complex, 5000000)
         ltetrig_c = ltetrigger.ltetrigger_c()
         self.tb.connect(vsrc, head, ltetrig_c)
 
