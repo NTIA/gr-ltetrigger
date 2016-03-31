@@ -63,7 +63,7 @@ namespace gr {
     }
 
     void
-    ltetrigger_events_impl::set_fc(pmt::pmt_t f)
+    ltetrigger_events_impl::set_fc(const pmt::pmt_t &f)
     {
       gr::thread::scoped_lock guard(d_mutex);
 

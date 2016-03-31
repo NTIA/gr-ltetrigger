@@ -57,7 +57,7 @@ namespace gr {
       ltetrigger_events_impl();
 
       size_t fc() {return d_fc;};
-      void set_fc(pmt::pmt_t f);
+      void set_fc(const pmt::pmt_t &f);
       std::string linktype() {return d_linktype;};
       void set_linktype_downlink() {d_linktype = "downlink";};
       void set_linktype_uplink() {d_linktype = "uplink";};

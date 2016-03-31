@@ -56,7 +56,7 @@ namespace gr {
       virtual size_t fc() = 0;
 
       /* Manually set current center frequency. Can also use msg port 'fc'. */
-      virtual void set_fc(pmt::pmt_t f) = 0;
+      virtual void set_fc(const pmt::pmt_t &f) = 0;
 
       /* Return either 'uplink' or 'downlink' */
       virtual std::string linktype() = 0;
