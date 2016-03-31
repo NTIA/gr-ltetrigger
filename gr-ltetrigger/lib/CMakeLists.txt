@@ -33,6 +33,7 @@ link_directories(
 
 list(APPEND ltetrigger_sources
     ltetrigger_c_impl.cc
+    ltetrigger_events_impl.cc
 )
 
 set(ltetrigger_sources "${ltetrigger_sources}" PARENT_SCOPE)

@@ -31,6 +31,6 @@ except ImportError:
         pass
 
 # import any pure python here
-from lte_cell_store import lte_cell_store
+
 
 #

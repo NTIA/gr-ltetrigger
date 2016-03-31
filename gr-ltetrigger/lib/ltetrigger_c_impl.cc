@@ -277,7 +277,7 @@ namespace gr {
               // Report detected cell
               // TODO: use more srslte facilities to extract this information
               pmt::pmt_t msg = pmt::make_dict();
-              msg = pmt::dict_add(msg, pmt::mp("link_type"),
+              msg = pmt::dict_add(msg, pmt::mp("linktype"),
                                   pmt::mp("downlink"));
               msg = pmt::dict_add(msg, pmt::mp("cell_id"),
                                   pmt::mp((long unsigned)cell.id));
