@@ -69,7 +69,13 @@ namespace gr {
 
       assert(pmt::is_number(f));
       // TODO: think a bit more academically about possiblity of overflow here
-      d_fc = static_cast<size_t>(pmt::to_float(f));
+      d_fc = static_cast<size_t>(pmt::to_double(f));
+    }
+
+    const ltetrigger_events::celldb_t&
+    ltetrigger_events_impl::cells()
+    {
+      return d_cells;
     }
 
     void
@@ -83,6 +89,7 @@ namespace gr {
       pmt::pmt_t cell_id_pmt = pmt::dict_ref(cell, pmt::mp("cell_id"), pmt::mp(-1));
       size_t cell_id = static_cast<size_t>(pmt::to_uint64(cell_id_pmt));
       d_cells[d_fc][cell_id] = cell;
+      //print_cells();
     }
 
     void

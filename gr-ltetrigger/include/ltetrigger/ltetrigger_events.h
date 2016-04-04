@@ -22,7 +22,9 @@
 #ifndef INCLUDED_LTETRIGGER_LTETRIGGER_EVENTS_H
 #define INCLUDED_LTETRIGGER_LTETRIGGER_EVENTS_H
 
+#include <cstddef> /* size_t */
 #include <string>
+#include <unordered_map>
 
 #include <gnuradio/block.h>
 #include <pmt/pmt.h>
@@ -41,6 +43,7 @@ namespace gr {
     {
      public:
       typedef boost::shared_ptr<ltetrigger_events> sptr;
+      typedef std::unordered_map<size_t, std::unordered_map<size_t, pmt::pmt_t> > celldb_t;
 
       /*!
        * \brief Return a shared_ptr to a new instance of ltetrigger::ltetrigger_events.
@@ -51,6 +54,9 @@ namespace gr {
        * creating new instances.
        */
       static sptr make();
+
+      /* Return the cell store */
+      virtual const celldb_t& cells() = 0;
 
       /* Return a current center frequency */
       virtual size_t fc() = 0;

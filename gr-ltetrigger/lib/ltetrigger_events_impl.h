@@ -50,8 +50,7 @@ namespace gr {
       gr::thread::mutex d_mutex;
       size_t d_fc;
       std::string d_linktype;
-      std::unordered_map<size_t, std::unordered_map<size_t, pmt::pmt_t>> d_cells;
-
+      ltetrigger_events::celldb_t d_cells;
 
     public:
       ltetrigger_events_impl();
@@ -61,6 +60,7 @@ namespace gr {
       std::string linktype() {return d_linktype;};
       void set_linktype_downlink() {d_linktype = "downlink";};
       void set_linktype_uplink() {d_linktype = "uplink";};
+      const ltetrigger_events::celldb_t& cells();
       void record_cell(pmt::pmt_t cell);
       void drop_cell(const pmt::pmt_t &cell);
 
