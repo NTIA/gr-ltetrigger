@@ -23,5 +23,5 @@
 install(FILES
     api.h
     ltetrigger_c.h
-    ltetrigger_events.h DESTINATION include/ltetrigger
+    DESTINATION include/ltetrigger
 )

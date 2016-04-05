@@ -9,11 +9,8 @@
 
 %{
 #include "ltetrigger/ltetrigger_c.h"
-#include "ltetrigger/ltetrigger_events.h"
 %}
 
 
 %include "ltetrigger/ltetrigger_c.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, ltetrigger_c);
-%include "ltetrigger/ltetrigger_events.h"
-GR_SWIG_BLOCK_MAGIC2(ltetrigger, ltetrigger_events);

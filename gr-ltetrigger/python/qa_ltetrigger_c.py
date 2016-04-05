@@ -92,7 +92,7 @@ class qa_ltetrigger_c(gr_unittest.TestCase):
             msg = pmt.to_python(msgdebug.get_message(i))
 
             # test ltetrigger conditions
-            self.assertEqual(msg['link_type'], 'downlink', msg="wrong link_type")
+            self.assertEqual(msg['linktype'], 'downlink', msg="wrong linktype")
             self.assertEqual(msg['cell_id'], 369, msg="wrong cell_id")
 
 

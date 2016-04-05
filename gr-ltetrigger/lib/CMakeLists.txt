@@ -30,11 +30,9 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
   ${SRSLTE_LIBRARY_DIRS}
   )
-
 list(APPEND ltetrigger_sources
     ltetrigger_c_impl.cc
-    ltetrigger_events_impl.cc
-)
+    )
 
 set(ltetrigger_sources "${ltetrigger_sources}" PARENT_SCOPE)
 if(NOT ltetrigger_sources)
