@@ -1,5 +1,17 @@
 #!/usr/bin/env python2
 
+
+"""
+Given a file containing a recorded LTE downlink, decode MIB and print to stdout.
+
+Example usage:
+
+$ ./cell_search_file.py -s 1.92M -f 2145M --repeat -c 19.2M ../gr-ltetrigger/python/lte_test_frames
+Using Volk machine: avx2_64_mmx
+{'nports': 1L, 'linktype': 'downlink', 'nprb': 6L, 'cell_id': 369L}
+"""
+
+
 from __future__ import print_function
 
 import logging
@@ -18,16 +30,6 @@ from ltetrigger import ltetrigger_c
 DATA_SIZE = gr.sizeof_gr_complex
 REQUIRED_SAMPLE_RATE = 1.92e6
 
-
-"""
-Given a file containing a recorded LTE downlink, decode MIB and print to stdout.
-
-Example usage:
-
-$ ./cell_search_file.py -s 1.92M -f 2145M --repeat -c 19.2M ../gr-ltetrigger/python/lte_test_frames
-Using Volk machine: avx2_64_mmx
-{'nports': 1L, 'linktype': 'downlink', 'nprb': 6L, 'cell_id': 369L}
-"""
 
 class cell_search_file(gr.top_block):
     def __init__(self, args):
