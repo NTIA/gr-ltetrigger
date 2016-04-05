@@ -89,16 +89,26 @@ def main(args):
 
     tb = cell_search_file(args)
 
+    print("Starting cell search... ", end='')
+    sys.stdout.flush()
+
     tb.start()
 
-    while not tb.msg_store.num_messages():
+    t_start = t_now = time.time()
+    while not tb.msg_store.num_messages() and t_now - t_start < args.time_out:
         time.sleep(0.1)
+        t_now = time.time()
 
     tb.stop()
     tb.wait()
 
+    print("done.")
+
     for i in range(tb.msg_store.num_messages()):
         print(pmt.to_python(tb.msg_store.get_message(i)))
+        break
+    else:
+        print("No cells found.")
 
 
 if __name__ == '__main__':
@@ -144,6 +154,8 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N",
                         help="stop looping after N samples [default=%(default)s]")
     parser.add_argument("-t", "--throttle", type=eng_float, metavar="Hz",
-                        help="throlle file source to lower CPU load [default=%(default)s]")
+                        help="throttle file source to lower CPU load [default=%(default)s]")
+    parser.add_argument("--time-out", type=eng_float, metavar="sec", default=5,
+                        help="max time in seconds to perform search [default=%(default)s]")
     args = parser.parse_args()
     main(args)
