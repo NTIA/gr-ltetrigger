@@ -12,7 +12,7 @@ from gnuradio import filter as gr_filter
 
 import pmt
 
-from ltetrigger import ltetrigger_c, ltetrigger_events
+from ltetrigger import ltetrigger_c
 
 
 DATA_SIZE = gr.sizeof_gr_complex
