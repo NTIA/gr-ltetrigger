@@ -20,7 +20,7 @@ REQUIRED_SAMPLE_RATE = 1.92e6
 
 
 """
-Given a file containing a recorded LTE downlink, decode MIB print to stdout.
+Given a file containing a recorded LTE downlink, decode MIB and print to stdout.
 
 Example usage:
 
