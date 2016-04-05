@@ -14,7 +14,7 @@ $ find -name ue_cell_search.c |xargs sed -i 's/DEBUG/SRSLTE_DEBUG/g'
 $ mkdir build; cd build
 $ cmake ../
 $ make && make test
-$ make install
+$ sudo make install
 ```
 
 * Install LTETrigger
