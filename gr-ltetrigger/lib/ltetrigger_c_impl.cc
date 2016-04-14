@@ -55,6 +55,7 @@ namespace gr {
     uint32_t ltetrigger_c_impl::d_nof_scanned_frames = 0;
     uint32_t ltetrigger_c_impl::d_nof_cells_found = 0;
     double ltetrigger_c_impl::d_fc = -1;
+    int ltetrigger_c_impl::d_fc_i = 0;
 
     // Set initialize state
     ltetrigger_c_impl::State ltetrigger_c_impl::state = ST_CELL_SEARCH_AND_SYNC;
@@ -74,8 +75,8 @@ namespace gr {
                        gr::io_signature::make(0, 0, 0))
     {
       // Set debug
-      //srslte_verbose += 2;
-      //assert(SRSLTE_VERBOSE_ISDEBUG());
+      srslte_verbose += 2;
+      assert(SRSLTE_VERBOSE_ISDEBUG());
 
       // srsLTE initialization below this line:
 
