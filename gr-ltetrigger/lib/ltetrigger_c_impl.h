@@ -59,8 +59,7 @@ namespace gr {
                              uint32_t *nof_tx_ports,
                              uint32_t *sfn_offset,
                              cf_t *input_buffer);
-
-      uint32_t freq = 2145; // MHz, FIXME: this must be set dynamically
+      void set_fc(pmt::pmt_t msg);
 
       enum State
       {
@@ -70,7 +69,8 @@ namespace gr {
 
       static State state;
 
-      const pmt::pmt_t port_id = pmt::mp("trigger");
+      const pmt::pmt_t trigger_port_id = pmt::mp("trigger");
+      const pmt::pmt_t fc_port_id      = pmt::mp("fc");
 
       // TODO: the early-stop threshold not currently implemented
       cell_search_cfg_t config = {
@@ -109,6 +109,8 @@ namespace gr {
       static uint32_t d_nof_detected_frames;
       static uint32_t d_nof_scanned_frames;
       static uint32_t d_nof_cells_found;
+      static double d_fc;
+      static int d_fc_i; // channel index
 
       bool d_make_tracking_adjustment = true;
 

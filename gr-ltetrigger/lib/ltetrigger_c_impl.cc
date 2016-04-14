@@ -54,6 +54,7 @@ namespace gr {
     uint32_t ltetrigger_c_impl::d_nof_detected_frames = 0;
     uint32_t ltetrigger_c_impl::d_nof_scanned_frames = 0;
     uint32_t ltetrigger_c_impl::d_nof_cells_found = 0;
+    double ltetrigger_c_impl::d_fc = -1;
 
     // Set initialize state
     ltetrigger_c_impl::State ltetrigger_c_impl::state = ST_CELL_SEARCH_AND_SYNC;
@@ -135,25 +136,11 @@ namespace gr {
 
       set_output_multiple(2*cs.ue_sync.frame_len);
 
-      message_port_register_out(port_id);
+      message_port_register_out(trigger_port_id);
 
-      // FIXME: for now, just hard code to match unit test. Eventually this
-      //        will need to be set via MSOD
-      int band = 10;
-      int min_earfcn = -1;
-      int max_earfcn = -1;
-      int nof_freqs = srslte_band_get_fd_band(band,
-                                              channels,
-                                              min_earfcn,
-                                              max_earfcn,
-                                              MAX_EARFCN);
-
-      assert(nof_freqs > 0);
-      for (int i=0; i<nof_freqs; i++)
-        if ((float)channels[i].fd == (float)freq) {
-          freq = i;
-          break;
-        }
+      message_port_register_in(fc_port_id);
+      set_msg_handler(fc_port_id,
+                      boost::bind(&ltetrigger_c_impl::set_fc, this, _1));
     }
 
     /*
@@ -163,6 +150,32 @@ namespace gr {
     {
       // FIXME: raw_pointers -> smart pointers
       srslte_ue_cellsearch_free(&cs);
+    }
+
+    void
+    ltetrigger_c_impl::set_fc(pmt::pmt_t msg)
+    {
+      assert(pmt::is_pair(msg));
+
+      pmt::pmt_t band_pmt = pmt::car(msg);
+      pmt::pmt_t freq_pmt = pmt::cdr(msg);
+
+      assert(pmt::is_integer(band_pmt));
+      assert(pmt::is_number(freq_pmt));
+
+      int band = pmt::to_long(band_pmt);
+      d_fc = pmt::to_double(freq_pmt);
+
+      int nof_freqs = srslte_band_get_fd_band_all(band,
+                                                  channels,
+                                                  MAX_EARFCN);
+
+      assert(nof_freqs > 0);
+      for (int i = 0; i < nof_freqs; i++)
+        if ((float)channels[i].fd == (float)d_fc) {
+          d_fc_i = i;
+          break;
+        }
     }
 
     int
@@ -269,8 +282,8 @@ namespace gr {
               std::memcpy(&d_results[d_nof_cells_found].cell,
                           &cell,
                           sizeof(srslte_cell_t));
-              //d_results[d_nof_cells_found].freq = channels[freq].fd;
-              //d_results[d_nof_cells_found].dl_earfcn = channels[freq].id;
+              d_results[d_nof_cells_found].freq = channels[d_fc_i].fd;
+              d_results[d_nof_cells_found].dl_earfcn = channels[d_fc_i].id;
               d_results[d_nof_cells_found].power = found_cell.peak;
               d_nof_cells_found++;
 
@@ -286,7 +299,7 @@ namespace gr {
               msg = pmt::dict_add(msg, pmt::mp("nports"),
                                   pmt::mp((long unsigned)cell.nof_ports));
 
-              message_port_pub(port_id, msg);
+              message_port_pub(trigger_port_id, msg);
             }
           }
 
@@ -387,9 +400,9 @@ namespace gr {
 
     int
     ltetrigger_c_impl::ue_cellsearch_scan(srslte_ue_cellsearch_t *q,
-                                        srslte_ue_cellsearch_result_t found_cells[3],
-                                        uint32_t *max_N_id_2,
-                                        cf_t *input_buffer)
+                                          srslte_ue_cellsearch_result_t found_cells[3],
+                                          uint32_t *max_N_id_2,
+                                          cf_t *input_buffer)
     {
       int ret = this->ue_sync_buffer(&q->ue_sync, input_buffer);
 
@@ -423,6 +436,8 @@ namespace gr {
         }
       }
       d_nof_scanned_frames++;
+
+      return ret;
     }
 
     int
@@ -627,8 +642,8 @@ namespace gr {
     /* Decide the most likely cell based on the mode */
     void
     ltetrigger_c_impl::get_cell(srslte_ue_cellsearch_t *q,
-                         uint32_t nof_detected_frames,
-                         srslte_ue_cellsearch_result_t *found_cell)
+                                uint32_t nof_detected_frames,
+                                srslte_ue_cellsearch_result_t *found_cell)
     {
       uint32_t i, j;
 
