@@ -75,8 +75,8 @@ namespace gr {
                        gr::io_signature::make(0, 0, 0))
     {
       // Set debug
-      srslte_verbose += 2;
-      assert(SRSLTE_VERBOSE_ISDEBUG());
+      //srslte_verbose += 2;
+      //assert(SRSLTE_VERBOSE_ISDEBUG());
 
       // srsLTE initialization below this line:
 
