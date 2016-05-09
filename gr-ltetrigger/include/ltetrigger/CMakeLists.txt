@@ -22,6 +22,7 @@
 ########################################################################
 install(FILES
     api.h
-    ltetrigger_c.h
-    DESTINATION include/ltetrigger
+    cfo.h
+    pss.h
+    sss.h DESTINATION include/ltetrigger
 )

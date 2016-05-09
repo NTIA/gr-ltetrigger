@@ -22,8 +22,6 @@
 ########################################################################
 cmake_minimum_required(VERSION 2.6)
 project(gr-ltetrigger CXX C)
-set(CMAKE_CXX_STANDARD 11) # enable C++11
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 enable_testing()
 
 #select the release build type by default to get optimization flags
@@ -64,11 +62,6 @@ find_package(Boost "1.35" COMPONENTS filesystem system)
 if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost required to compile ltetrigger")
 endif()
-
-########################################################################
-# Find srsLTE
-########################################################################
-find_package(srsLTE REQUIRED)
 
 ########################################################################
 # Install directories
@@ -128,9 +121,9 @@ endif()
 # Setup doxygen option
 ########################################################################
 if(DOXYGEN_FOUND)
-        option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
+	option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
 else(DOXYGEN_FOUND)
-        option(ENABLE_DOXYGEN "Build docs using Doxygen" OFF)
+	option(ENABLE_DOXYGEN "Build docs using Doxygen" OFF)
 endif(DOXYGEN_FOUND)
 
 ########################################################################
@@ -144,14 +137,12 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${CPPUNIT_INCLUDE_DIRS}
     ${GNURADIO_ALL_INCLUDE_DIRS}
-    ${SRSLTE_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
     ${CPPUNIT_LIBRARY_DIRS}
     ${GNURADIO_RUNTIME_LIBRARY_DIRS}
-    ${SRSLTE_LIBRARY_DIRS}
 )
 
 # Set component parameters

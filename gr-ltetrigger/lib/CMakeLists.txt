@@ -22,31 +22,23 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(
-  ${Boost_INCLUDE_DIR}
-  ${SRSLTE_INCLUDE_DIRS}
-  )
-link_directories(
-  ${Boost_LIBRARY_DIRS}
-  ${SRSLTE_LIBRARY_DIRS}
-  )
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
+
 list(APPEND ltetrigger_sources
-    ltetrigger_c_impl.cc
-    )
+    cfo_impl.cc
+    pss_impl.cc
+    sss_impl.cc
+)
 
 set(ltetrigger_sources "${ltetrigger_sources}" PARENT_SCOPE)
 if(NOT ltetrigger_sources)
-        MESSAGE(STATUS "No C++ sources... skipping lib/")
-        return()
+	MESSAGE(STATUS "No C++ sources... skipping lib/")
+	return()
 endif(NOT ltetrigger_sources)
 
 add_library(gnuradio-ltetrigger SHARED ${ltetrigger_sources})
-target_link_libraries(
-  gnuradio-ltetrigger
-  ${Boost_LIBRARIES}
-  ${GNURADIO_ALL_LIBRARIES}
-  ${SRSLTE_LIBRARY}
-)
+target_link_libraries(gnuradio-ltetrigger ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
 set_target_properties(gnuradio-ltetrigger PROPERTIES DEFINE_SYMBOL "gnuradio_ltetrigger_EXPORTS")
 
 if(APPLE)

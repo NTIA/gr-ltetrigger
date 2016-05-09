@@ -8,9 +8,15 @@
 %include "ltetrigger_swig_doc.i"
 
 %{
-#include "ltetrigger/ltetrigger_c.h"
+#include "ltetrigger/cfo.h"
+#include "ltetrigger/pss.h"
+#include "ltetrigger/sss.h"
 %}
 
 
-%include "ltetrigger/ltetrigger_c.h"
-GR_SWIG_BLOCK_MAGIC2(ltetrigger, ltetrigger_c);
+%include "ltetrigger/cfo.h"
+GR_SWIG_BLOCK_MAGIC2(ltetrigger, cfo);
+%include "ltetrigger/pss.h"
+GR_SWIG_BLOCK_MAGIC2(ltetrigger, pss);
+%include "ltetrigger/sss.h"
+GR_SWIG_BLOCK_MAGIC2(ltetrigger, sss);

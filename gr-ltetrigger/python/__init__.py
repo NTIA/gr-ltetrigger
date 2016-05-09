@@ -25,12 +25,10 @@ description here (python/__init__.py).
 
 # import swig generated symbols into the ltetrigger namespace
 try:
-        # this might fail if the module is python-only
-        from ltetrigger_swig import *
+	# this might fail if the module is python-only
+	from ltetrigger_swig import *
 except ImportError:
-        pass
+	pass
 
 # import any pure python here
-
-
 #

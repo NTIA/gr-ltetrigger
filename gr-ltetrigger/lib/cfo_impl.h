@@ -18,38 +18,41 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#ifndef INCLUDED_LTETRIGGER_CFO_IMPL_H
+#define INCLUDED_LTETRIGGER_CFO_IMPL_H
 
-#ifndef INCLUDED_LTETRIGGER_LTETRIGGER_C_H
-#define INCLUDED_LTETRIGGER_LTETRIGGER_C_H
-
-#include <ltetrigger/api.h>
-#include <gnuradio/sync_block.h>
+#include <ltetrigger/cfo.h>
 
 namespace gr {
   namespace ltetrigger {
 
-    /*!
-     * \brief <+description of block+>
-     * \ingroup ltetrigger_c
-     *
-     */
-    class LTETRIGGER_API ltetrigger_c : virtual public gr::sync_block
+    class cfo_impl : public cfo
     {
-    public:
-      typedef boost::shared_ptr<ltetrigger_c> sptr;
+    private:
+      srslte_cfo_t cfocorr;
 
-      /*!
-       * \brief Return a shared_ptr to a new instance of ltetrigger::ltetrigger_c.
-       *
-       * To avoid accidental use of raw pointers, ltetrigger::ltetrigger_c's
-       * constructor is in a private implementation
-       * class. ltetrigger::ltetrigger_c::make is the public interface for
-       * creating new instances.
-       */
-      static sptr make();
+      const int half_frame_length = 9600; // 10 slots = 1 half frame
+      const int full_frame_length = 2 * frame_length;
+      const int symbol_sz = 128;
+
+      float d_fc;
+      const float nofc = -9999.0;
+
+    public:
+      cfo_impl();
+      ~cfo_impl();
+
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+
+      void set_fc(float fc) { d_fc = fc; }
+      float fc() { return d_fc; }
+      void disable() { d_fc = nofc; }
+      bool is_enabled() { return d_fc != nofc; }
     };
 
   } // namespace ltetrigger
 } // namespace gr
 
-#endif /* INCLUDED_LTETRIGGER_LTETRIGGER_C_H */
+#endif /* INCLUDED_LTETRIGGER_CFO_IMPL_H */

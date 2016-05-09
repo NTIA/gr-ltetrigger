@@ -16,7 +16,9 @@
 # along with GNU Radio; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
+
 install(FILES
-    ltetrigger_ltetrigger_c.xml
-    DESTINATION share/gnuradio/grc/blocks
+    ltetrigger_cfo.xml
+    ltetrigger_pss.xml
+    ltetrigger_sss.xml DESTINATION share/gnuradio/grc/blocks
 )

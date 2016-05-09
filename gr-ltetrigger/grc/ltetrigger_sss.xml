@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>ltetrigger_c</name>
-  <key>ltetrigger_ltetrigger_c</key>
+  <name>sss</name>
+  <key>ltetrigger_sss</key>
   <category>ltetrigger</category>
   <import>import ltetrigger</import>
-  <make>ltetrigger.ltetrigger_c()</make>
+  <make>ltetrigger.sss()</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
