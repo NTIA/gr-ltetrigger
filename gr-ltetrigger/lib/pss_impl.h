@@ -21,11 +21,10 @@
 #ifndef INCLUDED_LTETRIGGER_PSS_IMPL_H
 #define INCLUDED_LTETRIGGER_PSS_IMPL_H
 
+#include <future> /* future */
 #include <string> /* string */
 
 #include <srslte/srslte.h>
-
-#include <pmt/pmt.h> /* pmt_t */
 
 #include <ltetrigger/pss.h>
 
@@ -37,6 +36,8 @@ namespace gr {
     {
     private:
       srslte_pss_synch_t d_pss[3]; // one for each N_id_2
+      float d_peak_values[3];
+      std::future<int> d_peak_pos[3];
 
       const int half_frame_length = 9600; // 10 slots = 1 half frame
       const int full_frame_length = 2 * half_frame_length;
@@ -44,10 +45,9 @@ namespace gr {
       const std::string length_tag_key = "frame_length";
       const std::string N_id_2_tag_key = "N_id_2";
 
-      std::future<int> d_peak_pos[3];
-      float d_peak_value[3];
+      static float d_max_peak_value;
 
-      float d_peak_threshold = 25.0;
+      float d_peak_threshold = 5.0;
 
       int d_N_id_2;
 

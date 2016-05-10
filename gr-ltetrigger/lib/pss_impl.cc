@@ -24,18 +24,24 @@
 
 #include <algorithm> /* copy */
 #include <cassert>   /* assert */
-#include <cstdlib>   /* exit, EXIT_FAILURE */
-#include <future>    /* future, async */
 #include <cstdint>   /* uint64_t */
+#include <cstdio>    /* printf */
+#include <cstdlib>   /* exit, EXIT_FAILURE */
+#include <future>    /* async */
 
 #include <gnuradio/io_signature.h>
-#include <gnuradio/thread/thread.h> /* gr::thread */
+//#include <gnuradio/thread/thread.h> /* gr::thread */
+
+#include <pmt/pmt.h> /* pmt_t */
 
 #include "pss_impl.h"
 
 
 namespace gr {
   namespace ltetrigger {
+
+    // initialize static variables
+    float pss_impl::d_max_peak_value = -1;
 
     pss::sptr
     pss::make()
@@ -62,6 +68,8 @@ namespace gr {
           exit(EXIT_FAILURE);
         }
       }
+
+      set_output_multiple(full_frame_length);
     }
 
     /*
@@ -88,25 +96,26 @@ namespace gr {
         d_peak_pos[i] = std::async(std::launch::async,
                                    [&, i](){ return srslte_pss_synch_find_pss(&d_pss[i],
                                                                               const_cast<cf_t *>(in),
-                                                                              &d_peak_value[i]); });
+                                                                              &d_peak_values[i]); });
 
       // wait for results
       for (int i = 0; i < 3; i++)
         d_peak_pos[i].wait();
 
       // find the value of N_id_2 with the highest peak correlation value
-      float max_value = -1;
       for (int i = 0; i < 3; i++) {
-        if (d_peak_value[i] > max_value) {
-          max_value = d_peak_value[i];
+        if (d_peak_values[i] > d_max_peak_value) {
+          d_max_peak_value = d_peak_values[i];
+          printf("New max PSS correlation N_id_2 %d: %f\n", i, d_max_peak_value);
+          //fflush(stdout);
           d_N_id_2 = i;
         }
       }
 
-      if (max_value > d_peak_threshold) {
+      if (d_max_peak_value > d_peak_threshold) {
         // tag and ship
         int rel_offset = d_peak_pos[d_N_id_2].get();
-        uint64_t abs_offset = nitems_written(0) + rel_offset;
+        uint64_t abs_offset = nitems_read(0) + rel_offset;
 
         noutput_items = half_frame_length;
         int nconsume = rel_offset + noutput_items;
