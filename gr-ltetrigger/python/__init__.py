@@ -31,4 +31,5 @@ except ImportError:
 	pass
 
 # import any pure python here
+from downlink_trigger_c import downlink_trigger_c
 #

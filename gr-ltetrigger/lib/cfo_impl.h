@@ -23,16 +23,19 @@
 
 #include <ltetrigger/cfo.h>
 
+#include <srslte/srslte.h>
+
+
 namespace gr {
   namespace ltetrigger {
 
     class cfo_impl : public cfo
     {
     private:
-      srslte_cfo_t cfocorr;
+      srslte_cfo_t d_cfocorr;
 
       const int half_frame_length = 9600; // 10 slots = 1 half frame
-      const int full_frame_length = 2 * frame_length;
+      const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
 
       float d_fc;

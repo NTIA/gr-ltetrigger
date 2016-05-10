@@ -23,6 +23,7 @@
 #endif
 
 #include <algorithm> /* copy */
+#include <cstdlib> /* exit, EXIT_FAILURE */
 #include <iostream> /* cerr */
 
 #include <gnuradio/io_signature.h>
@@ -43,23 +44,23 @@ namespace gr {
      */
     cfo_impl::cfo_impl()
       : gr::sync_block("cfo",
-                       gr::io_signature::make(<+MIN_IN+>, <+MAX_IN+>, sizeof(<+ITYPE+>)),
-                       gr::io_signature::make(<+MIN_OUT+>, <+MAX_OUT+>, sizeof(<+OTYPE+>)))
+                       gr::io_signature::make(1, 1, sizeof(cf_t)),
+                       gr::io_signature::make(1, 1, sizeof(cf_t)))
     {
-      if (srslte_cfo_init(&cfocorr, frame_length)) {
+      if (srslte_cfo_init(&d_cfocorr, half_frame_length)) {
         std::cerr << "Error initiating CFO" << std::endl;
-        return -1;
+        exit(EXIT_FAILURE);
       }
 
-      set_output_multiple(full_frame_length); // 2 half-frames
+      set_output_multiple(full_frame_length);
     }
 
     /*
-     * virtual destructor.
+     * virtual destructor
      */
     cfo_impl::~cfo_impl()
     {
-      srslte_cfo_free(cfocorr);
+      srslte_cfo_free(&d_cfocorr);
     }
 
     int
@@ -71,11 +72,17 @@ namespace gr {
       cf_t *out = static_cast<cf_t *>(output_items[0]);
 
       if (is_enabled()) {
-        srslte_cfo_correct(cfocorr, in, out, d_fc); // correct first half frame
-        srslte_cfo_correct(cfocorr,                 // correct second half frame
-                           &in[half_frame_length],
+        // correct first half frame
+        srslte_cfo_correct(&d_cfocorr,
+                           const_cast<cf_t *>(in),
+                           out,
+                           d_fc / symbol_sz);
+
+        // correct second half frame
+        srslte_cfo_correct(&d_cfocorr,
+                           const_cast<cf_t *>(&in[half_frame_length]),
                            &out[half_frame_length],
-                           d_fc)
+                           d_fc / symbol_sz);
       } else {
         std::copy(in, &in[full_frame_length], out);
       }

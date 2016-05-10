@@ -31,7 +31,7 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    DESTINATION ${GR_PYTHON_DIR}/ltetrigger
+    downlink_trigger_c.py DESTINATION ${GR_PYTHON_DIR}/ltetrigger
 )
 
 ########################################################################
@@ -44,3 +44,4 @@ set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_cfo ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_cfo.py)
 GR_ADD_TEST(qa_pss ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pss.py)
 GR_ADD_TEST(qa_sss ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_sss.py)
+GR_ADD_TEST(qa_downlink_trigger_c ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_downlink_trigger_c.py)

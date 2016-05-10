@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2016 <+YOU OR YOUR COMPANY+>.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -40,8 +40,8 @@ namespace gr {
      */
     sss_impl::sss_impl()
       : gr::tagged_stream_block("sss",
-              gr::io_signature::make(<+MIN_IN+>, <+MAX_IN+>, sizeof(<+ITYPE+>)),
-              gr::io_signature::make(<+MIN_OUT+>, <+MAX_OUT+>, sizeof(<+OTYPE+>)), <+len_tag_key+>)
+                                gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                                gr::io_signature::make(1, 1, sizeof(gr_complex)), "frame_length")
     {}
 
     /*
@@ -54,18 +54,18 @@ namespace gr {
     int
     sss_impl::calculate_output_stream_length(const gr_vector_int &ninput_items)
     {
-      int noutput_items = /* <+set this+> */;
+      int noutput_items = half_frame_length;
       return noutput_items ;
     }
 
     int
     sss_impl::work (int noutput_items,
-                       gr_vector_int &ninput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
+                    gr_vector_int &ninput_items,
+                    gr_vector_const_void_star &input_items,
+                    gr_vector_void_star &output_items)
     {
-      const <+ITYPE+> *in = (const <+ITYPE+> *) input_items[0];
-      <+OTYPE+> *out = (<+OTYPE+> *) output_items[0];
+      const cf_t *in = static_cast<const cf_t *>(input_items[0]);
+      cf_t *out = static_cast<cf_t *>(output_items[0]);
 
       // Do <+signal processing+>
 
@@ -75,4 +75,3 @@ namespace gr {
 
   } /* namespace ltetrigger */
 } /* namespace gr */
-

@@ -25,8 +25,6 @@
 #include <ltetrigger/api.h>
 #include <gnuradio/sync_block.h>
 
-#include <srslte/srslte.h>
-
 
 namespace gr {
   namespace ltetrigger {
