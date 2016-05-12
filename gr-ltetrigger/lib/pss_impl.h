@@ -43,7 +43,6 @@ namespace gr {
       const int half_frame_length = 10 * slot_length;
       const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
-      const std::string peak_pos_tag_key = "peak_position";
 
       int d_track_after_n_frames;
       int d_track_every_n_frames;

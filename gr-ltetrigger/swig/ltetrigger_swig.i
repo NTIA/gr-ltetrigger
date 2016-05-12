@@ -11,6 +11,7 @@
 #include "ltetrigger/cfo.h"
 #include "ltetrigger/pss.h"
 #include "ltetrigger/sss.h"
+#include "ltetrigger/mib.h"
 %}
 
 
@@ -21,3 +22,5 @@ GR_SWIG_BLOCK_MAGIC2(ltetrigger, pss);
 
 %include "ltetrigger/sss.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, sss);
+%include "ltetrigger/mib.h"
+GR_SWIG_BLOCK_MAGIC2(ltetrigger, mib);

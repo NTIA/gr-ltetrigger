@@ -24,5 +24,6 @@ install(FILES
     api.h
     cfo.h
     pss.h
-    sss.h DESTINATION include/ltetrigger
+    sss.h
+    mib.h DESTINATION include/ltetrigger
 )

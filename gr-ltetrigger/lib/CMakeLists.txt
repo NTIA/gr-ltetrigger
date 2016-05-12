@@ -33,7 +33,8 @@ link_directories(
 list(APPEND ltetrigger_sources
     cfo_impl.cc
     pss_impl.cc
-    sss_impl.cc )
+    sss_impl.cc
+    mib_impl.cc )
 
 set(ltetrigger_sources "${ltetrigger_sources}" PARENT_SCOPE)
 if(NOT ltetrigger_sources)

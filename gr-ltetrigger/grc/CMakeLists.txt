@@ -20,5 +20,6 @@ install(FILES
     ltetrigger_cfo.xml
     ltetrigger_pss.xml
     ltetrigger_downlink_trigger_c.xml
-    ltetrigger_sss.xml DESTINATION share/gnuradio/grc/blocks
+    ltetrigger_sss.xml
+    ltetrigger_mib.xml DESTINATION share/gnuradio/grc/blocks
 )
