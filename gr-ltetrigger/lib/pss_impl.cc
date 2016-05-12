@@ -27,7 +27,6 @@
 #include <cstdint>   /* uint64_t */
 #include <cstdio>    /* printf */
 #include <cstdlib>   /* exit, EXIT_FAILURE */
-#include <future>    /* async */
 
 #include <gnuradio/io_signature.h>
 //#include <gnuradio/thread/thread.h> /* gr::thread */
@@ -41,32 +40,40 @@ namespace gr {
   namespace ltetrigger {
 
     // initialize static variables
-    float pss_impl::d_max_peak_value = -1;
+    pss_impl::tracking_t pss_impl::d_tracking = {{false, false, false},
+                                                 {0, 0, 0},
+                                                 {0, 0, 0}};
 
     pss::sptr
-    pss::make()
+    pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
     {
-      return gnuradio::get_initial_sptr
-        (new pss_impl());
+      return gnuradio::get_initial_sptr(new pss_impl(N_id_2,
+                                                     psr_threshold,
+                                                     track_after,
+                                                     track_every));
     }
-
     /*
      * private constructor
      */
-    pss_impl::pss_impl()
+    pss_impl::pss_impl(int N_id_2,
+                       float psr_threshold,
+                       int track_after,
+                       int track_every)
       : gr::block("pss",
                   gr::io_signature::make(1, 1, sizeof(cf_t)),
-                  gr::io_signature::make(1, 1, sizeof(cf_t)))
+                  gr::io_signature::make(1, 1, sizeof(cf_t))),
+        d_N_id_2(N_id_2),
+        d_psr_threshold(psr_threshold),
+        d_track_after_n_frames(track_after),
+        d_track_every_n_frames(track_every)
     {
-      for (int i = 0; i < 3; i++) {
-        if (srslte_pss_synch_init(&d_pss[i], half_frame_length)) {
-          std::cerr << "Error initializing PSS object" << std::endl;
-          exit(EXIT_FAILURE);
-        }
-        if (srslte_pss_synch_set_N_id_2(&d_pss[i], i)) {
-          std::cerr << "Error initializing N_id_2" << std::endl;
-          exit(EXIT_FAILURE);
-        }
+      if (srslte_pss_synch_init(&d_pss[N_id_2], half_frame_length)) {
+        std::cerr << "Error initializing PSS object" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      if (srslte_pss_synch_set_N_id_2(&d_pss[N_id_2], N_id_2)) {
+        std::cerr << "Error initializing N_id_2" << std::endl;
+        exit(EXIT_FAILURE);
       }
 
       set_output_multiple(full_frame_length);
@@ -77,8 +84,35 @@ namespace gr {
      */
     pss_impl::~pss_impl()
     {
-      for (int i = 0; i < 3; i++) {
-        srslte_pss_synch_free(&d_pss[i]);
+      srslte_pss_synch_free(&d_pss[d_N_id_2]);
+    }
+
+    void
+    pss_impl::incr_score(tracking_t &tracking)
+    {
+      int max_score = d_track_after_n_frames;
+
+      if (tracking.N_id_2[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
+        // nothing to do
+        return;
+
+      tracking.score[d_N_id_2]++;
+
+      if (!tracking.N_id_2[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
+        tracking.N_id_2[d_N_id_2] = true;
+    }
+
+    void
+    pss_impl::decr_score(tracking_t &tracking)
+    {
+      if (!tracking.score[d_N_id_2])
+        return;
+
+      tracking.score[d_N_id_2]--;
+
+      if (tracking.N_id_2[d_N_id_2]) {
+        tracking.N_id_2[d_N_id_2] = false;
+        printf("Lost tracking on N_id_2 %d\n", d_N_id_2);
       }
     }
 
@@ -91,49 +125,39 @@ namespace gr {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]); // input stream
       cf_t *out = static_cast<cf_t *>(output_items[0]); // output stream
 
-      // parallelize peak search for 3 values of N_id_2
-      for (int i = 0; i < 3; i++)
-        d_peak_pos[i] = std::async(std::launch::async,
-                                   [&, i](){ return srslte_pss_synch_find_pss(&d_pss[i],
-                                                                              const_cast<cf_t *>(in),
-                                                                              &d_peak_values[i]); });
+      if (!d_tracking.any() || !d_tracking.count[d_N_id_2]) {
+        d_tracking.count[d_N_id_2] = d_track_every_n_frames;
+        d_peak_pos[d_N_id_2] = srslte_pss_synch_find_pss(&d_pss[d_N_id_2],
+                                                         const_cast<cf_t *>(in),
+                                                         &d_psr[d_N_id_2]);
+      } else {
+        d_tracking.count[d_N_id_2]--;
+      }
 
-      // wait for results
-      for (int i = 0; i < 3; i++)
-        d_peak_pos[i].wait();
-
-      // find the value of N_id_2 with the highest peak correlation value
       for (int i = 0; i < 3; i++) {
-        if (d_peak_values[i] > d_max_peak_value) {
-          d_max_peak_value = d_peak_values[i];
-          printf("New max PSS correlation N_id_2 %d: %f\n", i, d_max_peak_value);
-          //fflush(stdout);
-          d_N_id_2 = i;
+        if (d_psr[d_N_id_2] > d_psr_threshold) {
+          incr_score(d_tracking);
+        } else {
+          decr_score(d_tracking);
         }
       }
 
-      if (d_max_peak_value > d_peak_threshold) {
+      if (d_tracking.N_id_2[d_N_id_2]) {
         // tag and ship
-        int rel_offset = d_peak_pos[d_N_id_2].get();
-        uint64_t abs_offset = nitems_read(0) + rel_offset;
+        int rel_offset = d_peak_pos[d_N_id_2];
+        uint64_t abs_offset = nitems_written(0);
 
         noutput_items = half_frame_length;
         int nconsume = rel_offset + noutput_items;
 
         assert(nconsume < ninput_items[0]);
 
+        // FIXME: this is not necessary
         // add PDU length tag
         add_item_tag(0,
                      abs_offset,
                      pmt::mp(length_tag_key),
                      pmt::mp(half_frame_length));
-
-
-        // add N_id_2 tag
-        add_item_tag(0,
-                     abs_offset,
-                     pmt::mp(N_id_2_tag_key),
-                     pmt::mp(d_N_id_2));
 
         std::copy(&in[rel_offset], &in[nconsume], out);
 

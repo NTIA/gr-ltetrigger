@@ -21,9 +21,9 @@
 #ifndef INCLUDED_LTETRIGGER_SSS_IMPL_H
 #define INCLUDED_LTETRIGGER_SSS_IMPL_H
 
-#include <srslte/srslte.h>
-
 #include <ltetrigger/sss.h>
+
+#include <srslte/srslte.h>
 
 
 namespace gr {
@@ -32,10 +32,7 @@ namespace gr {
     class sss_impl : public sss
     {
     private:
-      const int half_frame_length = 9600;
-
-    protected:
-      int calculate_output_stream_length(const gr_vector_int &ninput_items);
+      // Nothing to declare in this block.
 
     public:
       sss_impl();
@@ -43,7 +40,6 @@ namespace gr {
 
       // Where all the action really happens
       int work(int noutput_items,
-               gr_vector_int &ninput_items,
                gr_vector_const_void_star &input_items,
                gr_vector_void_star &output_items);
     };

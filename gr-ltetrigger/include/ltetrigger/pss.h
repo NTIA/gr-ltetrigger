@@ -42,12 +42,28 @@ namespace gr {
       /*!
        * \brief Return a shared_ptr to a new instance of ltetrigger::pss.
        *
+       * N_id_2: initialize block to search for this N_id_2
+       * psr_threshold: peak-to-side-lobe ratio threshold above which pass
+       *                through frame for further processing
+       * track_after: Enter tracking state after n correlations in a row above
+       *              threshold. A single correlation below threshold drops
+       *              out of tracking
+       * track_every: In tracking state, check correlation of every n
+       *              half-frames
+       *
+       * NOTE: track_every should be large enough so that follow on block sss
+       *       has enough frames to correlate before potentially being passed
+       *       a disjoint set of frames
+       *
        * To avoid accidental use of raw pointers, ltetrigger::pss's
        * constructor is in a private implementation
        * class. ltetrigger::pss::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(int N_id_2,
+                       float psr_threshold=4.5,
+                       int track_after=10,
+                       int tracK_every=10);
     };
 
   } // namespace ltetrigger

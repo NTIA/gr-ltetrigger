@@ -21,7 +21,6 @@
 #ifndef INCLUDED_LTETRIGGER_PSS_IMPL_H
 #define INCLUDED_LTETRIGGER_PSS_IMPL_H
 
-#include <future> /* future */
 #include <string> /* string */
 
 #include <srslte/srslte.h>
@@ -36,8 +35,8 @@ namespace gr {
     {
     private:
       srslte_pss_synch_t d_pss[3]; // one for each N_id_2
-      float d_peak_values[3];
-      std::future<int> d_peak_pos[3];
+      float d_psr[3];
+      int d_peak_pos[3];
 
       const int half_frame_length = 9600; // 10 slots = 1 half frame
       const int full_frame_length = 2 * half_frame_length;
@@ -45,14 +44,29 @@ namespace gr {
       const std::string length_tag_key = "frame_length";
       const std::string N_id_2_tag_key = "N_id_2";
 
-      static float d_max_peak_value;
-
-      float d_peak_threshold = 5.0;
+      int d_track_after_n_frames;
+      int d_track_every_n_frames;
 
       int d_N_id_2;
 
+      struct tracking_t
+      {
+        bool N_id_2[3];
+        int score[3];
+        int count[3];
+        bool any() { return N_id_2[0] | N_id_2[1] | N_id_2[2]; }
+      } static d_tracking;
+
+      void incr_score(tracking_t &tracking);
+      void decr_score(tracking_t &tracking);
+
+      float d_psr_threshold = 4.5;
+
     public:
-      pss_impl();
+      pss_impl(int N_id_2,
+               float psr_threshold,
+               int track_after,
+               int track_every);
       ~pss_impl();
 
       int general_work(int noutput_items,

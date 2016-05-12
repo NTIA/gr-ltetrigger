@@ -31,17 +31,16 @@ namespace gr {
     sss::sptr
     sss::make()
     {
-      return gnuradio::get_initial_sptr
-        (new sss_impl());
+      return gnuradio::get_initial_sptr(new sss_impl());
     }
 
     /*
      * The private constructor
      */
     sss_impl::sss_impl()
-      : gr::tagged_stream_block("sss",
-                                gr::io_signature::make(1, 1, sizeof(gr_complex)),
-                                gr::io_signature::make(1, 1, sizeof(gr_complex)), "frame_length")
+      : gr::sync_block("sss",
+                       gr::io_signature::make(1, 1, sizeof(cf_t)),
+                       gr::io_signature::make(1, 1, sizeof(cf_t)))
     {}
 
     /*
@@ -52,17 +51,9 @@ namespace gr {
     }
 
     int
-    sss_impl::calculate_output_stream_length(const gr_vector_int &ninput_items)
-    {
-      int noutput_items = half_frame_length;
-      return noutput_items ;
-    }
-
-    int
-    sss_impl::work (int noutput_items,
-                    gr_vector_int &ninput_items,
-                    gr_vector_const_void_star &input_items,
-                    gr_vector_void_star &output_items)
+    sss_impl::work(int noutput_items,
+        gr_vector_const_void_star &input_items,
+        gr_vector_void_star &output_items)
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
       cf_t *out = static_cast<cf_t *>(output_items[0]);

@@ -18,5 +18,6 @@
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, cfo);
 %include "ltetrigger/pss.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, pss);
+
 %include "ltetrigger/sss.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, sss);

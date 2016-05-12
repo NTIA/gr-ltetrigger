@@ -33,21 +33,41 @@ class downlink_trigger_c(gr.hier_block2):
     """
     Hierarchical block for LTE downlink detection based on srsLTE
     """
-    def __init__(self, sample_rate):
+    def __init__(self, sample_rate, psr_threshold=4.5):
         gr.hier_block2.__init__(self,
                                 "downlink_trigger_c",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(0, 0, 0))
 
+        self.psr_threshold = psr_threshold
+
         resamp_ratio = float(sample_rate) / float(REQUIRED_SAMPLE_RATE)
         self.resampler = gr_filter.fractional_resampler_cc(0, resamp_ratio)
         self.cfo = ltetrigger.cfo()
-        self.pss = ltetrigger.pss()
-        #self.sss = ltetrigger.sss()
-        self.tag = blocks.tag_debug(gr.sizeof_gr_complex, "pss")
-        self.tag.set_display(True)
+        self.pss0 = ltetrigger.pss(N_id_2=0, psr_threshold=self.psr_threshold)
+        self.pss1 = ltetrigger.pss(N_id_2=1, psr_threshold=self.psr_threshold)
+        self.pss2 = ltetrigger.pss(N_id_2=2, psr_threshold=self.psr_threshold)
+        #self.sss0 = ltetrigger.sss(N_id_2=0)
+        #self.sss1 = ltetrigger.sss(N_id_2=1)
+        #self.sss2 = ltetrigger.sss(N_id_2=2)
+        self.sss0 = ltetrigger.sss()
+        self.sss1 = ltetrigger.sss()
+        self.sss2 = ltetrigger.sss()
+        self.tag0 = blocks.tag_debug(gr.sizeof_gr_complex, "sss0")
+        self.tag1 = blocks.tag_debug(gr.sizeof_gr_complex, "sss1")
+        self.tag2 = blocks.tag_debug(gr.sizeof_gr_complex, "sss2")
+        self.tag0.set_display(True)
+        self.tag1.set_display(True)
+        self.tag2.set_display(True)
 
         if resamp_ratio == 1:
-            self.connect(self, self.pss, self.tag)
+            lastblock = self
         else:
-            self.connect(self, self.resampler, self.cfo, self.pss, self.tag)
+            self.connect(self, self.resampler)
+            lastblock = self.resampler
+
+        # TODO: insert CFO block
+
+        self.connect((lastblock, 0), self.pss0, self.sss0, self.tag0)
+        self.connect((lastblock, 0), self.pss1, self.sss1, self.tag1)
+        self.connect((lastblock, 0), self.pss2, self.sss2, self.tag2)
