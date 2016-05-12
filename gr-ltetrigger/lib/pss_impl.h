@@ -35,14 +35,15 @@ namespace gr {
     {
     private:
       srslte_pss_synch_t d_pss[3]; // one for each N_id_2
-      float d_psr[3];
-      int d_peak_pos[3];
+      float d_psr[3] = {0};
+      float d_max_psr[3] = {0};
+      int d_peak_pos[3] = {0};
 
-      const int half_frame_length = 9600; // 10 slots = 1 half frame
+      const int slot_length = 960;
+      const int half_frame_length = 10 * slot_length;
       const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
-      const std::string length_tag_key = "frame_length";
-      const std::string N_id_2_tag_key = "N_id_2";
+      const std::string peak_pos_tag_key = "peak_position";
 
       int d_track_after_n_frames;
       int d_track_every_n_frames;
@@ -51,9 +52,9 @@ namespace gr {
 
       struct tracking_t
       {
-        bool N_id_2[3];
-        int score[3];
-        int count[3];
+        bool N_id_2[3] = {0};
+        int score[3] = {0};
+        int count[3] = {0};
         bool any() { return N_id_2[0] | N_id_2[1] | N_id_2[2]; }
       } static d_tracking;
 

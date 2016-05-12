@@ -40,9 +40,7 @@ namespace gr {
   namespace ltetrigger {
 
     // initialize static variables
-    pss_impl::tracking_t pss_impl::d_tracking = {{false, false, false},
-                                                 {0, 0, 0},
-                                                 {0, 0, 0}};
+    pss_impl::tracking_t pss_impl::d_tracking;
 
     pss::sptr
     pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
@@ -134,36 +132,39 @@ namespace gr {
         d_tracking.count[d_N_id_2]--;
       }
 
-      for (int i = 0; i < 3; i++) {
-        if (d_psr[d_N_id_2] > d_psr_threshold) {
-          incr_score(d_tracking);
-        } else {
-          decr_score(d_tracking);
-        }
+      if (d_psr[d_N_id_2] > d_psr_threshold) {
+        incr_score(d_tracking);
+      } else {
+        decr_score(d_tracking);
       }
 
       if (d_tracking.N_id_2[d_N_id_2]) {
-        // tag and ship
-        int rel_offset = d_peak_pos[d_N_id_2];
-        uint64_t abs_offset = nitems_written(0);
+        // track max PSR for fun
+        if (d_psr[d_N_id_2] > d_max_psr[d_N_id_2]) {
+          d_max_psr[d_N_id_2] = d_psr[d_N_id_2];
+          printf("New max PSR value for N_id_2 %d: %f\n",
+                 d_N_id_2,
+                 d_max_psr[d_N_id_2]);
+        }
+
+        int frame_start = d_peak_pos[d_N_id_2] - slot_length;
+        if (frame_start < 0)
+          frame_start += half_frame_length;
 
         noutput_items = half_frame_length;
-        int nconsume = rel_offset + noutput_items;
+        int nconsume = frame_start + noutput_items;
 
         assert(nconsume < ninput_items[0]);
 
-        // FIXME: this is not necessary
-        // add PDU length tag
-        add_item_tag(0,
-                     abs_offset,
-                     pmt::mp(length_tag_key),
-                     pmt::mp(half_frame_length));
-
-        std::copy(&in[rel_offset], &in[nconsume], out);
+        std::copy(&in[frame_start], &in[nconsume], out);
 
         consume_each(nconsume);
 
       } else {
+        // reset max PSR if tracked cell is long gone
+        if (d_tracking.score[d_N_id_2] == 0)
+          d_max_psr[d_N_id_2] = 0;
+
         // nothing to see, move along
         consume_each(half_frame_length); // drop the current half frame
         noutput_items = 0;               // don't propogate anything

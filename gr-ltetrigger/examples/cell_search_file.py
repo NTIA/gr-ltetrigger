@@ -92,7 +92,9 @@ def main(args):
 
     print("done.")
 
-    print("tag_debug saw {} samples".format(tb.trigger.tag.nitems_read(0)))
+    print("tag_debug0 saw {} samples".format(tb.trigger.tag0.nitems_read(0)))
+    print("tag_debug1 saw {} samples".format(tb.trigger.tag1.nitems_read(0)))
+    print("tag_debug2 saw {} samples".format(tb.trigger.tag2.nitems_read(0)))
 
     for i in range(tb.msg_store.num_messages()):
         print(pmt.to_python(tb.msg_store.get_message(i)))

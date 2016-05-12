@@ -41,12 +41,14 @@ namespace gr {
       /*!
        * \brief Return a shared_ptr to a new instance of ltetrigger::sss.
        *
+       * N_id_2: initialize block to search for this N_id_2
+       *
        * To avoid accidental use of raw pointers, ltetrigger::sss's
        * constructor is in a private implementation
        * class. ltetrigger::sss::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(int N_id_2);
     };
 
   } // namespace ltetrigger

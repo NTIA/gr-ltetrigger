@@ -21,9 +21,9 @@
 #ifndef INCLUDED_LTETRIGGER_SSS_IMPL_H
 #define INCLUDED_LTETRIGGER_SSS_IMPL_H
 
-#include <ltetrigger/sss.h>
-
 #include <srslte/srslte.h>
+
+#include <ltetrigger/sss.h>
 
 
 namespace gr {
@@ -32,10 +32,16 @@ namespace gr {
     class sss_impl : public sss
     {
     private:
-      // Nothing to declare in this block.
+      srslte_pss_synch_t d_sss[3]; // one for each N_id_2
+      int d_N_id_2;
+
+      const int half_frame_length = 9600; // 10 slots = 1 half frame
+      const int full_frame_length = 2 * half_frame_length;
+      const int symbol_sz = 128;
+
 
     public:
-      sss_impl();
+      sss_impl(int N_id_2);
       ~sss_impl();
 
       // Where all the action really happens
