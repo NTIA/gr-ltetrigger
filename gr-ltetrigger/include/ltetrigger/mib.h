@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2016 <+YOU OR YOUR COMPANY+>.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -23,7 +23,7 @@
 #define INCLUDED_LTETRIGGER_MIB_H
 
 #include <ltetrigger/api.h>
-#include <gnuradio/sync_block.h>
+#include <gnuradio/block.h>
 
 namespace gr {
   namespace ltetrigger {
@@ -33,9 +33,9 @@ namespace gr {
      * \ingroup ltetrigger
      *
      */
-    class LTETRIGGER_API mib : virtual public gr::sync_block
+    class LTETRIGGER_API mib : virtual public gr::block
     {
-     public:
+    public:
       typedef boost::shared_ptr<mib> sptr;
 
       /*!
@@ -53,4 +53,3 @@ namespace gr {
 } // namespace gr
 
 #endif /* INCLUDED_LTETRIGGER_MIB_H */
-
