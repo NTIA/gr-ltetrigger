@@ -49,10 +49,14 @@ class cell_search_file(gr.top_block):
         if args.sample_rate % REQUIRED_SAMPLE_RATE:
             # Resampling will be costly, warn
             wrn  = "Sample rate {:.2f} MHz is not a multiple of 1.92 MHz. "
-            wrn += "Performance will be poor."
-            self.logger.warn(wrn.format(args.sample_rate))
+            wrn += "Arbitrary resampling not supported at this time."
+            self.logger.error(wrn.format(args.sample_rate))
+            sys.exit(-1)
 
-        self.trigger = downlink_trigger_c(args.sample_rate)
+        resamp_ratio = int(args.sample_rate / REQUIRED_SAMPLE_RATE)
+        self.resampler = gr_filter.rational_resampler_ccc(1, resamp_ratio)
+
+        self.trigger = downlink_trigger_c(args.threshold)
 
         self.msg_store = blocks.message_debug()
 
@@ -60,6 +64,10 @@ class cell_search_file(gr.top_block):
 
         # Connect flowgraph
         lastblock = fsource
+
+        if resamp_ratio != 1:
+            self.connect(lastblock, self.resampler)
+            lastblock = self.resampler
 
         if args.throttle:
             self.connect(lastblock, throttle)
@@ -69,13 +77,43 @@ class cell_search_file(gr.top_block):
             self.connect(lastblock, cut_off)
             lastblock = cut_off
 
-        self.connect(lastblock, self.trigger)
+        self.connect((lastblock, 0), self.trigger)
+
+        if args.plotfreq | args.plotwaterfall | args.plottime | args.plotconst:
+            from gnuradio import qtgui
+            from PyQt4 import QtGui
+
+            fftsize = 128
+
+            self.qapp = QtGui.QApplication(sys.argv)
+            self.qtsink = qtgui.sink_c(fftsize,
+                                       gr_filter.window.WIN_RECTANGULAR,
+                                       args.frequency,
+                                       REQUIRED_SAMPLE_RATE,
+                                       "LTETrigger",
+                                       args.plotfreq,
+                                       args.plotwaterfall,
+                                       args.plottime,
+                                       args.plotconst)
+
+            self.connect((lastblock, 0), self.qtsink)
+
 
 
 def main(args):
     logger = logging.getLogger('cell_search_file.main')
 
     tb = cell_search_file(args)
+
+    if args.plotfreq | args.plotwaterfall | args.plottime | args.plotconst:
+        import sip
+        from PyQt4 import QtGui
+
+        # FIXME: not working
+        pywin = sip.wrapinstance(tb.qtsink.pyqwidget(), QtGui.QWidget)
+        pywin.show()
+
+
 
     print("Starting cell search... ", end='')
     sys.stdout.flush()
@@ -145,10 +183,16 @@ if __name__ == '__main__':
                         help="loop file until cell found or cut-off reached [default=%(default)s]")
     parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N",
                         help="stop looping after N samples [default=%(default)s]")
-    parser.add_argument("-t", "--throttle", type=eng_float, metavar="Hz",
+    parser.add_argument("--throttle", type=eng_float, metavar="Hz",
                         help="throttle file source to lower CPU load [default=%(default)s]")
     parser.add_argument("--time-out", type=eng_float, metavar="sec", default=5,
                         help="max time in seconds to perform search [default=%(default)s]")
+    parser.add_argument("--threshold", type=eng_float, default=4,
+                        help="set peak to side-lobe ratio threshold [default=%(default)s]")
+    parser.add_argument("--plotfreq", action='store_true', help="display frequency plot"),
+    parser.add_argument("--plotwaterfall", action='store_true', help="display waterfall plot"),
+    parser.add_argument("--plottime", action='store_true', help="display time plot"),
+    parser.add_argument("--plotconst", action='store_true', help="display constellation plot"),
     parser.add_argument("--debug", action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
 

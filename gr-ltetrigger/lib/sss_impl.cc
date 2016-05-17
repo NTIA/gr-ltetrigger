@@ -50,6 +50,8 @@ namespace gr {
                        gr::io_signature::make(1, 1, sizeof(cf_t))),
         d_N_id_2(N_id_2)
     {
+      srslte_use_standard_symbol_size(true);
+
       if (srslte_sss_synch_init(&d_sss[N_id_2], symbol_sz)) {
         std::cerr << "Error initializing SSS object" << std::endl;
         exit(EXIT_FAILURE);
@@ -67,6 +69,7 @@ namespace gr {
      */
     sss_impl::~sss_impl()
     {
+      srslte_sss_synch_free(&d_sss[d_N_id_2]);
     }
 
     int
@@ -80,7 +83,7 @@ namespace gr {
       unsigned int m0, m1;
       float m0_value, m1_value;
 
-      // FIXME this fn has return value... what is it?
+      // FIXME this fn has return value... should only continue if SRSLTE_SUCCESS
       srslte_sss_synch_m0m1_diff(&d_sss[d_N_id_2],
                                  const_cast<cf_t *>(&in[sss_idx]),
                                  &m0, &m0_value, &m1, &m1_value);

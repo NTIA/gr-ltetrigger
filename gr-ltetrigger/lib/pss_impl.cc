@@ -65,6 +65,8 @@ namespace gr {
         d_track_after_n_frames(track_after),
         d_track_every_n_frames(track_every)
     {
+      srslte_use_standard_symbol_size(true);
+
       if (srslte_pss_synch_init(&d_pss[N_id_2], half_frame_length)) {
         std::cerr << "Error initializing PSS object" << std::endl;
         exit(EXIT_FAILURE);
@@ -83,6 +85,11 @@ namespace gr {
     pss_impl::~pss_impl()
     {
       srslte_pss_synch_free(&d_pss[d_N_id_2]);
+
+      printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f\n",
+             d_N_id_2,
+             d_psr_sum[d_N_id_2] / d_psr_nsummed[d_N_id_2],
+             d_psr_max[d_N_id_2]);
     }
 
     void
@@ -128,6 +135,10 @@ namespace gr {
         d_peak_pos[d_N_id_2] = srslte_pss_synch_find_pss(&d_pss[d_N_id_2],
                                                          const_cast<cf_t *>(in),
                                                          &d_psr[d_N_id_2]);
+
+        // track avg PSR
+        d_psr_sum[d_N_id_2] += d_psr[d_N_id_2];
+        d_psr_nsummed[d_N_id_2]++;
       } else {
         d_tracking.count[d_N_id_2]--;
       }
@@ -140,14 +151,15 @@ namespace gr {
 
       if (d_tracking.N_id_2[d_N_id_2]) {
         // track max PSR for fun
-        if (d_psr[d_N_id_2] > d_max_psr[d_N_id_2]) {
-          d_max_psr[d_N_id_2] = d_psr[d_N_id_2];
+        if (d_psr[d_N_id_2] > d_psr_max[d_N_id_2]) {
+          d_psr_max[d_N_id_2] = d_psr[d_N_id_2];
           printf("New max PSR value for N_id_2 %d: %f\n",
                  d_N_id_2,
-                 d_max_psr[d_N_id_2]);
+                 d_psr_max[d_N_id_2]);
         }
 
         int frame_start = d_peak_pos[d_N_id_2] - slot_length;
+        d_peak_pos[d_N_id_2] = slot_length;
         if (frame_start < 0)
           frame_start += half_frame_length;
 
@@ -163,7 +175,7 @@ namespace gr {
       } else {
         // reset max PSR if tracked cell is long gone
         if (d_tracking.score[d_N_id_2] == 0)
-          d_max_psr[d_N_id_2] = 0;
+          d_psr_max[d_N_id_2] = 0;
 
         // nothing to see, move along
         consume_each(half_frame_length); // drop the current half frame

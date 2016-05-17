@@ -26,14 +26,13 @@ import gnuradio.filter as gr_filter
 import ltetrigger
 
 
-REQUIRED_SAMPLE_RATE = 1.92e6 # 1.92 MHz
-
-
 class downlink_trigger_c(gr.hier_block2):
     """
     Hierarchical block for LTE downlink detection based on srsLTE
+
+    This block requires input sampled at (or resampled to) 1.92 MHz
     """
-    def __init__(self, sample_rate, psr_threshold=4.5):
+    def __init__(self, psr_threshold=4.5):
         gr.hier_block2.__init__(self,
                                 "downlink_trigger_c",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
@@ -41,8 +40,6 @@ class downlink_trigger_c(gr.hier_block2):
 
         self.psr_threshold = psr_threshold
 
-        resamp_ratio = float(sample_rate) / float(REQUIRED_SAMPLE_RATE)
-        self.resampler = gr_filter.fractional_resampler_cc(0, resamp_ratio)
         self.cfo = ltetrigger.cfo()
         self.pss0 = ltetrigger.pss(N_id_2=0, psr_threshold=self.psr_threshold)
         self.pss1 = ltetrigger.pss(N_id_2=1, psr_threshold=self.psr_threshold)
@@ -57,14 +54,9 @@ class downlink_trigger_c(gr.hier_block2):
         self.tag1.set_display(True)
         self.tag2.set_display(True)
 
-        if resamp_ratio == 1:
-            lastblock = self
-        else:
-            self.connect(self, self.resampler)
-            lastblock = self.resampler
 
         # TODO: insert CFO block
 
-        self.connect((lastblock, 0), self.pss0, self.sss0, self.tag0)
-        self.connect((lastblock, 0), self.pss1, self.sss1, self.tag1)
-        self.connect((lastblock, 0), self.pss2, self.sss2, self.tag2)
+        self.connect(self, self.pss0, self.sss0, self.tag0)
+        self.connect(self, self.pss1, self.sss1, self.tag1)
+        self.connect(self, self.pss2, self.sss2, self.tag2)

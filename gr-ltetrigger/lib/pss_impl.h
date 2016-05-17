@@ -22,6 +22,7 @@
 #define INCLUDED_LTETRIGGER_PSS_IMPL_H
 
 #include <string> /* string */
+#include <vector> /* FOR DEBUGGING */
 
 #include <srslte/srslte.h>
 
@@ -36,7 +37,9 @@ namespace gr {
     private:
       srslte_pss_synch_t d_pss[3]; // one for each N_id_2
       float d_psr[3] = {0};
-      float d_max_psr[3] = {0};
+      double d_psr_sum[3] = {0};
+      int d_psr_nsummed[3] = {0};
+      float d_psr_max[3] = {0};
       int d_peak_pos[3] = {0};
 
       const int slot_length = 960;
