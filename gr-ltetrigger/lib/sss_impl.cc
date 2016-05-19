@@ -27,7 +27,6 @@
 #include <cstdlib>   /* exit, EXIT_FAILURE */
 
 #include <gnuradio/io_signature.h>
-#include <pmt/pmt.h>
 
 #include "sss_impl.h"
 
@@ -52,12 +51,19 @@ namespace gr {
     {
       srslte_use_standard_symbol_size(true);
 
-      if (srslte_sss_synch_init(&d_sss[N_id_2], symbol_sz)) {
-        std::cerr << "Error initializing SSS object" << std::endl;
+      if (srslte_sync_init(&d_sync[N_id_2],
+                           half_frame_length,
+                           max_offset,
+                           symbol_sz)) {
+        std::cerr << "Error initializing SSS SYNC" << std::endl;
         exit(EXIT_FAILURE);
       }
-      if (srslte_sss_synch_set_N_id_2(&d_sss[N_id_2], N_id_2)) {
-        std::cerr << "Error initializing N_id_2" << std::endl;
+      if (srslte_sync_set_N_id_2(&d_sync[N_id_2], N_id_2)) {
+        std::cerr << "Error initializing SSS SYNC N_id_2" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      if (srslte_sss_synch_set_N_id_2(&d_sync[N_id_2].sss, N_id_2)) {
+        std::cerr << "Error initializing SSS N_id_2" << std::endl;
         exit(EXIT_FAILURE);
       }
 
@@ -69,7 +75,7 @@ namespace gr {
      */
     sss_impl::~sss_impl()
     {
-      srslte_sss_synch_free(&d_sss[d_N_id_2]);
+      srslte_sync_free(&d_sync[d_N_id_2]);
     }
 
     int
@@ -80,15 +86,27 @@ namespace gr {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
       cf_t *out = static_cast<cf_t *>(output_items[0]);
 
-      unsigned int m0, m1;
-      float m0_value, m1_value;
+      srslte_sync_t *sync = &d_sync[d_N_id_2];
 
-      // FIXME this fn has return value... should only continue if SRSLTE_SUCCESS
-      srslte_sss_synch_m0m1_diff(&d_sss[d_N_id_2],
-                                 const_cast<cf_t *>(&in[sss_idx]),
-                                 &m0, &m0_value, &m1, &m1_value);
+      srslte_cp_t cp = srslte_sync_detect_cp(sync,
+                                             const_cast<cf_t *>(in),
+                                             slot_length);
 
-      int subframe_idx = srslte_sss_synch_subframe(m0, m1);
+      srslte_sync_set_cp(sync, cp);
+
+      int sss_idx = slot_length - 2 * symbol_sz - sync->cp_len;
+
+      srslte_sss_synch_m0m1_partial(&sync->sss,
+                                    const_cast<cf_t *>(&in[sss_idx]),
+                                    1, NULL,
+                                    &sync->m0, &sync->m0_value,
+                                    &sync->m1, &sync->m1_value);
+
+      sync->N_id_1 = srslte_sss_synch_N_id_1(&sync->sss, sync->m0, sync->m1);
+
+      int cell_id = srslte_sync_get_cell_id(sync);
+
+      int subframe_idx = srslte_sss_synch_subframe(sync->m0, sync->m1);
       if (d_subframe_idx < 0) {
         d_subframe_idx = subframe_idx;
       } else {
@@ -100,10 +118,6 @@ namespace gr {
                  d_subframe_idx);
       }
 
-      d_N_id_1 = srslte_sss_synch_N_id_1(&d_sss[d_N_id_2], m0, m1);
-
-      int cell_id = 3 * d_N_id_1 + d_N_id_2;
-
       // TODO: consider using nitems_read to tag stream in pss and here
       //       so that we can see when there's been dropped frames
 
@@ -111,6 +125,17 @@ namespace gr {
                    nitems_written(0), // offset
                    pmt::mp(cell_id_tag_key),
                    pmt::mp(cell_id));
+
+      pmt::pmt_t cp_is_norm;
+      if (SRSLTE_CP_ISNORM(sync->cp))
+        cp_is_norm = pmt::PMT_T;
+      else
+        cp_is_norm = pmt::PMT_F;
+
+      add_item_tag(0,
+                   nitems_written(0), // offset
+                   pmt::mp(cp_type_tag_key),
+                   cp_is_norm);
 
       std::copy(in, &in[half_frame_length], out);
 

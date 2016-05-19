@@ -31,8 +31,6 @@
 #include <gnuradio/io_signature.h>
 //#include <gnuradio/thread/thread.h> /* gr::thread */
 
-#include <pmt/pmt.h> /* pmt_t */
-
 #include "pss_impl.h"
 
 
@@ -68,11 +66,11 @@ namespace gr {
       srslte_use_standard_symbol_size(true);
 
       if (srslte_pss_synch_init(&d_pss[N_id_2], half_frame_length)) {
-        std::cerr << "Error initializing PSS object" << std::endl;
+        std::cerr << "Error initializing PSS" << std::endl;
         exit(EXIT_FAILURE);
       }
       if (srslte_pss_synch_set_N_id_2(&d_pss[N_id_2], N_id_2)) {
-        std::cerr << "Error initializing N_id_2" << std::endl;
+        std::cerr << "Error initializing PSS N_id_2" << std::endl;
         exit(EXIT_FAILURE);
       }
 

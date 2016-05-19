@@ -34,8 +34,7 @@ namespace gr {
     class sss_impl : public sss
     {
     private:
-      srslte_sss_synch_t d_sss[3]; // one for each N_id_2
-      int d_N_id_1;
+      srslte_sync_t d_sync[3]; // one for each N_id_2
       int d_N_id_2;
       int d_subframe_idx = -1;
 
@@ -43,10 +42,10 @@ namespace gr {
       const int half_frame_length = 10 * slot_length;
       const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
-      const int cp_length = 9;
-      const int sss_idx = slot_length - 2 * (symbol_sz + cp_length);
+      const int max_offset = 10; // FIXME: set arbitrarily, does it matter?
 
       const std::string cell_id_tag_key = "cell_id";
+      const std::string cp_type_tag_key = "cp_type";
 
     public:
       sss_impl(int N_id_2);
