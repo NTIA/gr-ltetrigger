@@ -47,9 +47,9 @@ class downlink_trigger_c(gr.hier_block2):
         self.sss0 = ltetrigger.sss(N_id_2=0)
         self.sss1 = ltetrigger.sss(N_id_2=1)
         self.sss2 = ltetrigger.sss(N_id_2=2)
-        #self.mib0 = ltetrigger.mib()
-        #self.mib1 = ltetrigger.mib()
-        #self.mib2 = ltetrigger.mib()
+        self.mib0 = ltetrigger.mib()
+        self.mib1 = ltetrigger.mib()
+        self.mib2 = ltetrigger.mib()
         self.tag0 = blocks.tag_debug(gr.sizeof_gr_complex, "mib0")
         self.tag1 = blocks.tag_debug(gr.sizeof_gr_complex, "mib1")
         self.tag2 = blocks.tag_debug(gr.sizeof_gr_complex, "mib2")
@@ -60,6 +60,6 @@ class downlink_trigger_c(gr.hier_block2):
 
         # TODO: insert CFO block
 
-        self.connect(self, self.pss0, self.sss0, self.tag0)
-        self.connect(self, self.pss1, self.sss1, self.tag1)
-        self.connect(self, self.pss2, self.sss2, self.tag2)
+        self.connect(self, self.pss0, self.sss0, self.mib0, self.tag0)
+        self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
+        self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)

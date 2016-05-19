@@ -21,9 +21,12 @@
 #ifndef INCLUDED_LTETRIGGER_MIB_IMPL_H
 #define INCLUDED_LTETRIGGER_MIB_IMPL_H
 
-#include <ltetrigger/mib.h>
+#include <string>
+#include <vector>
 
 #include <srslte/srslte.h>
+
+#include <ltetrigger/mib.h>
 
 
 namespace gr {
@@ -32,14 +35,24 @@ namespace gr {
     class mib_impl : public mib
     {
     private:
-      // Nothing to declare in this block.
+      const int slot_length = 960;
+      const int half_frame_length = 10 * slot_length;
+      const int full_frame_length = 2 * half_frame_length;
+      const int symbol_sz = 128;
+
+      srslte_cell_t d_cell;
+      srslte_ue_mib_t d_mib;
+
+      std::vector<tag_t> d_cell_id_tags;
+      std::vector<tag_t> d_cp_type_tags;
+
+      const pmt::pmt_t cell_id_tag_key = pmt::intern("cell_id");
+      const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
+
 
     public:
       mib_impl();
       ~mib_impl();
-
-      // Where all the action really happens
-      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
                        gr_vector_int &ninput_items,
