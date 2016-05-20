@@ -44,7 +44,8 @@ namespace gr {
     mib_impl::mib_impl()
       : gr::block("mib",
                   gr::io_signature::make(1, 1, sizeof(cf_t)),
-                  gr::io_signature::make(1, 1, sizeof(cf_t)))
+                  gr::io_signature::make(1, 1, sizeof(cf_t))),
+        d_mib_unpacked(false)
     {
       srslte_use_standard_symbol_size(true);
 
@@ -61,6 +62,10 @@ namespace gr {
 
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
+
+      message_port_register_in(tracking_port_id);
+      set_msg_handler(tracking_port_id,
+                      boost::bind(&mib_impl::tracking_lost_handler, this, _1));
     }
 
     /*
@@ -79,6 +84,13 @@ namespace gr {
     {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
       cf_t *out = static_cast<cf_t *>(output_items[0]);
+
+      gr::thread::scoped_lock lock(d_mutex);
+
+      if (d_mib_unpacked) {
+        consume_each(half_frame_length);
+        return 0;
+      }
 
       d_cell_id_tags.clear();
       d_cp_type_tags.clear();
@@ -121,15 +133,28 @@ namespace gr {
                                      &sfn_offset);
 
       if (ret == SRSLTE_UE_MIB_FOUND) {
-        srslte_pbch_mib_unpack(bch_payload, &d_cell, reinterpret_cast<uint32_t *>(&sfn_offset));
+        srslte_pbch_mib_unpack(bch_payload,
+                               &d_cell,
+                               reinterpret_cast<uint32_t *>(&sfn_offset));
         srslte_cell_fprint(stdout, &d_cell, sfn_offset);
-        return -1;
+        d_mib_unpacked = true;
       }
 
       consume_each(noutput_items);
 
       // Tell runtime system how many output items we produced.
       return noutput_items;
+    }
+
+    void
+    mib_impl::tracking_lost_handler(pmt::pmt_t msg)
+    {
+      gr::thread::scoped_lock lock(d_mutex);
+
+      d_mib_unpacked = false;
+      srslte_ue_mib_reset(&d_mib);
+
+      printf("DEBUG: mib received tracking lost msg\n");
     }
 
   } /* namespace ltetrigger */

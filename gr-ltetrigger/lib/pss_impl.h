@@ -47,6 +47,8 @@ namespace gr {
       const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
 
+      const pmt::pmt_t tracking_port_id = pmt::intern("tracking_lost");
+
       int d_track_after_n_frames;
       int d_track_every_n_frames;
 

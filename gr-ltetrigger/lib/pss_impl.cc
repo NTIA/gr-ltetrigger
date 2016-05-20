@@ -75,6 +75,7 @@ namespace gr {
       }
 
       set_output_multiple(full_frame_length);
+      message_port_register_out(tracking_port_id);
     }
 
     /*
@@ -115,7 +116,7 @@ namespace gr {
 
       if (tracking.N_id_2[d_N_id_2]) {
         tracking.N_id_2[d_N_id_2] = false;
-        printf("Lost tracking on N_id_2 %d\n", d_N_id_2);
+        message_port_pub(tracking_port_id, pmt::PMT_NIL);
       }
     }
 

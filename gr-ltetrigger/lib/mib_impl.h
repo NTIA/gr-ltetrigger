@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <gnuradio/thread/thread.h>
+
 #include <srslte/srslte.h>
 
 #include <ltetrigger/mib.h>
@@ -35,10 +37,15 @@ namespace gr {
     class mib_impl : public mib
     {
     private:
+      void tracking_lost_handler(pmt::pmt_t msg);
+
       const int slot_length = 960;
       const int half_frame_length = 10 * slot_length;
       const int full_frame_length = 2 * half_frame_length;
       const int symbol_sz = 128;
+
+      gr::thread::mutex d_mutex;
+      bool d_mib_unpacked;
 
       srslte_cell_t d_cell;
       srslte_ue_mib_t d_mib;
@@ -49,6 +56,7 @@ namespace gr {
       const pmt::pmt_t cell_id_tag_key = pmt::intern("cell_id");
       const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
 
+      const pmt::pmt_t tracking_port_id = pmt::intern("tracking_lost");
 
     public:
       mib_impl();
