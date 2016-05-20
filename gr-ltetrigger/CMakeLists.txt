@@ -22,6 +22,7 @@
 ########################################################################
 cmake_minimum_required(VERSION 2.6)
 project(gr-ltetrigger CXX C)
+set(CMAKE_CXX_FLAGS "-Wall") # enable all warnings
 set(CMAKE_CXX_STANDARD 11) # enable C++11
 enable_testing()
 

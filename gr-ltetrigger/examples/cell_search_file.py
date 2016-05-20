@@ -22,6 +22,14 @@ from gnuradio import filter as gr_filter
 
 import pmt
 
+try:
+    from gnuradio import qtgui
+    from PyQt4 import QtGui, QtCore
+    import sip
+except ImportError:
+    sys.stderr.write("Error: Program requires PyQt4 and gr-qtgui.\n")
+    sys.exit(1)
+
 from ltetrigger import downlink_trigger_c
 
 
@@ -79,13 +87,15 @@ class cell_search_file(gr.top_block):
 
         self.connect((lastblock, 0), self.trigger)
 
-        if args.plotfreq | args.plotwaterfall | args.plottime | args.plotconst:
-            from gnuradio import qtgui
-            from PyQt4 import QtGui
-
+        if args.gui:
             fftsize = 128
 
             self.qapp = QtGui.QApplication(sys.argv)
+            with open(gr.prefix() + '/share/gnuradio/themes/dark.qss') as ss:
+                sstext = ss.read()
+
+            self.qapp.setStyleSheet(sstext)
+
             self.qtsink = qtgui.sink_c(fftsize,
                                        gr_filter.window.WIN_RECTANGULAR,
                                        args.frequency,
@@ -98,6 +108,8 @@ class cell_search_file(gr.top_block):
 
             self.connect((lastblock, 0), self.qtsink)
 
+            pywin = sip.wrapinstance(self.qtsink.pyqwidget(), QtGui.QWidget)
+            pywin.show()
 
 
 def main(args):
@@ -105,27 +117,21 @@ def main(args):
 
     tb = cell_search_file(args)
 
-    if args.plotfreq | args.plotwaterfall | args.plottime | args.plotconst:
-        import sip
-        from PyQt4 import QtGui
-
-        # FIXME: not working
-        pywin = sip.wrapinstance(tb.qtsink.pyqwidget(), QtGui.QWidget)
-        pywin.show()
-
-
-
     print("Starting cell search... ", end='')
     sys.stdout.flush()
 
     tb.start()
+    if args.gui:
+        tb.qapp.exec_()
 
-    t_start = t_now = time.time()
-    while not tb.msg_store.num_messages() and t_now - t_start < args.time_out:
-        time.sleep(0.1)
-        t_now = time.time()
+    if not args.cut_off and args.time_out > -1:
+        t_start = t_now = time.time()
+        while t_now - t_start < args.time_out:
+            time.sleep(0.1)
+            t_now = time.time()
 
-    tb.stop()
+        tb.stop()
+
     tb.wait()
 
     print("done.")
@@ -170,27 +176,44 @@ if __name__ == '__main__':
     # Required
     parser.add_argument("filename", type=filetype)
     parser.add_argument("-s", "--sample-rate", type=eng_float, required=True,
-                        metavar="Hz", help="input data's sample rate [Required]")
+                        metavar="Hz", help="input data's sample rate " +
+                        "[Required]")
     parser.add_argument("-f", "--frequency", type=eng_float, required=True,
-                        metavar="Hz", help="input data's center frequency [Required]")
+                        metavar="Hz", help="input data's center frequency " +
+                        "[Required]")
 
     # Optional
     parser.add_argument("--repeat", action='store_true',
-                        help="loop file until cell found or cut-off reached [default=%(default)s]")
-    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N",
-                        help="stop looping after N samples [default=%(default)s]")
+                        help="loop file until cell found or cut-off reached " +
+                        "[default=%(default)s]")
+    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N", default=0,
+                        help="stop looping after N samples " +
+                        "[default=%(default)s]")
     parser.add_argument("--throttle", type=eng_float, metavar="Hz",
-                        help="throttle file source to lower CPU load [default=%(default)s]")
+                        help="throttle file source to lower CPU load " +
+                        "[default=%(default)s]")
     parser.add_argument("--time-out", type=eng_float, metavar="sec", default=5,
-                        help="max time in seconds to perform search [default=%(default)s]")
+                        help="max time in seconds to perform search " +
+                        "[default=%(default)s]")
     parser.add_argument("--threshold", type=eng_float, default=4,
-                        help="set peak to side-lobe ratio threshold [default=%(default)s]")
-    parser.add_argument("--plotfreq", action='store_true', help="display frequency plot"),
-    parser.add_argument("--plotwaterfall", action='store_true', help="display waterfall plot"),
-    parser.add_argument("--plottime", action='store_true', help="display time plot"),
-    parser.add_argument("--plotconst", action='store_true', help="display constellation plot"),
+                        help="set peak to side-lobe ratio threshold " +
+                        "[default=%(default)s]")
+    parser.add_argument("--plotfreq", action='store_true',
+                        help="display frequency plot"),
+    parser.add_argument("--plotwaterfall", action='store_true',
+                        help="display waterfall plot"),
+    parser.add_argument("--plottime", action='store_true',
+                        help="display time plot"),
+    parser.add_argument("--plotconst", action='store_true',
+                        help="display constellation plot"),
+    parser.add_argument("--gui", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--debug", action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
+
+    args.gui = any([args.plotfreq,
+                    args.plotwaterfall,
+                    args.plottime,
+                    args.plotconst])
 
     if args.debug:
         print("Blocked waiting for GDB attach (pid = {})".format(os.getpid()))

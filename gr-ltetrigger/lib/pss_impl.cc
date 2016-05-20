@@ -65,16 +65,17 @@ namespace gr {
     {
       srslte_use_standard_symbol_size(true);
 
-      if (srslte_pss_synch_init(&d_pss[N_id_2], half_frame_length)) {
+      if (srslte_pss_synch_init(&d_pss, half_frame_length)) {
         std::cerr << "Error initializing PSS" << std::endl;
         exit(EXIT_FAILURE);
       }
-      if (srslte_pss_synch_set_N_id_2(&d_pss[N_id_2], N_id_2)) {
+      if (srslte_pss_synch_set_N_id_2(&d_pss, N_id_2)) {
         std::cerr << "Error initializing PSS N_id_2" << std::endl;
         exit(EXIT_FAILURE);
       }
 
-      set_output_multiple(full_frame_length);
+      set_history(half_frame_length);
+      set_output_multiple(half_frame_length);
       message_port_register_out(tracking_port_id);
     }
 
@@ -83,12 +84,12 @@ namespace gr {
      */
     pss_impl::~pss_impl()
     {
-      srslte_pss_synch_free(&d_pss[d_N_id_2]);
+      srslte_pss_synch_free(&d_pss);
 
       printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f\n",
              d_N_id_2,
-             d_psr_sum[d_N_id_2] / d_psr_nsummed[d_N_id_2],
-             d_psr_max[d_N_id_2]);
+             d_psr_sum / d_psr_nsummed,
+             d_psr_max);
     }
 
     void
@@ -96,26 +97,37 @@ namespace gr {
     {
       int max_score = d_track_after_n_frames;
 
-      if (tracking.N_id_2[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
+      //if (d_N_id_2 == 1) printf("%d ", tracking.score[d_N_id_2]);
+
+      if (tracking.id[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
         // nothing to do
         return;
 
       tracking.score[d_N_id_2]++;
 
-      if (!tracking.N_id_2[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
-        tracking.N_id_2[d_N_id_2] = true;
+      if (!tracking.id[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
+        tracking.id[d_N_id_2] = true;
     }
 
     void
     pss_impl::decr_score(tracking_t &tracking)
     {
+      //if (d_N_id_2 == 1) printf("DEBUG: dec tracking score: %d\n", tracking.score[d_N_id_2]);
+
       if (!tracking.score[d_N_id_2])
         return;
 
       tracking.score[d_N_id_2]--;
 
-      if (tracking.N_id_2[d_N_id_2]) {
-        tracking.N_id_2[d_N_id_2] = false;
+      if (tracking.id[d_N_id_2]) {
+        tracking.countdown[d_N_id_2] = 0; // force resync
+
+      }
+
+      if (tracking.score[d_N_id_2] == 0) {
+        // signal cell dropped
+        d_tracking.id[d_N_id_2] = false;
+        d_psr_max = 0;
         message_port_pub(tracking_port_id, pmt::PMT_NIL);
       }
     }
@@ -126,41 +138,33 @@ namespace gr {
                            gr_vector_const_void_star &input_items,
                            gr_vector_void_star &output_items)
     {
-      const cf_t *in = static_cast<const cf_t *>(input_items[0]); // input stream
+      const cf_t *in = &(static_cast<const cf_t *>(input_items[0])[history()-1]);
       cf_t *out = static_cast<cf_t *>(output_items[0]); // output stream
 
-      if (!d_tracking.any() || !d_tracking.count[d_N_id_2]) {
-        d_tracking.count[d_N_id_2] = d_track_every_n_frames;
-        d_peak_pos[d_N_id_2] = srslte_pss_synch_find_pss(&d_pss[d_N_id_2],
-                                                         const_cast<cf_t *>(in),
-                                                         &d_psr[d_N_id_2]);
+      if (!d_tracking.any() || d_tracking.countdown[d_N_id_2] == 0) {
+        d_tracking.countdown[d_N_id_2] = d_track_every_n_frames;
+        d_peak_pos = srslte_pss_synch_find_pss(&d_pss,
+                                               const_cast<cf_t *>(in),
+                                               &d_psr);
 
         // track avg PSR
-        d_psr_sum[d_N_id_2] += d_psr[d_N_id_2];
-        d_psr_nsummed[d_N_id_2]++;
+        d_psr_sum += d_psr;
+        d_psr_nsummed++;
       } else {
-        d_tracking.count[d_N_id_2]--;
+        d_tracking.countdown[d_N_id_2]--;
       }
 
-      if (d_psr[d_N_id_2] > d_psr_threshold) {
+      if (d_psr > d_psr_threshold)
         incr_score(d_tracking);
-      } else {
+      else
         decr_score(d_tracking);
-      }
 
-      if (d_tracking.N_id_2[d_N_id_2]) {
-        // track max PSR for fun
-        if (d_psr[d_N_id_2] > d_psr_max[d_N_id_2]) {
-          d_psr_max[d_N_id_2] = d_psr[d_N_id_2];
-          printf("New max PSR value for N_id_2 %d: %f\n",
-                 d_N_id_2,
-                 d_psr_max[d_N_id_2]);
-        }
+      if (d_psr > d_psr_max)
+        d_psr_max = d_psr;
 
-        int frame_start = d_peak_pos[d_N_id_2] - slot_length;
-        d_peak_pos[d_N_id_2] = slot_length;
-        if (frame_start < 0)
-          frame_start += half_frame_length;
+      if (d_tracking.id[d_N_id_2]) {
+        int frame_start = d_peak_pos - slot_length;
+        d_peak_pos = slot_length;
 
         noutput_items = half_frame_length;
         int nconsume = frame_start + noutput_items;
@@ -170,12 +174,7 @@ namespace gr {
         std::copy(&in[frame_start], &in[nconsume], out);
 
         consume_each(nconsume);
-
       } else {
-        // reset max PSR if tracked cell is long gone
-        if (d_tracking.score[d_N_id_2] == 0)
-          d_psr_max[d_N_id_2] = 0;
-
         // nothing to see, move along
         consume_each(half_frame_length); // drop the current half frame
         noutput_items = 0;               // don't propogate anything
