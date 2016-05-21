@@ -64,6 +64,7 @@ namespace gr {
         d_track_every_n_frames(track_every)
     {
       srslte_use_standard_symbol_size(true);
+      //srslte_verbose = SRSLTE_VERBOSE_DEBUG;
 
       if (srslte_pss_synch_init(&d_pss, half_frame_length)) {
         std::cerr << "Error initializing PSS" << std::endl;

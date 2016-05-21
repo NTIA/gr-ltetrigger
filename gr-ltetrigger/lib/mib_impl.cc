@@ -119,8 +119,6 @@ namespace gr {
           std::cerr << "Error initializing MIB" << std::endl;
           exit(EXIT_FAILURE);
         }
-        printf("DEBUG: Reinitializing mib with cell_id %d, cp_type: %s\n",
-               d_cell.id, srslte_cp_string(d_cell.cp));
       }
 
       uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN];
