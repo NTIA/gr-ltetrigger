@@ -34,18 +34,18 @@ namespace gr {
     class sss_impl : public sss
     {
     private:
-      srslte_sync_t d_sync[3]; // one for each N_id_2
+      srslte_sync_t d_sync; // one for each N_id_2
       int d_N_id_2;
       int d_subframe_idx = -1;
 
-      const int slot_length = 960;
-      const int half_frame_length = 10 * slot_length;
-      const int full_frame_length = 2 * half_frame_length;
-      const int symbol_sz = 128;
-      const int max_offset = 10; // FIXME: set arbitrarily, does it matter?
+      static const int slot_length = 960;
+      static const int half_frame_length = 10 * slot_length;
+      static const int full_frame_length = 2 * half_frame_length;
+      static const int symbol_sz = 128;
+      static const int max_offset = 100; // FIXME: set arbitrarily, does it matter?
 
-      const std::string cell_id_tag_key = "cell_id";
-      const std::string cp_type_tag_key = "cp_type";
+      const pmt::pmt_t cell_id_tag_key = pmt::intern("cell_id");
+      const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
 
     public:
       sss_impl(int N_id_2);

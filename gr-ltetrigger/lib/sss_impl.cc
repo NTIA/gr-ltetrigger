@@ -51,18 +51,18 @@ namespace gr {
     {
       srslte_use_standard_symbol_size(true);
 
-      if (srslte_sync_init(&d_sync[N_id_2],
+      if (srslte_sync_init(&d_sync,
                            half_frame_length,
                            max_offset,
                            symbol_sz)) {
         std::cerr << "Error initializing SSS SYNC" << std::endl;
         exit(EXIT_FAILURE);
       }
-      if (srslte_sync_set_N_id_2(&d_sync[N_id_2], N_id_2)) {
+      if (srslte_sync_set_N_id_2(&d_sync, N_id_2)) {
         std::cerr << "Error initializing SSS SYNC N_id_2" << std::endl;
         exit(EXIT_FAILURE);
       }
-      if (srslte_sss_synch_set_N_id_2(&d_sync[N_id_2].sss, N_id_2)) {
+      if (srslte_sss_synch_set_N_id_2(&d_sync.sss, N_id_2)) {
         std::cerr << "Error initializing SSS N_id_2" << std::endl;
         exit(EXIT_FAILURE);
       }
@@ -75,7 +75,7 @@ namespace gr {
      */
     sss_impl::~sss_impl()
     {
-      srslte_sync_free(&d_sync[d_N_id_2]);
+      srslte_sync_free(&d_sync);
     }
 
     int
@@ -86,7 +86,7 @@ namespace gr {
       const cf_t *in = static_cast<const cf_t *>(input_items[0]);
       cf_t *out = static_cast<cf_t *>(output_items[0]);
 
-      srslte_sync_t *sync = &d_sync[d_N_id_2];
+      srslte_sync_t *sync = &d_sync;
 
       srslte_cp_t cp = srslte_sync_detect_cp(sync,
                                              const_cast<cf_t *>(in),
@@ -121,21 +121,16 @@ namespace gr {
       // TODO: consider using nitems_read to tag stream in pss and here
       //       so that we can see when there's been dropped frames
 
-      add_item_tag(0,
-                   nitems_written(0), // offset
-                   pmt::mp(cell_id_tag_key),
-                   pmt::mp(cell_id));
+      pmt::pmt_t cell_id_tag_value = pmt::from_long(cell_id);
+      add_item_tag(0, nitems_written(0), cell_id_tag_key, cell_id_tag_value);
 
-      pmt::pmt_t cp_is_norm;
+      pmt::pmt_t cp_type_tag_value;
       if (SRSLTE_CP_ISNORM(sync->cp))
-        cp_is_norm = pmt::PMT_T;
+        cp_type_tag_value = pmt::PMT_T;
       else
-        cp_is_norm = pmt::PMT_F;
+        cp_type_tag_value = pmt::PMT_F;
 
-      add_item_tag(0,
-                   nitems_written(0), // offset
-                   pmt::mp(cp_type_tag_key),
-                   cp_is_norm);
+      add_item_tag(0, nitems_written(0), cp_type_tag_key, cp_type_tag_value);
 
       std::copy(in, &in[half_frame_length], out);
 

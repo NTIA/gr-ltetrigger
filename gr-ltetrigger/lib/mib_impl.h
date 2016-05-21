@@ -39,10 +39,10 @@ namespace gr {
     private:
       void tracking_lost_handler(pmt::pmt_t msg);
 
-      const int slot_length = 960;
-      const int half_frame_length = 10 * slot_length;
-      const int full_frame_length = 2 * half_frame_length;
-      const int symbol_sz = 128;
+      static const int slot_length = 960;
+      static const int half_frame_length = 10 * slot_length;
+      static const int full_frame_length = 2 * half_frame_length;
+      static const int symbol_sz = 128;
 
       gr::thread::mutex d_mutex;
       bool d_mib_unpacked;
