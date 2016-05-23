@@ -22,7 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    cfo.h
     pss.h
     sss.h
     mib.h DESTINATION include/ltetrigger

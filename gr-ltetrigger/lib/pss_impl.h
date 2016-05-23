@@ -21,8 +21,6 @@
 #ifndef INCLUDED_LTETRIGGER_PSS_IMPL_H
 #define INCLUDED_LTETRIGGER_PSS_IMPL_H
 
-#include <string> /* string */
-
 #include <srslte/srslte.h>
 
 #include <ltetrigger/pss.h>
@@ -58,6 +56,10 @@ namespace gr {
       int d_psr_nsummed = 0;
       float d_psr_max = 0.0;
       int d_peak_pos = 0;
+
+      srslte_cfo_t d_cfo;
+      cf_t d_channel_estimation_buffer[SRSLTE_PSS_LEN];
+      float d_cfo_mean;
 
       int d_N_id_2;
       float d_psr_threshold;

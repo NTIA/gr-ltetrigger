@@ -21,7 +21,6 @@
 #ifndef INCLUDED_LTETRIGGER_MIB_IMPL_H
 #define INCLUDED_LTETRIGGER_MIB_IMPL_H
 
-#include <string>
 #include <vector>
 
 #include <gnuradio/thread/thread.h>

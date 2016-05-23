@@ -21,8 +21,6 @@
 #ifndef INCLUDED_LTETRIGGER_SSS_IMPL_H
 #define INCLUDED_LTETRIGGER_SSS_IMPL_H
 
-#include <string>
-
 #include <srslte/srslte.h>
 
 #include <ltetrigger/sss.h>
@@ -51,7 +49,6 @@ namespace gr {
       sss_impl(int N_id_2);
       ~sss_impl();
 
-      // Where all the action really happens
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,
                gr_vector_void_star &output_items);

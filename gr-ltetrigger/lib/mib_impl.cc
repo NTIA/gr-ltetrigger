@@ -22,8 +22,7 @@
 #include "config.h"
 #endif
 
-#include <cassert>
-#include <iostream>
+#include <cassert>   /* assert */
 
 #include <gnuradio/io_signature.h>
 #include "mib_impl.h"
@@ -55,10 +54,8 @@ namespace gr {
       d_cell.cp = SRSLTE_CP_NORM;
       d_cell.id = 100;
 
-      if (srslte_ue_mib_init(&d_mib, d_cell)) {
-        std::cerr << "Error initializing MIB" << std::endl;
-        exit(EXIT_FAILURE);
-      }
+      if (srslte_ue_mib_init(&d_mib, d_cell))
+        throw std::runtime_error("Error initializing MIB");
 
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
@@ -115,10 +112,10 @@ namespace gr {
         srslte_ue_mib_reset(&d_mib);
         d_cell.id = cell_id;
         d_cell.cp = cp;
-        if (srslte_ue_mib_init(&d_mib, d_cell)) {
-          std::cerr << "Error initializing MIB" << std::endl;
-          exit(EXIT_FAILURE);
-        }
+
+        if (srslte_ue_mib_init(&d_mib, d_cell))
+          throw std::runtime_error("Error initializing MIB");
+
       }
 
       uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN];

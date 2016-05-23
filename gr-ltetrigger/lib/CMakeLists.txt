@@ -31,7 +31,6 @@ link_directories(
   ${SRSLTE_LIBRARY_DIRS}
   )
 list(APPEND ltetrigger_sources
-    cfo_impl.cc
     pss_impl.cc
     sss_impl.cc
     mib_impl.cc )

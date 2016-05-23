@@ -40,7 +40,6 @@ class downlink_trigger_c(gr.hier_block2):
 
         self.psr_threshold = psr_threshold
 
-        self.cfo = ltetrigger.cfo()
         self.pss0 = ltetrigger.pss(N_id_2=0, psr_threshold=self.psr_threshold)
         self.pss1 = ltetrigger.pss(N_id_2=1, psr_threshold=self.psr_threshold)
         self.pss2 = ltetrigger.pss(N_id_2=2, psr_threshold=self.psr_threshold)
@@ -57,12 +56,12 @@ class downlink_trigger_c(gr.hier_block2):
         self.tag1.set_display(False)
         self.tag2.set_display(False)
 
-        # TODO: insert CFO block
+
         self.connect(self, self.pss0, self.sss0, self.mib0, self.tag0)
         self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
         self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)
 
-        port_id = "tracking_lost"
-        self.msg_connect(self.pss0, port_id, self.mib0, port_id)
-        self.msg_connect(self.pss1, port_id, self.mib1, port_id)
-        self.msg_connect(self.pss2, port_id, self.mib2, port_id)
+        tracking_port_id = "tracking_lost"
+        self.msg_connect(self.pss0, tracking_port_id, self.mib0, tracking_port_id)
+        self.msg_connect(self.pss1, tracking_port_id, self.mib1, tracking_port_id)
+        self.msg_connect(self.pss2, tracking_port_id, self.mib2, tracking_port_id)

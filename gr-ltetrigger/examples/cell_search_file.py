@@ -22,14 +22,6 @@ from gnuradio import filter as gr_filter
 
 import pmt
 
-try:
-    from gnuradio import qtgui
-    from PyQt4 import QtGui, QtCore
-    import sip
-except ImportError:
-    sys.stderr.write("Error: Program requires PyQt4 and gr-qtgui.\n")
-    sys.exit(1)
-
 from ltetrigger import downlink_trigger_c
 
 
@@ -55,10 +47,9 @@ class cell_search_file(gr.top_block):
             cut_off = blocks.head(DATA_SIZE, args.cut_off)
 
         if args.sample_rate % REQUIRED_SAMPLE_RATE:
-            # Resampling will be costly, warn
-            wrn  = "Sample rate {:.2f} MHz is not a multiple of 1.92 MHz. "
-            wrn += "Arbitrary resampling not supported at this time."
-            self.logger.error(wrn.format(args.sample_rate))
+            err  = "Sample rate {:.2f} MHz is not a multiple of 1.92 MHz. "
+            err += "Arbitrary resampling not supported at this time."
+            self.logger.error(err.format(args.sample_rate))
             sys.exit(-1)
 
         resamp_ratio = int(args.sample_rate / REQUIRED_SAMPLE_RATE)
@@ -87,30 +78,6 @@ class cell_search_file(gr.top_block):
 
         self.connect((lastblock, 0), self.trigger)
 
-        if args.gui:
-            fftsize = 128
-
-            self.qapp = QtGui.QApplication(sys.argv)
-            with open(gr.prefix() + '/share/gnuradio/themes/dark.qss') as ss:
-                sstext = ss.read()
-
-            self.qapp.setStyleSheet(sstext)
-
-            self.qtsink = qtgui.sink_c(fftsize,
-                                       gr_filter.window.WIN_RECTANGULAR,
-                                       args.frequency,
-                                       REQUIRED_SAMPLE_RATE,
-                                       "LTETrigger",
-                                       args.plotfreq,
-                                       args.plotwaterfall,
-                                       args.plottime,
-                                       args.plotconst)
-
-            self.connect((lastblock, 0), self.qtsink)
-
-            pywin = sip.wrapinstance(self.qtsink.pyqwidget(), QtGui.QWidget)
-            pywin.show()
-
 
 def main(args):
     logger = logging.getLogger('cell_search_file.main')
@@ -121,8 +88,6 @@ def main(args):
     sys.stdout.flush()
 
     tb.start()
-    if args.gui:
-        tb.qapp.exec_()
 
     if not args.cut_off and args.time_out > -1:
         t_start = t_now = time.time()
@@ -192,28 +157,15 @@ if __name__ == '__main__':
     parser.add_argument("--throttle", type=eng_float, metavar="Hz",
                         help="throttle file source to lower CPU load " +
                         "[default=%(default)s]")
-    parser.add_argument("--time-out", type=eng_float, metavar="sec", default=5,
+    parser.add_argument("--time-out", type=eng_float, metavar="sec", default=-1,
                         help="max time in seconds to perform search " +
                         "[default=%(default)s]")
     parser.add_argument("--threshold", type=eng_float, default=4,
                         help="set peak to side-lobe ratio threshold " +
                         "[default=%(default)s]")
-    parser.add_argument("--plotfreq", action='store_true',
-                        help="display frequency plot"),
-    parser.add_argument("--plotwaterfall", action='store_true',
-                        help="display waterfall plot"),
-    parser.add_argument("--plottime", action='store_true',
-                        help="display time plot"),
-    parser.add_argument("--plotconst", action='store_true',
-                        help="display constellation plot"),
     parser.add_argument("--gui", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--debug", action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
-
-    args.gui = any([args.plotfreq,
-                    args.plotwaterfall,
-                    args.plottime,
-                    args.plotconst])
 
     if args.debug:
         print("Blocked waiting for GDB attach (pid = {})".format(os.getpid()))

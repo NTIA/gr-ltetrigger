@@ -17,7 +17,6 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    ltetrigger_cfo.xml
     ltetrigger_pss.xml
     ltetrigger_downlink_trigger_c.xml
     ltetrigger_sss.xml

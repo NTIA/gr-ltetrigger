@@ -24,7 +24,7 @@
 
 #include <algorithm> /* copy */
 #include <cstdio>    /* printf */
-#include <cstdlib>   /* exit, EXIT_FAILURE */
+#include <stdexcept> /* runtime_error */
 
 #include <gnuradio/io_signature.h>
 
@@ -51,21 +51,14 @@ namespace gr {
     {
       srslte_use_standard_symbol_size(true);
 
-      if (srslte_sync_init(&d_sync,
-                           half_frame_length,
-                           max_offset,
-                           symbol_sz)) {
-        std::cerr << "Error initializing SSS SYNC" << std::endl;
-        exit(EXIT_FAILURE);
-      }
-      if (srslte_sync_set_N_id_2(&d_sync, N_id_2)) {
-        std::cerr << "Error initializing SSS SYNC N_id_2" << std::endl;
-        exit(EXIT_FAILURE);
-      }
-      if (srslte_sss_synch_set_N_id_2(&d_sync.sss, N_id_2)) {
-        std::cerr << "Error initializing SSS N_id_2" << std::endl;
-        exit(EXIT_FAILURE);
-      }
+      if (srslte_sync_init(&d_sync, half_frame_length, max_offset, symbol_sz))
+        throw std::runtime_error("Error initializing SSS SYNC");
+
+      if (srslte_sync_set_N_id_2(&d_sync, N_id_2))
+        throw std::runtime_error("Error initializing SSS SYNC N_id_2");
+
+      if (srslte_sss_synch_set_N_id_2(&d_sync.sss, N_id_2))
+        throw std::runtime_error("Error initializing SSS N_id_2");
 
       set_output_multiple(half_frame_length);
     }
