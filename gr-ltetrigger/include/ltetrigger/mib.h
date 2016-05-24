@@ -46,7 +46,7 @@ namespace gr {
        * class. ltetrigger::mib::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(bool exit_on_success=false);
     };
 
   } // namespace ltetrigger

@@ -32,13 +32,14 @@ class downlink_trigger_c(gr.hier_block2):
 
     This block requires input sampled at (or resampled to) 1.92 MHz
     """
-    def __init__(self, psr_threshold=4.5):
+    def __init__(self, psr_threshold, exit_on_success=False):
         gr.hier_block2.__init__(self,
                                 "downlink_trigger_c",
                                 gr.io_signature(1, 1, gr.sizeof_gr_complex),
                                 gr.io_signature(0, 0, 0))
 
         self.psr_threshold = psr_threshold
+        self.exit_on_success = exit_on_success
 
         self.pss0 = ltetrigger.pss(N_id_2=0, psr_threshold=self.psr_threshold)
         self.pss1 = ltetrigger.pss(N_id_2=1, psr_threshold=self.psr_threshold)
@@ -46,9 +47,9 @@ class downlink_trigger_c(gr.hier_block2):
         self.sss0 = ltetrigger.sss(N_id_2=0)
         self.sss1 = ltetrigger.sss(N_id_2=1)
         self.sss2 = ltetrigger.sss(N_id_2=2)
-        self.mib0 = ltetrigger.mib()
-        self.mib1 = ltetrigger.mib()
-        self.mib2 = ltetrigger.mib()
+        self.mib0 = ltetrigger.mib(exit_on_success=self.exit_on_success)
+        self.mib1 = ltetrigger.mib(exit_on_success=self.exit_on_success)
+        self.mib2 = ltetrigger.mib(exit_on_success=self.exit_on_success)
         self.tag0 = blocks.tag_debug(gr.sizeof_gr_complex, "mib0")
         self.tag1 = blocks.tag_debug(gr.sizeof_gr_complex, "mib1")
         self.tag2 = blocks.tag_debug(gr.sizeof_gr_complex, "mib2")
@@ -61,7 +62,21 @@ class downlink_trigger_c(gr.hier_block2):
         self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
         self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)
 
-        tracking_port_id = "tracking_lost"
-        self.msg_connect(self.pss0, tracking_port_id, self.mib0, tracking_port_id)
-        self.msg_connect(self.pss1, tracking_port_id, self.mib1, tracking_port_id)
-        self.msg_connect(self.pss2, tracking_port_id, self.mib2, tracking_port_id)
+        tracking_lost_port_id = "tracking_lost"
+        self.msg_connect(self.pss0, tracking_lost_port_id,
+                         self.mib0, tracking_lost_port_id)
+        self.msg_connect(self.pss1, tracking_lost_port_id,
+                         self.mib1, tracking_lost_port_id)
+        self.msg_connect(self.pss2, tracking_lost_port_id,
+                         self.mib2, tracking_lost_port_id)
+
+        tracking_cell_port_id = "tracking_cell"
+        self.message_port_register_hier_in(tracking_cell_port_id)
+        self.message_port_register_hier_out(tracking_cell_port_id)
+
+        self.msg_connect(self.mib0, tracking_cell_port_id,
+                         self, tracking_cell_port_id)
+        self.msg_connect(self.mib1, tracking_cell_port_id,
+                         self, tracking_cell_port_id)
+        self.msg_connect(self.mib2, tracking_cell_port_id,
+                         self, tracking_cell_port_id)

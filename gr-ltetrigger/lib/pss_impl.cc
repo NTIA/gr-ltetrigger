@@ -70,7 +70,7 @@ namespace gr {
       if (srslte_pss_synch_set_N_id_2(&d_pss, N_id_2))
         throw std::runtime_error("Error initializing PSS N_id_2");
 
-      if (srslte_cfo_init(&d_cfo, symbol_sz))
+      if (srslte_cfo_init(&d_cfo, half_frame_length))
         throw std::runtime_error("Error initializing CFO");
 
       set_history(half_frame_length);
@@ -85,10 +85,13 @@ namespace gr {
     {
       srslte_pss_synch_free(&d_pss);
 
-      printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f\n",
+      srslte_cfo_free(&d_cfo);
+
+      printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f, avg CFO: %f\n",
              d_N_id_2,
-             d_psr_sum / d_psr_nsummed,
-             d_psr_max);
+             d_psr_mean,
+             d_psr_max,
+             d_cfo_mean);
     }
 
     void
@@ -145,8 +148,7 @@ namespace gr {
                                                &d_psr);
 
         // track avg PSR
-        d_psr_sum += d_psr;
-        d_psr_nsummed++;
+        d_psr_mean = SRSLTE_VEC_CMA(d_psr, d_psr_mean, d_psr_nseen++);
       } else {
         d_tracking.countdown[d_N_id_2]--;
       }
@@ -175,7 +177,9 @@ namespace gr {
         // estimate CFO
         float cfo = srslte_pss_synch_cfo_compute(&d_pss,
                                                  &out[slot_length - symbol_sz]);
-        d_cfo_mean = SRSLTE_VEC_CMA(cfo, d_cfo_mean, nitems_written(0));
+        d_cfo_mean = SRSLTE_VEC_CMA(cfo,
+                                    d_cfo_mean,
+                                    nitems_written(0) / half_frame_length);
 
         // correct CFO in place
         srslte_cfo_correct(&d_cfo, out, out, -d_cfo_mean / symbol_sz);

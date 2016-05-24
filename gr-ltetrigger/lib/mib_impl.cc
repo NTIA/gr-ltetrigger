@@ -23,6 +23,7 @@
 #endif
 
 #include <cassert>   /* assert */
+#include <ctime>     /* time */
 
 #include <gnuradio/io_signature.h>
 #include "mib_impl.h"
@@ -32,19 +33,20 @@ namespace gr {
   namespace ltetrigger {
 
     mib::sptr
-    mib::make()
+    mib::make(bool exit_on_success)
     {
-      return gnuradio::get_initial_sptr(new mib_impl());
+      return gnuradio::get_initial_sptr(new mib_impl(exit_on_success));
     }
 
     /*
      * The private constructor
      */
-    mib_impl::mib_impl()
+    mib_impl::mib_impl(bool exit_on_success)
       : gr::block("mib",
                   gr::io_signature::make(1, 1, sizeof(cf_t)),
                   gr::io_signature::make(1, 1, sizeof(cf_t))),
-        d_mib_unpacked(false)
+        d_cell_published(false),
+        d_exit_on_success(exit_on_success)
     {
       srslte_use_standard_symbol_size(true);
 
@@ -63,6 +65,8 @@ namespace gr {
       message_port_register_in(tracking_port_id);
       set_msg_handler(tracking_port_id,
                       boost::bind(&mib_impl::tracking_lost_handler, this, _1));
+
+      message_port_register_out(tracking_cell_port_id);
     }
 
     /*
@@ -84,7 +88,7 @@ namespace gr {
 
       gr::thread::scoped_lock lock(d_mutex);
 
-      if (d_mib_unpacked) {
+      if (d_cell_published) {
         consume_each(half_frame_length);
         return 0;
       }
@@ -131,8 +135,12 @@ namespace gr {
         srslte_pbch_mib_unpack(bch_payload,
                                &d_cell,
                                reinterpret_cast<uint32_t *>(&sfn_offset));
-        srslte_cell_fprint(stdout, &d_cell, sfn_offset);
-        d_mib_unpacked = true;
+        //srslte_cell_fprint(stdout, &d_cell, sfn_offset);
+        d_current_tracking_cell = pack_cell(d_cell, sfn_offset);
+        message_port_pub(tracking_cell_port_id, d_current_tracking_cell);
+        d_cell_published = true;
+        if (d_exit_on_success)
+          return WORK_DONE;
       }
 
       consume_each(noutput_items);
@@ -146,10 +154,73 @@ namespace gr {
     {
       gr::thread::scoped_lock lock(d_mutex);
 
-      d_mib_unpacked = false;
+      d_cell_published = false;
+      d_current_tracking_cell = pmt::PMT_NIL;
       srslte_ue_mib_reset(&d_mib);
 
       printf("DEBUG: mib received tracking lost msg\n");
+    }
+
+    pmt::pmt_t
+    mib_impl::pack_cell(const srslte_cell_t &cell, const int &sfn) const
+    {
+      pmt::pmt_t d = pmt::make_dict();
+
+      d = pmt::dict_add(d,
+                        pmt::intern("cell_id"),
+                        pmt::from_long(cell.id));
+
+      d = pmt::dict_add(d,
+                        pmt::intern("nof_tx_ports"),
+                        pmt::from_long(cell.nof_ports));
+
+      d = pmt::dict_add(d,
+                        pmt::intern("cp_len"),
+                        pmt::intern(srslte_cp_string(cell.cp)));
+
+      d = pmt::dict_add(d,
+                        pmt::intern("nof_prb"),
+                        pmt::from_long(cell.nof_prb));
+
+      std::string phich_len_str;
+      if (cell.phich_length == SRSLTE_PHICH_EXT)
+        phich_len_str = "Extended";
+      else
+        phich_len_str = "Normal";
+
+      d = pmt::dict_add(d,
+                        pmt::intern("phich_len"),
+                        pmt::intern(phich_len_str));
+
+      std::string nof_phich_resources_str;
+      switch (cell.phich_resources) {
+      case SRSLTE_PHICH_R_1_6:
+        nof_phich_resources_str = "1/6";
+        break;
+      case SRSLTE_PHICH_R_1_2:
+        nof_phich_resources_str = "1/2";
+        break;
+      case SRSLTE_PHICH_R_1:
+        nof_phich_resources_str = "1";
+        break;
+      case SRSLTE_PHICH_R_2:
+        nof_phich_resources_str = "2";
+        break;
+      }
+
+      d = pmt::dict_add(d,
+                        pmt::intern("nof_phich_resources"),
+                        pmt::intern(nof_phich_resources_str));
+
+      d = pmt::dict_add(d,
+                        pmt::intern("sfn_offset"),
+                        pmt::from_long(sfn));
+
+      d = pmt::dict_add(d,
+                        pmt::intern("tracking_start_time"),
+                        pmt::from_long(time(0)));
+
+      return d;
     }
 
   } /* namespace ltetrigger */

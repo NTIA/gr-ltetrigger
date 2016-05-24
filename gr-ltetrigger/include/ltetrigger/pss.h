@@ -61,8 +61,8 @@ namespace gr {
        * creating new instances.
        */
       static sptr make(int N_id_2,
-                       float psr_threshold=4.5,
-                       int track_after=10,
+                       float psr_threshold,
+                       int track_after=32,
                        int track_every=4);
     };
 

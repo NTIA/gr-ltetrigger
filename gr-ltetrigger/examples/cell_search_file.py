@@ -14,6 +14,7 @@ from __future__ import print_function
 
 import logging
 import os
+from pprint import pprint
 import sys
 import time
 
@@ -55,7 +56,8 @@ class cell_search_file(gr.top_block):
         resamp_ratio = int(args.sample_rate / REQUIRED_SAMPLE_RATE)
         self.resampler = gr_filter.rational_resampler_ccc(1, resamp_ratio)
 
-        self.trigger = downlink_trigger_c(args.threshold)
+        self.trigger = downlink_trigger_c(psr_threshold=args.threshold,
+                                          exit_on_success=True)
 
         self.msg_store = blocks.message_debug()
 
@@ -77,6 +79,10 @@ class cell_search_file(gr.top_block):
             lastblock = cut_off
 
         self.connect((lastblock, 0), self.trigger)
+
+        tracking_cell_port_id = "tracking_cell"
+        self.msg_connect(self.trigger, tracking_cell_port_id,
+                         self.msg_store, "store")
 
 
 def main(args):
@@ -101,11 +107,11 @@ def main(args):
 
     print("done.")
 
-    #for i in range(tb.msg_store.num_messages()):
-    #    print(pmt.to_python(tb.msg_store.get_message(i)))
-    #    break
-    #else:
-    #    print("No cells found.")
+    for i in range(tb.msg_store.num_messages()):
+        pprint(pmt.to_python(tb.msg_store.get_message(i)))
+        break
+    else:
+        print("No cells found.")
 
 
 if __name__ == '__main__':
@@ -143,11 +149,10 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--sample-rate", type=eng_float, required=True,
                         metavar="Hz", help="input data's sample rate " +
                         "[Required]")
-    parser.add_argument("-f", "--frequency", type=eng_float, required=True,
+    # Optional
+    parser.add_argument("-f", "--frequency", type=eng_float,
                         metavar="Hz", help="input data's center frequency " +
                         "[Required]")
-
-    # Optional
     parser.add_argument("--repeat", action='store_true',
                         help="loop file until cell found or cut-off reached " +
                         "[default=%(default)s]")

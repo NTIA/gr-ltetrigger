@@ -52,14 +52,14 @@ namespace gr {
 
       srslte_pss_synch_t d_pss;
       float d_psr = 0;
-      double d_psr_sum = 0.0;
-      int d_psr_nsummed = 0;
+      float d_psr_mean = 0.0;
+      unsigned int d_psr_nseen = 0;
       float d_psr_max = 0.0;
       int d_peak_pos = 0;
 
       srslte_cfo_t d_cfo;
       cf_t d_channel_estimation_buffer[SRSLTE_PSS_LEN];
-      float d_cfo_mean;
+      float d_cfo_mean = 0;
 
       int d_N_id_2;
       float d_psr_threshold;

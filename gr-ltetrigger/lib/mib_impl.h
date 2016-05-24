@@ -37,6 +37,7 @@ namespace gr {
     {
     private:
       void tracking_lost_handler(pmt::pmt_t msg);
+      pmt::pmt_t pack_cell(const srslte_cell_t &cell, const int &sfn) const;
 
       static const int slot_length = 960;
       static const int half_frame_length = 10 * slot_length;
@@ -44,7 +45,7 @@ namespace gr {
       static const int symbol_sz = 128;
 
       gr::thread::mutex d_mutex;
-      bool d_mib_unpacked;
+      bool d_cell_published;
 
       srslte_cell_t d_cell;
       srslte_ue_mib_t d_mib;
@@ -56,15 +57,21 @@ namespace gr {
       const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
 
       const pmt::pmt_t tracking_port_id = pmt::intern("tracking_lost");
+      const pmt::pmt_t tracking_cell_port_id = pmt::intern("tracking_cell");
+
+      pmt::pmt_t d_current_tracking_cell = pmt::PMT_NIL;
+
+      bool d_exit_on_success;
 
     public:
-      mib_impl();
+      mib_impl(bool exit_on_success);
       ~mib_impl();
 
       int general_work(int noutput_items,
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items);
+
     };
 
   } // namespace ltetrigger
