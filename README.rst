@@ -59,7 +59,7 @@ Quick Start
                             input data's center frequency
       --repeat              loop file until cell found or cut-off reached
                             [default=False]
-      -c N, --cut-off N     stop looping after N samples [default=0]
+      -c N, --cut-off N     stop looping after N samples [default=-1]
       --throttle Hz         throttle file source to lower CPU load [default=None]
       --time-out sec        max time in seconds to perform search [default=-1]
       --threshold THRESHOLD
