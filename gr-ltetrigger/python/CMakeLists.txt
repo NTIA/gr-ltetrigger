@@ -41,7 +41,4 @@ include(GrTest)
 
 set(GR_TEST_TARGET_DEPS gnuradio-ltetrigger)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
-GR_ADD_TEST(qa_pss ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_pss.py)
 GR_ADD_TEST(qa_downlink_trigger_c ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_downlink_trigger_c.py)
-GR_ADD_TEST(qa_sss ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_sss.py)
-GR_ADD_TEST(qa_mib ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_mib.py)

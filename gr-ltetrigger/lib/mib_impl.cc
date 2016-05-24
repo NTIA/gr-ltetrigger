@@ -174,19 +174,25 @@ namespace gr {
                         pmt::intern("nof_tx_ports"),
                         pmt::from_long(cell.nof_ports));
 
+      std::string cp_len_str;
+      if (cell.cp == SRSLTE_CP_NORM)
+        cp_len_str = "Normal";
+      else
+        cp_len_str = "Extended";
+
       d = pmt::dict_add(d,
                         pmt::intern("cp_len"),
-                        pmt::intern(srslte_cp_string(cell.cp)));
+                        pmt::intern(cp_len_str));
 
       d = pmt::dict_add(d,
                         pmt::intern("nof_prb"),
                         pmt::from_long(cell.nof_prb));
 
       std::string phich_len_str;
-      if (cell.phich_length == SRSLTE_PHICH_EXT)
-        phich_len_str = "Extended";
-      else
+      if (cell.phich_length == SRSLTE_PHICH_NORM)
         phich_len_str = "Normal";
+      else
+        phich_len_str = "Extended";
 
       d = pmt::dict_add(d,
                         pmt::intern("phich_len"),

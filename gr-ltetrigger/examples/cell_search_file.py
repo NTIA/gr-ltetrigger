@@ -90,7 +90,7 @@ def main(args):
 
     tb = cell_search_file(args)
 
-    print("Starting cell search... ")
+    print("Starting cell search... ", end='')
     sys.stdout.flush()
 
     tb.start()
