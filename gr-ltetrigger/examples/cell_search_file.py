@@ -44,7 +44,7 @@ class cell_search_file(gr.top_block):
         if args.throttle:
             throttle = blocks.throttle(DATA_SIZE, args.throttle)
 
-        if args.cut_off:
+        if args.cut_off > -1:
             cut_off = blocks.head(DATA_SIZE, args.cut_off)
 
         if args.sample_rate % REQUIRED_SAMPLE_RATE:
@@ -74,7 +74,7 @@ class cell_search_file(gr.top_block):
             self.connect(lastblock, throttle)
             lastblock = throttle
 
-        if args.cut_off:
+        if args.cut_off > -1:
             self.connect(lastblock, cut_off)
             lastblock = cut_off
 
@@ -95,7 +95,7 @@ def main(args):
 
     tb.start()
 
-    if not args.cut_off and args.time_out > -1:
+    if args.cut_off == -1 and args.time_out > -1:
         t_start = t_now = time.time()
         while t_now - t_start < args.time_out:
             time.sleep(0.1)
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     parser.add_argument("--repeat", action='store_true',
                         help="loop file until cell found or cut-off reached " +
                         "[default=%(default)s]")
-    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N", default=0,
+    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N", default=-1,
                         help="stop looping after N samples " +
                         "[default=%(default)s]")
     parser.add_argument("--throttle", type=eng_float, metavar="Hz",
