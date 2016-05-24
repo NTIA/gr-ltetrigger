@@ -56,7 +56,7 @@ Quick Start
       -s Hz, --sample-rate Hz
                             input data's sample rate [Required]
       -f Hz, --frequency Hz
-                            input data's center frequency [Required]
+                            input data's center frequency
       --repeat              loop file until cell found or cut-off reached
                             [default=False]
       -c N, --cut-off N     stop looping after N samples [default=0]

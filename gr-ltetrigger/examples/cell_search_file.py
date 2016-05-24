@@ -151,8 +151,7 @@ if __name__ == '__main__':
                         "[Required]")
     # Optional
     parser.add_argument("-f", "--frequency", type=eng_float,
-                        metavar="Hz", help="input data's center frequency " +
-                        "[Required]")
+                        metavar="Hz", help="input data's center frequency")
     parser.add_argument("--repeat", action='store_true',
                         help="loop file until cell found or cut-off reached " +
                         "[default=%(default)s]")
