@@ -54,7 +54,7 @@ namespace gr {
       d_cell.nof_ports = 0; // if set to 0, detects nof_ports
       d_cell.nof_prb = SRSLTE_UE_MIB_NOF_PRB; // 6
       d_cell.cp = SRSLTE_CP_NORM;
-      d_cell.id = 100;
+      d_cell.id = 0;
 
       if (srslte_ue_mib_init(&d_mib, d_cell))
         throw std::runtime_error("Error initializing MIB");

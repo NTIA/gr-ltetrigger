@@ -35,9 +35,6 @@
 namespace gr {
   namespace ltetrigger {
 
-    // initialize static variables
-    pss_impl::tracking_t pss_impl::d_tracking;
-
     pss::sptr
     pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
     {
@@ -75,7 +72,7 @@ namespace gr {
 
       set_history(half_frame_length);
       set_output_multiple(half_frame_length);
-      message_port_register_out(tracking_port_id);
+      message_port_register_out(tracking_lost_port_id);
     }
 
     /*
@@ -101,14 +98,14 @@ namespace gr {
 
       //if (d_N_id_2 == 1) printf("%d ", tracking.score[d_N_id_2]);
 
-      if (tracking.id[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
+      if (tracking && tracking.score == max_score)
         // nothing to do
         return;
 
-      tracking.score[d_N_id_2]++;
+      tracking.score++;
 
-      if (!tracking.id[d_N_id_2] && tracking.score[d_N_id_2] == max_score)
-        tracking.id[d_N_id_2] = true;
+      if (!tracking && tracking.score == max_score)
+        tracking.start();
     }
 
     void
@@ -116,19 +113,19 @@ namespace gr {
     {
       //if (d_N_id_2 == 1) printf("DEBUG: dec tracking score: %d\n", tracking.score[d_N_id_2]);
 
-      if (!tracking.score[d_N_id_2])
+      if (!tracking.score)
         return;
 
-      tracking.score[d_N_id_2]--;
+      tracking.score--;
 
-      if (tracking.id[d_N_id_2])
-        tracking.countdown[d_N_id_2] = 0; // force resync
+      if (tracking)
+        tracking.countdown = 0; // force resync
 
-      if (tracking.score[d_N_id_2] == 0) {
+      if (tracking.score == 0) {
         // signal cell dropped
-        d_tracking.id[d_N_id_2] = false;
+        d_tracking.stop();
         d_psr_max = 0;
-        message_port_pub(tracking_port_id, pmt::PMT_NIL);
+        message_port_pub(tracking_lost_port_id, pmt::PMT_NIL);
       }
     }
 
@@ -141,8 +138,8 @@ namespace gr {
       const cf_t *in = &(static_cast<const cf_t *>(input_items[0])[history()-1]);
       cf_t *out = static_cast<cf_t *>(output_items[0]); // output stream
 
-      if (!d_tracking.any() || d_tracking.countdown[d_N_id_2] == 0) {
-        d_tracking.countdown[d_N_id_2] = d_track_every_n_frames;
+      if (!d_tracking || d_tracking.countdown == 0) {
+        d_tracking.countdown = d_track_every_n_frames;
         d_peak_pos = srslte_pss_synch_find_pss(&d_pss,
                                                const_cast<cf_t *>(in),
                                                &d_psr);
@@ -150,7 +147,7 @@ namespace gr {
         // track avg PSR
         d_psr_mean = SRSLTE_VEC_CMA(d_psr, d_psr_mean, d_psr_nseen++);
       } else {
-        d_tracking.countdown[d_N_id_2]--;
+        d_tracking.countdown--;
       }
 
       if (d_psr > d_psr_threshold)
@@ -161,7 +158,7 @@ namespace gr {
       if (d_psr > d_psr_max)
         d_psr_max = d_psr;
 
-      if (d_tracking.id[d_N_id_2]) {
+      if (d_tracking) {
         int frame_start = d_peak_pos - slot_length;
         d_peak_pos = slot_length;
 

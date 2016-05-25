@@ -32,7 +32,7 @@ namespace gr {
     class sss_impl : public sss
     {
     private:
-      srslte_sync_t d_sync; // one for each N_id_2
+      srslte_sync_t d_sync;
       int d_N_id_2;
       int d_subframe_idx = -1;
 

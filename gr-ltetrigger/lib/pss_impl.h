@@ -34,18 +34,21 @@ namespace gr {
     private:
       struct tracking_t
       {
-        bool id[3] = {false};
-        int score[3] = {0};
-        int countdown[3] = {0};
-        bool any() const { return id[0] | id[1] | id[2]; }
-      } static d_tracking;
+        explicit operator bool() const { return is_tracking; }
+        void start() { is_tracking = true; }
+        void stop() { is_tracking = false; }
+        int score = 0;
+        int countdown = 0;
+      private:
+        bool is_tracking = false;
+      } d_tracking;
 
       static const int slot_length = 960;
       static const int half_frame_length = 10 * slot_length;
       static const int full_frame_length = 2 * half_frame_length;
       static const int symbol_sz = 128;
 
-      const pmt::pmt_t tracking_port_id = pmt::intern("tracking_lost");
+      const pmt::pmt_t tracking_lost_port_id = pmt::intern("tracking_lost");
 
       void incr_score(tracking_t &tracking);
       void decr_score(tracking_t &tracking);
