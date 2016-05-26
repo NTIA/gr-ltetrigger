@@ -113,7 +113,7 @@ namespace gr {
     {
       //if (d_N_id_2 == 1) printf("DEBUG: dec tracking score: %d\n", tracking.score[d_N_id_2]);
 
-      if (!tracking.score)
+      if (tracking.score == 0)
         return;
 
       tracking.score--;
@@ -123,7 +123,7 @@ namespace gr {
 
       if (tracking.score == 0) {
         // signal cell dropped
-        d_tracking.stop();
+        tracking.stop();
         d_psr_max = 0;
         message_port_pub(tracking_lost_port_id, pmt::PMT_NIL);
       }
