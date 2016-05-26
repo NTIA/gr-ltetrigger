@@ -21,6 +21,8 @@
 #ifndef INCLUDED_LTETRIGGER_PSS_IMPL_H
 #define INCLUDED_LTETRIGGER_PSS_IMPL_H
 
+#include <pmt/pmt.h>
+
 #include <srslte/srslte.h>
 
 #include <ltetrigger/pss.h>
@@ -32,6 +34,7 @@ namespace gr {
     class pss_impl : public pss
     {
     private:
+
       struct tracking_t
       {
         explicit operator bool() const { return is_tracking; }
@@ -43,26 +46,26 @@ namespace gr {
         bool is_tracking = false;
       } d_tracking;
 
-      static const int slot_length = 960;
-      static const int half_frame_length = 10 * slot_length;
-      static const int full_frame_length = 2 * half_frame_length;
-      static const int symbol_sz = 128;
+      static const int slot_length {960};
+      static const int half_frame_length {10 * slot_length};
+      static const int full_frame_length {2 * half_frame_length};
+      static const int symbol_sz = {128};
 
-      const pmt::pmt_t tracking_lost_port_id = pmt::intern("tracking_lost");
+      static const pmt::pmt_t tracking_lost_port_id;
 
       void incr_score(tracking_t &tracking);
       void decr_score(tracking_t &tracking);
 
       srslte_pss_synch_t d_pss;
-      float d_psr = 0;
-      float d_psr_mean = 0.0;
-      unsigned int d_psr_nseen = 0;
-      float d_psr_max = 0.0;
-      int d_peak_pos = 0;
+      float d_psr {0};
+      float d_psr_mean {0.0};
+      unsigned int d_psr_nseen {0};
+      float d_psr_max {0.0};
+      int d_peak_pos {0};
 
       srslte_cfo_t d_cfo;
       cf_t d_channel_estimation_buffer[SRSLTE_PSS_LEN];
-      float d_cfo_mean = 0;
+      float d_cfo_mean {0};
 
       int d_N_id_2;
       float d_psr_threshold;

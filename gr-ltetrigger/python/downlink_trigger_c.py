@@ -57,7 +57,6 @@ class downlink_trigger_c(gr.hier_block2):
         self.tag1.set_display(False)
         self.tag2.set_display(False)
 
-
         self.connect(self, self.pss0, self.sss0, self.mib0, self.tag0)
         self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
         self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)

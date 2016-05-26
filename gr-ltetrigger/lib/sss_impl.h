@@ -21,6 +21,8 @@
 #ifndef INCLUDED_LTETRIGGER_SSS_IMPL_H
 #define INCLUDED_LTETRIGGER_SSS_IMPL_H
 
+#include <pmt/pmt.h>
+
 #include <srslte/srslte.h>
 
 #include <ltetrigger/sss.h>
@@ -34,16 +36,16 @@ namespace gr {
     private:
       srslte_sync_t d_sync;
       int d_N_id_2;
-      int d_subframe_idx = -1;
+      int d_subframe_idx {-1};
 
-      static const int slot_length = 960;
-      static const int half_frame_length = 10 * slot_length;
-      static const int full_frame_length = 2 * half_frame_length;
-      static const int symbol_sz = 128;
-      static const int max_offset = 100; // FIXME: set arbitrarily, does it matter?
+      static const int slot_length {960};
+      static const int half_frame_length {10 * slot_length};
+      static const int full_frame_length {2 * half_frame_length};
+      static const int symbol_sz {128};
+      static const int max_offset {100}; // FIXME: set arbitrarily, does it matter?
 
-      const pmt::pmt_t cell_id_tag_key = pmt::intern("cell_id");
-      const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
+      static const pmt::pmt_t cell_id_tag_key;
+      static const pmt::pmt_t cp_type_tag_key;
 
     public:
       sss_impl(int N_id_2);

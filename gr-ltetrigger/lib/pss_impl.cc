@@ -24,7 +24,7 @@
 
 #include <algorithm> /* copy */
 #include <cassert>   /* assert */
-//#include <cstdio>    /* printf */
+#include <cstdio>    /* printf */
 #include <stdexcept> /* runtime_error */
 
 #include <gnuradio/io_signature.h>
@@ -35,13 +35,17 @@
 namespace gr {
   namespace ltetrigger {
 
+    // initialize static variable
+    const pmt::pmt_t
+    pss_impl::tracking_lost_port_id {pmt::intern("tracking_lost")};
+
     pss::sptr
     pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
     {
-      return gnuradio::get_initial_sptr(new pss_impl(N_id_2,
-                                                     psr_threshold,
-                                                     track_after,
-                                                     track_every));
+      return gnuradio::get_initial_sptr(new pss_impl {N_id_2,
+                                                      psr_threshold,
+                                                      track_after,
+                                                      track_every});
     }
     /*
      * private constructor
@@ -53,22 +57,22 @@ namespace gr {
       : gr::block("pss",
                   gr::io_signature::make(1, 1, sizeof(cf_t)),
                   gr::io_signature::make(1, 1, sizeof(cf_t))),
-        d_N_id_2(N_id_2),
-        d_psr_threshold(psr_threshold),
-        d_track_after_n_frames(track_after),
-        d_track_every_n_frames(track_every)
+        d_N_id_2 {N_id_2},
+        d_psr_threshold {psr_threshold},
+        d_track_after_n_frames {track_after},
+        d_track_every_n_frames {track_every}
     {
       srslte_use_standard_symbol_size(true);
       //srslte_verbose = SRSLTE_VERBOSE_DEBUG;
 
       if (srslte_pss_synch_init(&d_pss, half_frame_length))
-        throw std::runtime_error("Error initializing PSS");
+        throw std::runtime_error {"Error initializing PSS"};
 
       if (srslte_pss_synch_set_N_id_2(&d_pss, N_id_2))
-        throw std::runtime_error("Error initializing PSS N_id_2");
+        throw std::runtime_error {"Error initializing PSS N_id_2"};
 
       if (srslte_cfo_init(&d_cfo, half_frame_length))
-        throw std::runtime_error("Error initializing CFO");
+        throw std::runtime_error {"Error initializing CFO"};
 
       set_history(half_frame_length);
       set_output_multiple(half_frame_length);
@@ -84,19 +88,17 @@ namespace gr {
 
       srslte_cfo_free(&d_cfo);
 
-      printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f, avg CFO: %f\n",
-             d_N_id_2,
-             d_psr_mean,
-             d_psr_max,
-             d_cfo_mean);
+      std::printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f, avg CFO: %f\n",
+                  d_N_id_2,
+                  d_psr_mean,
+                  d_psr_max,
+                  d_cfo_mean);
     }
 
     void
     pss_impl::incr_score(tracking_t &tracking)
     {
-      int max_score = d_track_after_n_frames;
-
-      //if (d_N_id_2 == 1) printf("%d ", tracking.score[d_N_id_2]);
+      int max_score {d_track_after_n_frames};
 
       if (tracking && tracking.score == max_score)
         // nothing to do
@@ -111,8 +113,6 @@ namespace gr {
     void
     pss_impl::decr_score(tracking_t &tracking)
     {
-      //if (d_N_id_2 == 1) printf("DEBUG: dec tracking score: %d\n", tracking.score[d_N_id_2]);
-
       if (!tracking.score)
         return;
 
@@ -135,8 +135,8 @@ namespace gr {
                            gr_vector_const_void_star &input_items,
                            gr_vector_void_star &output_items)
     {
-      const cf_t *in = &(static_cast<const cf_t *>(input_items[0])[history()-1]);
-      cf_t *out = static_cast<cf_t *>(output_items[0]); // output stream
+      const cf_t *in {&(static_cast<const cf_t *>(input_items[0])[history()-1])};
+      cf_t *out {static_cast<cf_t *>(output_items[0])}; // output stream
 
       if (!d_tracking || d_tracking.countdown == 0) {
         d_tracking.countdown = d_track_every_n_frames;
@@ -159,11 +159,11 @@ namespace gr {
         d_psr_max = d_psr;
 
       if (d_tracking) {
-        int frame_start = d_peak_pos - slot_length;
+        int frame_start {d_peak_pos - slot_length};
         d_peak_pos = slot_length;
 
         noutput_items = half_frame_length;
-        int nconsume = frame_start + noutput_items;
+        int nconsume {frame_start + noutput_items};
 
         assert(nconsume < ninput_items[0]);
 
@@ -172,8 +172,8 @@ namespace gr {
         consume_each(nconsume);
 
         // estimate CFO
-        float cfo = srslte_pss_synch_cfo_compute(&d_pss,
-                                                 &out[slot_length - symbol_sz]);
+        float cfo {srslte_pss_synch_cfo_compute(&d_pss,
+                                                &out[slot_length - symbol_sz])};
         d_cfo_mean = SRSLTE_VEC_CMA(cfo,
                                     d_cfo_mean,
                                     nitems_written(0) / half_frame_length);

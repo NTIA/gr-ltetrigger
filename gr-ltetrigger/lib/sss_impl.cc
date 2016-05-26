@@ -34,10 +34,14 @@
 namespace gr {
   namespace ltetrigger {
 
+    // initialize static variables
+    const pmt::pmt_t sss_impl::cell_id_tag_key {pmt::intern("cell_id")};
+    const pmt::pmt_t sss_impl::cp_type_tag_key {pmt::intern("cp_type")};
+
     sss::sptr
     sss::make(int N_id_2)
     {
-      return gnuradio::get_initial_sptr(new sss_impl(N_id_2));
+      return gnuradio::get_initial_sptr(new sss_impl {N_id_2});
     }
 
     /*
@@ -47,18 +51,18 @@ namespace gr {
       : gr::sync_block("sss",
                        gr::io_signature::make(1, 1, sizeof(cf_t)),
                        gr::io_signature::make(1, 1, sizeof(cf_t))),
-        d_N_id_2(N_id_2)
+        d_N_id_2 {N_id_2}
     {
       srslte_use_standard_symbol_size(true);
 
       if (srslte_sync_init(&d_sync, half_frame_length, max_offset, symbol_sz))
-        throw std::runtime_error("Error initializing SSS SYNC");
+        throw std::runtime_error {"Error initializing SSS SYNC"};
 
       if (srslte_sync_set_N_id_2(&d_sync, N_id_2))
-        throw std::runtime_error("Error initializing SSS SYNC N_id_2");
+        throw std::runtime_error {"Error initializing SSS SYNC N_id_2"};
 
       if (srslte_sss_synch_set_N_id_2(&d_sync.sss, N_id_2))
-        throw std::runtime_error("Error initializing SSS N_id_2");
+        throw std::runtime_error {"Error initializing SSS N_id_2"};
 
       set_output_multiple(half_frame_length);
     }
@@ -76,18 +80,18 @@ namespace gr {
                    gr_vector_const_void_star &input_items,
                    gr_vector_void_star &output_items)
     {
-      const cf_t *in = static_cast<const cf_t *>(input_items[0]);
-      cf_t *out = static_cast<cf_t *>(output_items[0]);
+      const cf_t *in {static_cast<const cf_t *>(input_items[0])};
+      cf_t *out {static_cast<cf_t *>(output_items[0])};
 
-      srslte_sync_t *sync = &d_sync;
+      srslte_sync_t *sync {&d_sync};
 
-      srslte_cp_t cp = srslte_sync_detect_cp(sync,
-                                             const_cast<cf_t *>(in),
-                                             slot_length);
+      srslte_cp_t cp {srslte_sync_detect_cp(sync,
+                                            const_cast<cf_t *>(in),
+                                            slot_length)};
 
       srslte_sync_set_cp(sync, cp);
 
-      int sss_idx = slot_length - 2 * symbol_sz - sync->cp_len;
+      unsigned int sss_idx {slot_length - 2 * symbol_sz - sync->cp_len};
 
       srslte_sss_synch_m0m1_partial(&sync->sss,
                                     const_cast<cf_t *>(&in[sss_idx]),
@@ -97,24 +101,24 @@ namespace gr {
 
       sync->N_id_1 = srslte_sss_synch_N_id_1(&sync->sss, sync->m0, sync->m1);
 
-      int cell_id = srslte_sync_get_cell_id(sync);
+      int cell_id {srslte_sync_get_cell_id(sync)};
 
-      int subframe_idx = srslte_sss_synch_subframe(sync->m0, sync->m1);
+      unsigned int subframe_idx {srslte_sss_synch_subframe(sync->m0, sync->m1)};
       if (d_subframe_idx < 0) {
         d_subframe_idx = subframe_idx;
       } else {
-        int expected_subframe_idx = (d_subframe_idx + 5) % 10;
+        int expected_subframe_idx {(d_subframe_idx + 5) % 10};
         d_subframe_idx = subframe_idx;
         if (d_subframe_idx != expected_subframe_idx)
-          printf("Expected subframe index %d, but got %d\n",
-                 expected_subframe_idx,
-                 d_subframe_idx);
+          std::printf("Expected subframe index %d, but got %d\n",
+                      expected_subframe_idx,
+                      d_subframe_idx);
       }
 
       // TODO: consider using nitems_read to tag stream in pss and here
       //       so that we can see when there's been dropped frames
 
-      pmt::pmt_t cell_id_tag_value = pmt::from_long(cell_id);
+      const pmt::pmt_t cell_id_tag_value {pmt::from_long(cell_id)};
       add_item_tag(0, nitems_written(0), cell_id_tag_key, cell_id_tag_value);
 
       pmt::pmt_t cp_type_tag_value;

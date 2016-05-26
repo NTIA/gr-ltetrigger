@@ -23,6 +23,7 @@
 #endif
 
 #include <cassert>   /* assert */
+#include <cstdio>    /* printf */
 #include <ctime>     /* time */
 
 #include <gnuradio/io_signature.h>
@@ -32,10 +33,23 @@
 namespace gr {
   namespace ltetrigger {
 
+    // initialize static variables
+    const pmt::pmt_t
+    mib_impl::cell_id_tag_key {pmt::intern("cell_id")};
+
+    const pmt::pmt_t
+    mib_impl::cp_type_tag_key {pmt::intern("cp_type")};
+
+    const pmt::pmt_t
+    mib_impl::tracking_port_id {pmt::intern("tracking_lost")};
+
+    const pmt::pmt_t
+    mib_impl::tracking_cell_port_id {pmt::intern("tracking_cell")};
+
     mib::sptr
     mib::make(bool exit_on_success)
     {
-      return gnuradio::get_initial_sptr(new mib_impl(exit_on_success));
+      return gnuradio::get_initial_sptr(new mib_impl {exit_on_success});
     }
 
     /*
@@ -45,8 +59,8 @@ namespace gr {
       : gr::block("mib",
                   gr::io_signature::make(1, 1, sizeof(cf_t)),
                   gr::io_signature::make(1, 1, sizeof(cf_t))),
-        d_cell_published(false),
-        d_exit_on_success(exit_on_success)
+        d_cell_published {false},
+        d_exit_on_success {exit_on_success}
     {
       srslte_use_standard_symbol_size(true);
 
@@ -57,7 +71,7 @@ namespace gr {
       d_cell.id = 0;
 
       if (srslte_ue_mib_init(&d_mib, d_cell))
-        throw std::runtime_error("Error initializing MIB");
+        throw std::runtime_error {"Error initializing MIB"};
 
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
@@ -83,18 +97,15 @@ namespace gr {
                            gr_vector_const_void_star &input_items,
                            gr_vector_void_star &output_items)
     {
-      const cf_t *in = static_cast<const cf_t *>(input_items[0]);
-      cf_t *out = static_cast<cf_t *>(output_items[0]);
+      const cf_t *in {static_cast<const cf_t *>(input_items[0])};
+      cf_t *out {static_cast<cf_t *>(output_items[0])};
 
-      gr::thread::scoped_lock lock(d_mutex);
+      gr::thread::scoped_lock lock {d_mutex};
 
       if (d_cell_published) {
         consume_each(half_frame_length);
         return 0;
       }
-
-      d_cell_id_tags.clear();
-      d_cp_type_tags.clear();
 
       get_tags_in_window(d_cell_id_tags, 0, 0, 1, cell_id_tag_key);
       get_tags_in_window(d_cp_type_tags, 0, 0, 1, cp_type_tag_key);
@@ -111,6 +122,9 @@ namespace gr {
       else
         cp = SRSLTE_CP_EXT;
 
+      d_cell_id_tags.clear();
+      d_cp_type_tags.clear();
+
       if (cell_id != d_cell.id || cp != d_cell.cp) {
         // reinit MIB
         srslte_ue_mib_reset(&d_mib);
@@ -118,25 +132,21 @@ namespace gr {
         d_cell.cp = cp;
 
         if (srslte_ue_mib_init(&d_mib, d_cell))
-          throw std::runtime_error("Error initializing MIB");
-
+          throw std::runtime_error {"Error initializing MIB"};
       }
 
-      uint8_t bch_payload[SRSLTE_BCH_PAYLOAD_LEN];
-      int sfn_offset;
-
-      int ret = srslte_ue_mib_decode(&d_mib,
-                                     const_cast<cf_t *>(in),
-                                     bch_payload,
-                                     &d_cell.nof_ports,
-                                     &sfn_offset);
+      int ret {srslte_ue_mib_decode(&d_mib,
+                                    const_cast<cf_t *>(in),
+                                    d_bch_payload,
+                                    &d_cell.nof_ports,
+                                    &d_sfn_offset)};
 
       if (ret == SRSLTE_UE_MIB_FOUND) {
-        srslte_pbch_mib_unpack(bch_payload,
+        srslte_pbch_mib_unpack(d_bch_payload,
                                &d_cell,
-                               reinterpret_cast<uint32_t *>(&sfn_offset));
+                               reinterpret_cast<uint32_t *>(&d_sfn_offset));
         //srslte_cell_fprint(stdout, &d_cell, sfn_offset);
-        d_current_tracking_cell = pack_cell(d_cell, sfn_offset);
+        d_current_tracking_cell = pack_cell(d_cell, d_sfn_offset);
         message_port_pub(tracking_cell_port_id, d_current_tracking_cell);
         d_cell_published = true;
         if (d_exit_on_success)
@@ -152,19 +162,19 @@ namespace gr {
     void
     mib_impl::tracking_lost_handler(pmt::pmt_t msg)
     {
-      gr::thread::scoped_lock lock(d_mutex);
+      gr::thread::scoped_lock lock {d_mutex};
 
       d_cell_published = false;
       d_current_tracking_cell = pmt::PMT_NIL;
       srslte_ue_mib_reset(&d_mib);
 
-      printf("DEBUG: mib received tracking lost msg\n");
+      std::printf("DEBUG: mib received tracking lost msg\n");
     }
 
     pmt::pmt_t
     mib_impl::pack_cell(const srslte_cell_t &cell, const int &sfn) const
     {
-      pmt::pmt_t d = pmt::make_dict();
+      pmt::pmt_t d {pmt::make_dict()};
 
       d = pmt::dict_add(d,
                         pmt::intern("cell_id"),

@@ -25,6 +25,8 @@
 
 #include <gnuradio/thread/thread.h>
 
+#include <pmt/pmt.h>
+
 #include <srslte/srslte.h>
 
 #include <ltetrigger/mib.h>
@@ -39,10 +41,17 @@ namespace gr {
       void tracking_lost_handler(pmt::pmt_t msg);
       pmt::pmt_t pack_cell(const srslte_cell_t &cell, const int &sfn) const;
 
-      static const int slot_length = 960;
-      static const int half_frame_length = 10 * slot_length;
-      static const int full_frame_length = 2 * half_frame_length;
-      static const int symbol_sz = 128;
+      static const int slot_length {960};
+      static const int half_frame_length {10 * slot_length};
+      static const int full_frame_length {2 * half_frame_length};
+      static const int symbol_sz {128};
+
+      static const pmt::pmt_t cell_id_tag_key;
+      static const pmt::pmt_t cp_type_tag_key;
+      static const pmt::pmt_t tracking_port_id;
+      static const pmt::pmt_t tracking_cell_port_id;
+
+      pmt::pmt_t d_current_tracking_cell {pmt::PMT_NIL};
 
       gr::thread::mutex d_mutex;
       bool d_cell_published;
@@ -53,15 +62,9 @@ namespace gr {
       std::vector<tag_t> d_cell_id_tags;
       std::vector<tag_t> d_cp_type_tags;
 
-      const pmt::pmt_t cell_id_tag_key = pmt::intern("cell_id");
-      const pmt::pmt_t cp_type_tag_key = pmt::intern("cp_type");
-
-      const pmt::pmt_t tracking_port_id = pmt::intern("tracking_lost");
-      const pmt::pmt_t tracking_cell_port_id = pmt::intern("tracking_cell");
-
-      pmt::pmt_t d_current_tracking_cell = pmt::PMT_NIL;
-
       bool d_exit_on_success;
+      int d_sfn_offset;
+      uint8_t d_bch_payload[SRSLTE_BCH_PAYLOAD_LEN] {0};
 
     public:
       mib_impl(bool exit_on_success);
