@@ -234,7 +234,7 @@ namespace gr {
 
       d = pmt::dict_add(d,
                         pmt::intern("tracking_start_time"),
-                        pmt::from_long(time(0)));
+                        pmt::from_long(std::time(0)));
 
       return d;
     }
