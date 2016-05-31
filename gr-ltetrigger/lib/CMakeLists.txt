@@ -87,4 +87,4 @@ target_link_libraries(
   gnuradio-ltetrigger
 )
 
-GR_ADD_TEST(test_ltetrigger test-ltetrigger)
+#GR_ADD_TEST(test_ltetrigger test-ltetrigger)

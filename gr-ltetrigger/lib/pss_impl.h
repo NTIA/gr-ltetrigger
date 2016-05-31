@@ -40,16 +40,16 @@ namespace gr {
         explicit operator bool() const { return is_tracking; }
         void start() { is_tracking = true; }
         void stop() { is_tracking = false; }
-        int score = 0;
-        int countdown = 0;
+        int score {0};
+        int countdown {0};
       private:
-        bool is_tracking = false;
+        bool is_tracking {false};
       } d_tracking;
 
       static const int slot_length {960};
       static const int half_frame_length {10 * slot_length};
       static const int full_frame_length {2 * half_frame_length};
-      static const int symbol_sz = {128};
+      static const int symbol_sz {128};
 
       static const pmt::pmt_t tracking_lost_port_id;
 
