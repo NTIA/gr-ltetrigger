@@ -35,8 +35,8 @@ namespace gr {
   namespace ltetrigger {
 
     // initialize static variables
-    const pmt::pmt_t sss_impl::cell_id_tag_key {pmt::intern("cell_id")};
-    const pmt::pmt_t sss_impl::cp_type_tag_key {pmt::intern("cp_type")};
+    const pmt::pmt_t sss_impl::cell_id_tag_key = pmt::intern("cell_id");
+    const pmt::pmt_t sss_impl::cp_type_tag_key = pmt::intern("cp_type");
 
     sss::sptr
     sss::make(int N_id_2)

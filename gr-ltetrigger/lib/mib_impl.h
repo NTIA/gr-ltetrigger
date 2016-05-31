@@ -48,7 +48,7 @@ namespace gr {
 
       static const pmt::pmt_t cell_id_tag_key;
       static const pmt::pmt_t cp_type_tag_key;
-      static const pmt::pmt_t tracking_port_id;
+      static const pmt::pmt_t tracking_lost_port_id;
       static const pmt::pmt_t tracking_cell_port_id;
 
       pmt::pmt_t d_current_tracking_cell {pmt::PMT_NIL};

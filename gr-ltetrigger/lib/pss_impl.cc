@@ -37,7 +37,7 @@ namespace gr {
 
     // initialize static variable
     const pmt::pmt_t
-    pss_impl::tracking_lost_port_id {pmt::intern("tracking_lost")};
+    pss_impl::tracking_lost_port_id = pmt::intern("tracking_lost");
 
     pss::sptr
     pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
