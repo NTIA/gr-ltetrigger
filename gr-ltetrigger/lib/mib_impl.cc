@@ -34,17 +34,15 @@ namespace gr {
   namespace ltetrigger {
 
     // initialize static variables
-    const pmt::pmt_t
-    mib_impl::cell_id_tag_key {pmt::intern("cell_id")};
+    const pmt::pmt_t mib_impl::cell_id_tag_key = pmt::intern("cell_id");
+
+    const pmt::pmt_t mib_impl::cp_type_tag_key = pmt::intern("cp_type");
 
     const pmt::pmt_t
-    mib_impl::cp_type_tag_key {pmt::intern("cp_type")};
+    mib_impl::tracking_lost_port_id = pmt::intern("tracking_lost");
 
     const pmt::pmt_t
-    mib_impl::tracking_port_id {pmt::intern("tracking_lost")};
-
-    const pmt::pmt_t
-    mib_impl::tracking_cell_port_id {pmt::intern("tracking_cell")};
+    mib_impl::tracking_cell_port_id = pmt::intern("tracking_cell");
 
     mib::sptr
     mib::make(bool exit_on_success)
@@ -76,8 +74,8 @@ namespace gr {
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
 
-      message_port_register_in(tracking_port_id);
-      set_msg_handler(tracking_port_id,
+      message_port_register_in(tracking_lost_port_id);
+      set_msg_handler(tracking_lost_port_id,
                       boost::bind(&mib_impl::tracking_lost_handler, this, _1));
 
       message_port_register_out(tracking_cell_port_id);

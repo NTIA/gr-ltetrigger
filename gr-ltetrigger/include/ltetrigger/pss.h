@@ -18,7 +18,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-
 #ifndef INCLUDED_LTETRIGGER_PSS_H
 #define INCLUDED_LTETRIGGER_PSS_H
 
@@ -46,8 +45,7 @@ namespace gr {
        * psr_threshold: peak-to-side-lobe ratio threshold above which pass
        *                through frame for further processing
        * track_after: Enter tracking state after n correlations in a row above
-       *              threshold. A single correlation below threshold drops
-       *              out of tracking
+       *              threshold.
        * track_every: In tracking state, check correlation of every n
        *              half-frames
        *
