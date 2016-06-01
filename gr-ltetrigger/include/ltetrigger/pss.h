@@ -60,8 +60,8 @@ namespace gr {
        */
       static sptr make(int N_id_2,
                        float psr_threshold,
-                       int track_after=32,
-                       int track_every=4);
+                       int track_after=10,
+                       int track_every=10);
     };
 
   } // namespace ltetrigger
