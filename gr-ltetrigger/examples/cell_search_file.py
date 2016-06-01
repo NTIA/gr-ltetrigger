@@ -17,6 +17,8 @@ import os
 from pprint import pprint
 import sys
 import time
+import ltetrigger
+import json
 
 from gnuradio import gr, blocks, eng_notation
 from gnuradio import filter as gr_filter
@@ -86,6 +88,7 @@ class cell_search_file(gr.top_block):
 
 
 def main(args):
+    logging.basicConfig()
     logger = logging.getLogger('cell_search_file.main')
 
     tb = cell_search_file(args)
@@ -108,10 +111,21 @@ def main(args):
     print("done.")
 
     for i in range(tb.msg_store.num_messages()):
-        pprint(pmt.to_python(tb.msg_store.get_message(i)))
+        result = pmt.to_python(tb.msg_store.get_message(i))
+	result["status"] = "FOUND"
+        result_json = json.dumps(result,default=lambda o: o.__dict__,indent=4)
         break
     else:
-        print("No cells found.")
+        result = {"status":"NOT_FOUND"}
+	result_json = json.dumps(result)
+
+    print(result_json)
+    if args.fifoname != None:
+       if not os.path.exists(args.fifoname):
+           os.mkfifo(args.fifoname)
+       pipeout = os.open(args.fifoname, os.O_WRONLY)
+       os.write(pipeout,result_json)
+       os.close(pipeout)
 
 
 if __name__ == '__main__':
@@ -169,6 +183,7 @@ if __name__ == '__main__':
                         "[default=%(default)s]")
     parser.add_argument("--gui", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--debug", action='store_true', help=argparse.SUPPRESS)
+    parser.add_argument("--fifoname", default=None, required=False, help = "FIFO name to which to write output")
     args = parser.parse_args()
 
     if args.debug:
