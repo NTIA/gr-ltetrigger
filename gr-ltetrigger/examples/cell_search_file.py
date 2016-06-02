@@ -124,7 +124,7 @@ def main(args):
        if not os.path.exists(args.fifoname):
            os.mkfifo(args.fifoname)
        pipeout = os.open(args.fifoname, os.O_WRONLY)
-       os.write(pipeout,result_json)
+       os.write(pipeout,str(len(result_json)) + "\n" +  result_json)
        os.close(pipeout)
 
 
