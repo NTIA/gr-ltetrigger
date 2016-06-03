@@ -101,13 +101,14 @@ namespace gr {
       int max_score {d_track_after_n_frames};
 
       if (tracking && tracking.score == max_score)
-        // nothing to do
         return;
 
       tracking.score++;
 
-      if (!tracking && tracking.score == max_score)
+      if (!tracking && tracking.score == max_score) {
         tracking.start();
+        srslte_pss_synch_reset(&d_pss); // reset convolution avg
+      }
     }
 
     void
@@ -121,9 +122,10 @@ namespace gr {
       if (tracking)
         tracking.countdown = 0; // force resync
 
-      if (tracking.score == 0) {
+      if (tracking && tracking.score == 0) {
         // signal cell dropped
         tracking.stop();
+        srslte_pss_synch_reset(&d_pss);
         d_psr_max = 0;
         message_port_pub(tracking_lost_port_id, pmt::PMT_NIL);
       }
