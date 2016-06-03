@@ -83,6 +83,10 @@ namespace gr {
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items);
+
+      float max_psr()  { return d_psr_max; }
+      float mean_psr() { return d_psr_mean; }
+      float mean_cfo() { return d_cfo_mean; }
     };
 
   } // namespace ltetrigger

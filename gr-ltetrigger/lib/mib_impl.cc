@@ -98,7 +98,7 @@ namespace gr {
       const cf_t *in {static_cast<const cf_t *>(input_items[0])};
       cf_t *out {static_cast<cf_t *>(output_items[0])};
 
-      gr::thread::scoped_lock lock {d_mutex};
+      std::lock_guard<std::mutex> lock {d_mutex};
 
       if (d_cell_published) {
         consume_each(half_frame_length);
@@ -160,7 +160,7 @@ namespace gr {
     void
     mib_impl::tracking_lost_handler(pmt::pmt_t msg)
     {
-      gr::thread::scoped_lock lock {d_mutex};
+      std::lock_guard<std::mutex> lock {d_mutex};
 
       d_cell_published = false;
       d_current_tracking_cell = pmt::PMT_NIL;

@@ -85,14 +85,7 @@ namespace gr {
     pss_impl::~pss_impl()
     {
       srslte_pss_synch_free(&d_pss);
-
       srslte_cfo_free(&d_cfo);
-
-      std::printf("N_id_2 [%d]: avg PSR: %f, max PSR: %f, avg CFO: %f\n",
-                  d_N_id_2,
-                  d_psr_mean,
-                  d_psr_max,
-                  d_cfo_mean);
     }
 
     void

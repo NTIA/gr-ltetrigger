@@ -62,6 +62,15 @@ namespace gr {
                        float psr_threshold,
                        int track_after=10,
                        int track_every=10);
+
+      /*! \brief Return maximum peak to side-lobe ratio seen by this block */
+      virtual float max_psr() = 0;
+
+      /*! \brief Return mean peak to side-lobe ratio seen by this block */
+      virtual float mean_psr() = 0;
+
+      /*! \brief Return mean carrier frequency offset seen by this block */
+      virtual float mean_cfo() = 0;
     };
 
   } // namespace ltetrigger
