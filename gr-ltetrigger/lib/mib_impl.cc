@@ -109,8 +109,10 @@ namespace gr {
       get_tags_in_window(d_cp_type_tags, 0, 0, 1, cp_type_tag_key);
 
       // sanity check
-      assert(d_cell_id_tags.size() == 1);
-      assert(d_cp_type_tags.size() == 1);
+      if (d_cell_id_tags.size() != 1 || d_cp_type_tags.size() != 1) {
+        consume_each(half_frame_length);
+        return 0;
+      }
 
       unsigned int cell_id = pmt::to_long(d_cell_id_tags[0].value);
       srslte_cp_t cp;

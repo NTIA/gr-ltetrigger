@@ -99,7 +99,11 @@ namespace gr {
                                     &sync->m0, &sync->m0_value,
                                     &sync->m1, &sync->m1_value);
 
-      sync->N_id_1 = srslte_sss_synch_N_id_1(&sync->sss, sync->m0, sync->m1);
+      int retval = srslte_sss_synch_N_id_1(&sync->sss, sync->m0, sync->m1);
+      if (retval == SRSLTE_ERROR)
+        return half_frame_length; // mib block ignores input with no tag
+      else
+        sync->N_id_1 = retval;
 
       int cell_id {srslte_sync_get_cell_id(sync)};
 
