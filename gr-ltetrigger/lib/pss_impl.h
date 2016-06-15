@@ -84,13 +84,8 @@ namespace gr {
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items);
 
-<<<<<<< HEAD
-      float mean_psr() { return d_psr_mean; }
-      float max_psr()  { return d_psr_max; }
-=======
       float max_psr()  { return d_psr_max; }
       float mean_psr() { return d_psr_mean; }
->>>>>>> 3ee586ab564d7e55c4d731d4fd8aa354bebc946c
       float mean_cfo() { return d_cfo_mean; }
     };
 
