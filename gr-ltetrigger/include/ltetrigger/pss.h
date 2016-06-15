@@ -60,6 +60,7 @@ namespace gr {
        */
       static sptr make(int N_id_2,
                        float psr_threshold,
+<<<<<<< HEAD
                        int track_after=10,
                        int track_every=10);
 
@@ -80,6 +81,19 @@ namespace gr {
 
 
 
+=======
+                       int track_after=16,
+                       int track_every=8);
+
+      /*! \brief Return maximum peak to side-lobe ratio seen by this block */
+      virtual float max_psr() = 0;
+
+      /*! \brief Return mean peak to side-lobe ratio seen by this block */
+      virtual float mean_psr() = 0;
+
+      /*! \brief Return mean carrier frequency offset seen by this block */
+      virtual float mean_cfo() = 0;
+>>>>>>> 3ee586ab564d7e55c4d731d4fd8aa354bebc946c
     };
 
   } // namespace ltetrigger

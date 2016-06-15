@@ -21,9 +21,8 @@
 #ifndef INCLUDED_LTETRIGGER_MIB_IMPL_H
 #define INCLUDED_LTETRIGGER_MIB_IMPL_H
 
+#include <mutex>
 #include <vector>
-
-#include <gnuradio/thread/thread.h>
 
 #include <pmt/pmt.h>
 
@@ -53,7 +52,7 @@ namespace gr {
 
       pmt::pmt_t d_current_tracking_cell {pmt::PMT_NIL};
 
-      gr::thread::mutex d_mutex;
+      std::mutex d_mutex;
       bool d_cell_published;
 
       srslte_cell_t d_cell;

@@ -91,6 +91,8 @@ namespace gr {
     void
     pss_impl::incr_score(tracking_t &tracking)
     {
+      //if (d_N_id_2 == 2) std::printf("%d ", tracking.score);
+
       int max_score {d_track_after_n_frames};
 
       if (tracking && tracking.score == max_score)
@@ -107,6 +109,8 @@ namespace gr {
     void
     pss_impl::decr_score(tracking_t &tracking)
     {
+      //if (d_N_id_2 == 2) std::printf("%d ", tracking.score);
+
       if (tracking.score == 0)
         return;
 

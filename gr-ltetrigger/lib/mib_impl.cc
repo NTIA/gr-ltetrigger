@@ -98,7 +98,7 @@ namespace gr {
       const cf_t *in {static_cast<const cf_t *>(input_items[0])};
       cf_t *out {static_cast<cf_t *>(output_items[0])};
 
-      gr::thread::scoped_lock lock {d_mutex};
+      std::lock_guard<std::mutex> lock {d_mutex};
 
       if (d_cell_published) {
         consume_each(half_frame_length);
@@ -109,8 +109,10 @@ namespace gr {
       get_tags_in_window(d_cp_type_tags, 0, 0, 1, cp_type_tag_key);
 
       // sanity check
-      assert(d_cell_id_tags.size() == 1);
-      assert(d_cp_type_tags.size() == 1);
+      if (d_cell_id_tags.size() != 1 || d_cp_type_tags.size() != 1) {
+        consume_each(half_frame_length);
+        return 0;
+      }
 
       unsigned int cell_id = pmt::to_long(d_cell_id_tags[0].value);
       srslte_cp_t cp;
@@ -160,7 +162,7 @@ namespace gr {
     void
     mib_impl::tracking_lost_handler(pmt::pmt_t msg)
     {
-      gr::thread::scoped_lock lock {d_mutex};
+      std::lock_guard<std::mutex> lock {d_mutex};
 
       d_cell_published = false;
       d_current_tracking_cell = pmt::PMT_NIL;
@@ -232,7 +234,7 @@ namespace gr {
 
       d = pmt::dict_add(d,
                         pmt::intern("tracking_start_time"),
-                        pmt::from_long(time(0)));
+                        pmt::from_long(std::time(0)));
 
       return d;
     }
