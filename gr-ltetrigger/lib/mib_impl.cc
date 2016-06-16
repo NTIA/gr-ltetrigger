@@ -62,7 +62,7 @@ namespace gr {
     {
       srslte_use_standard_symbol_size(true);
 
-      // make sure d_mib is initialized so that destructor call doesn't segfault
+      // make sure d_mib is initialized so destructor doesn't cause segfault
       d_cell.nof_ports = 0; // if set to 0, detects nof_ports
       d_cell.nof_prb = SRSLTE_UE_MIB_NOF_PRB; // 6
       d_cell.cp = SRSLTE_CP_NORM;
@@ -131,8 +131,11 @@ namespace gr {
         d_cell.id = cell_id;
         d_cell.cp = cp;
 
-        if (srslte_ue_mib_init(&d_mib, d_cell))
-          throw std::runtime_error {"Error initializing MIB"};
+        if (srslte_ue_mib_init(&d_mib, d_cell)) {
+          // SSS block passed us non-sense
+          consume_each(half_frame_length);
+          return 0;
+        }
       }
 
       int ret {srslte_ue_mib_decode(&d_mib,
