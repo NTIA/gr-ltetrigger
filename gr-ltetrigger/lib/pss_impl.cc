@@ -40,7 +40,10 @@ namespace gr {
     pss_impl::tracking_lost_port_id = pmt::intern("tracking_lost");
 
     pss::sptr
-    pss::make(int N_id_2, float psr_threshold, int track_after, int track_every)
+    pss::make(int N_id_2,
+              float psr_threshold,
+              int track_after,
+              int track_every)
     {
       return gnuradio::get_initial_sptr(new pss_impl {N_id_2,
                                                       psr_threshold,
@@ -86,6 +89,23 @@ namespace gr {
     {
       srslte_pss_synch_free(&d_pss);
       srslte_cfo_free(&d_cfo);
+    }
+
+    float
+    pss_impl::compute_moving_avg(const float data[], size_t npts) const
+    {
+      if (!npts)  // avoid divide-by-zero
+        return 0.0;
+
+      double accumulator {0.0};
+
+      if (npts > moving_avg_sz)
+        npts = moving_avg_sz;
+
+      for (size_t i=0; i<npts; i++)
+        accumulator += data[i];
+
+      return accumulator / npts;
     }
 
     void
@@ -143,8 +163,7 @@ namespace gr {
                                                const_cast<cf_t *>(in),
                                                &d_psr);
 
-        // track avg PSR
-        d_psr_mean = SRSLTE_VEC_CMA(d_psr, d_psr_mean, d_psr_nseen++);
+        d_psr_data[d_psr_i++ % moving_avg_sz] = d_psr;
       } else {
         d_tracking.countdown--;
       }
@@ -173,12 +192,10 @@ namespace gr {
         // estimate CFO
         float cfo {srslte_pss_synch_cfo_compute(&d_pss,
                                                 &out[slot_length - symbol_sz])};
-        d_cfo_mean = SRSLTE_VEC_CMA(cfo,
-                                    d_cfo_mean,
-                                    nitems_written(0) / half_frame_length);
+        d_cfo_data[d_cfo_i++ % moving_avg_sz] = cfo;
 
         // correct CFO in place
-        srslte_cfo_correct(&d_cfo, out, out, -d_cfo_mean / symbol_sz);
+        srslte_cfo_correct(&d_cfo, out, out, -mean_cfo() / symbol_sz);
 
         if (srslte_pss_synch_chest(&d_pss,
                                    &out[slot_length - symbol_sz],

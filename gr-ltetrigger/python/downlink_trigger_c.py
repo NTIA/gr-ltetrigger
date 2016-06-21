@@ -21,7 +21,6 @@
 
 
 from gnuradio import gr, blocks
-import gnuradio.filter as gr_filter
 
 import ltetrigger
 
@@ -79,3 +78,8 @@ class downlink_trigger_c(gr.hier_block2):
                          self, tracking_cell_port_id)
         self.msg_connect(self.mib2, tracking_cell_port_id,
                          self, tracking_cell_port_id)
+
+    def set_psr_threshold(self, threshold):
+        self.pss0.set_psr_threshold(threshold)
+        self.pss1.set_psr_threshold(threshold)
+        self.pss2.set_psr_threshold(threshold)

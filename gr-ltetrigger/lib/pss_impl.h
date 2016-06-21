@@ -28,6 +28,9 @@
 #include <ltetrigger/pss.h>
 
 
+const int moving_avg_sz {200};
+
+
 namespace gr {
   namespace ltetrigger {
 
@@ -56,16 +59,19 @@ namespace gr {
       void incr_score(tracking_t &tracking);
       void decr_score(tracking_t &tracking);
 
+      float compute_moving_avg(const float data[], size_t npts) const;
+
       srslte_pss_synch_t d_pss;
+      float d_psr_data[moving_avg_sz] {0.0};
+      size_t d_psr_i {0};
       float d_psr {0};
-      float d_psr_mean {0.0};
-      unsigned int d_psr_nseen {0};
       float d_psr_max {0.0};
       int d_peak_pos {0};
 
       srslte_cfo_t d_cfo;
       cf_t d_channel_estimation_buffer[SRSLTE_PSS_LEN];
-      float d_cfo_mean {0};
+      float d_cfo_data[moving_avg_sz] {0.0};
+      size_t d_cfo_i {0};
 
       int d_N_id_2;
       float d_psr_threshold;
@@ -84,9 +90,12 @@ namespace gr {
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items);
 
-      float max_psr()  { return d_psr_max; }
-      float mean_psr() { return d_psr_mean; }
-      float mean_cfo() { return d_cfo_mean; }
+      float max_psr() const { return d_psr_max; }
+      float mean_psr() const { return compute_moving_avg(d_psr_data, d_psr_i); }
+      float mean_cfo() const { return compute_moving_avg(d_cfo_data, d_cfo_i); }
+      void set_psr_threshold(float threshold) { d_psr_threshold = threshold; }
+      float psr_threshold() const { return d_psr_threshold; }
+      float tracking_score() const { return d_tracking.score; }
     };
 
   } // namespace ltetrigger

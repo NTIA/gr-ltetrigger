@@ -42,12 +42,17 @@ namespace gr {
        * \brief Return a shared_ptr to a new instance of ltetrigger::pss.
        *
        * N_id_2: initialize block to search for this N_id_2
-       * psr_threshold: peak-to-side-lobe ratio threshold above which pass
-       *                through frame for further processing
-       * track_after: Enter tracking state after n correlations in a row above
+       * psr_threshold: peak-to-side-lobe ratio threshold above which pass If
+       *                the PSS correlates above `psr_threshold`, a point is
+       *                added to the tracking score or tracking status is
+       *                confirmed if already tracking.  If the PSS correlates
+       *                below `psr_threshold`, a point is deducted from the
+       *                tracking score and a resync is forced. If the cell was
+       *                tracking but the tracking score gets decremented to 0,
+       *                the block signals "tracking lost".
+       * track_after: enter tracking state after n correlations in a row above
        *              threshold.
-       * track_every: In tracking state, check correlation of every n
-       *              half-frames
+       * track_every: if tracking, check correlation of every n half-frames
        *
        * NOTE: track_every should be large enough so that follow on block sss
        *       has enough frames to correlate before potentially being passed
@@ -64,13 +69,22 @@ namespace gr {
                        int track_every=8);
 
       /*! \brief Return maximum peak to side-lobe ratio seen by this block */
-      virtual float max_psr() = 0;
+      virtual float max_psr() const = 0;
 
-      /*! \brief Return mean peak to side-lobe ratio seen by this block */
-      virtual float mean_psr() = 0;
+      /*! \brief Return mean peak to side-lobe ratio seen in 200 frames */
+      virtual float mean_psr() const = 0;
 
       /*! \brief Return mean carrier frequency offset seen by this block */
-      virtual float mean_cfo() = 0;
+      virtual float mean_cfo() const = 0;
+
+      /*! \brief Set peak to side-lobe threshold */
+      virtual void set_psr_threshold(float threshold) = 0;
+
+      /*! \brief Return current peak to side-lobe ratio threshold */
+      virtual float psr_threshold() const = 0;
+
+      /*! \brief Return current tracking score */
+      virtual float tracking_score() const = 0;
     };
 
   } // namespace ltetrigger

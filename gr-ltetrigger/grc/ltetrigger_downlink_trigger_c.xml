@@ -1,20 +1,39 @@
 <?xml version="1.0"?>
 <block>
-  <name>downlink_trigger_c</name>
+  <name>LTE Downlink Trigger</name>
   <key>ltetrigger_downlink_trigger_c</key>
   <category>ltetrigger</category>
   <import>import ltetrigger</import>
-  <make>ltetrigger.downlink_trigger_c()</make>
+  <make>ltetrigger.downlink_trigger_c($psr_threshold)</make>
+
+  <callback>set_psr_threshold($psr_threshold)</callback>
+
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
        * key (makes the value accessible as $keyname, e.g. in the make node)
        * type -->
   <param>
-    <name>...</name>
-    <key>...</key>
-    <type>...</type>
+    <name>PSR Threshold</name>
+    <key>psr_threshold</key>
+    <type>float</type>
   </param>
+  <param>
+    <name>Exit on Success</name>
+    <key>exit_on_success</key>
+    <value>False</value>
+    <type>bool</type>
+    <option>
+      <name>True</name>
+      <key>True</key>
+    </option>
+    <option>
+      <name>False</name>
+      <key>False</key>
+    </option>
+  </param>
+
+  <check>$psr_threshold &gt; 0</check>
 
   <!-- Make one 'sink' node per input. Sub-nodes:
        * name (an identifier for the GUI)
@@ -23,7 +42,7 @@
        * optional (set to 1 for optional inputs) -->
   <sink>
     <name>in</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>complex</type>
   </sink>
 
   <!-- Make one 'source' node per output. Sub-nodes:
@@ -32,7 +51,8 @@
        * vlen
        * optional (set to 1 for optional inputs) -->
   <source>
-    <name>out</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <name>tracking_cell</name>
+    <type>message</type>
   </source>
+
 </block>

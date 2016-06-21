@@ -111,19 +111,21 @@ def main(args):
     for i in range(tb.msg_store.num_messages()):
         result = pmt.to_python(tb.msg_store.get_message(i))
         result["status"] = "FOUND"
-        result_json = json.dumps(result, default=lambda o: o.__dict__, indent=4)
+        result_json = json.dumps(result,
+                                 default=lambda o: o.__dict__,
+                                 indent=4)
         break
     else:
         result = {"status": "NOT_FOUND"}
         result_json = json.dumps(result)
 
     print(result_json)
-    if args.fifoname != None:
-       if not os.path.exists(args.fifoname):
-           os.mkfifo(args.fifoname)
-           pipeout = os.open(args.fifoname, os.O_WRONLY)
-           os.write(pipeout,str(len(result_json)) + "\n" +  result_json)
-           os.close(pipeout)
+    if args.fifoname is not None:
+        if not os.path.exists(args.fifoname):
+            os.mkfifo(args.fifoname)
+            pipeout = os.open(args.fifoname, os.O_WRONLY)
+            os.write(pipeout, str(len(result_json)) + "\n" + result_json)
+            os.close(pipeout)
 
 
 if __name__ == '__main__':
