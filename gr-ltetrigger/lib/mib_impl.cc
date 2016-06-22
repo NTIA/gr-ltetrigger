@@ -39,10 +39,13 @@ namespace gr {
     const pmt::pmt_t mib_impl::cp_type_tag_key = pmt::intern("cp_type");
 
     const pmt::pmt_t
-    mib_impl::tracking_lost_port_id = pmt::intern("tracking_lost");
+    mib_impl::pss_drop_port_id = pmt::intern("pss_drop");
 
     const pmt::pmt_t
-    mib_impl::tracking_cell_port_id = pmt::intern("tracking_cell");
+    mib_impl::drop_port_id = pmt::intern("drop");
+
+    const pmt::pmt_t
+    mib_impl::track_port_id = pmt::intern("track");
 
     mib::sptr
     mib::make(bool exit_on_success)
@@ -74,11 +77,12 @@ namespace gr {
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
 
-      message_port_register_in(tracking_lost_port_id);
-      set_msg_handler(tracking_lost_port_id,
-                      boost::bind(&mib_impl::tracking_lost_handler, this, _1));
+      message_port_register_in(pss_drop_port_id);
+      set_msg_handler(pss_drop_port_id,
+                      boost::bind(&mib_impl::pss_drop_handler, this, _1));
 
-      message_port_register_out(tracking_cell_port_id);
+      message_port_register_out(track_port_id);
+      message_port_register_out(drop_port_id);
     }
 
     /*
@@ -150,7 +154,7 @@ namespace gr {
                                reinterpret_cast<uint32_t *>(&d_sfn_offset));
         //srslte_cell_fprint(stdout, &d_cell, sfn_offset);
         d_current_tracking_cell = pack_cell(d_cell, d_sfn_offset);
-        message_port_pub(tracking_cell_port_id, d_current_tracking_cell);
+        message_port_pub(track_port_id, d_current_tracking_cell);
         d_cell_published = true;
         if (d_exit_on_success)
           return WORK_DONE;
@@ -163,15 +167,15 @@ namespace gr {
     }
 
     void
-    mib_impl::tracking_lost_handler(pmt::pmt_t msg)
+    mib_impl::pss_drop_handler(pmt::pmt_t msg)
     {
       std::lock_guard<std::mutex> lock {d_mutex};
+
+      message_port_pub(drop_port_id, d_current_tracking_cell);
 
       d_cell_published = false;
       d_current_tracking_cell = pmt::PMT_NIL;
       srslte_ue_mib_reset(&d_mib);
-
-      std::printf("DEBUG: mib received tracking lost msg\n");
     }
 
     pmt::pmt_t

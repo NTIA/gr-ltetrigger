@@ -24,5 +24,6 @@ install(FILES
     api.h
     pss.h
     sss.h
-    mib.h DESTINATION include/ltetrigger
+    mib.h
+    cellstore.h DESTINATION include/ltetrigger
 )

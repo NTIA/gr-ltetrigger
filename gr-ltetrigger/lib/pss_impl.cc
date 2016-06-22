@@ -37,7 +37,7 @@ namespace gr {
 
     // initialize static variable
     const pmt::pmt_t
-    pss_impl::tracking_lost_port_id = pmt::intern("tracking_lost");
+    pss_impl::pss_drop_port_id = pmt::intern("pss_drop");
 
     pss::sptr
     pss::make(int N_id_2,
@@ -79,7 +79,7 @@ namespace gr {
 
       set_history(half_frame_length);
       set_output_multiple(half_frame_length);
-      message_port_register_out(tracking_lost_port_id);
+      message_port_register_out(pss_drop_port_id);
     }
 
     /*
@@ -144,7 +144,7 @@ namespace gr {
         tracking.stop();
         srslte_pss_synch_reset(&d_pss);
         d_psr_max = 0;
-        message_port_pub(tracking_lost_port_id, pmt::PMT_NIL);
+        message_port_pub(pss_drop_port_id, pmt::PMT_NIL);
       }
     }
 

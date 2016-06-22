@@ -23,7 +23,7 @@ from gnuradio import filter as gr_filter
 
 import pmt
 
-from ltetrigger import downlink_trigger_c
+from ltetrigger import downlink_trigger_c, cellstore
 
 
 DATA_SIZE = gr.sizeof_gr_complex
@@ -59,7 +59,7 @@ class cell_search_file(gr.top_block):
         self.trigger = downlink_trigger_c(psr_threshold=args.threshold,
                                           exit_on_success=True)
 
-        self.msg_store = blocks.message_debug()
+        self.cellstore = cellstore()
 
         # TODO: pass center_freq in to trigger
 
@@ -80,9 +80,13 @@ class cell_search_file(gr.top_block):
 
         self.connect((lastblock, 0), self.trigger)
 
-        tracking_cell_port_id = "tracking_cell"
-        self.msg_connect(self.trigger, tracking_cell_port_id,
-                         self.msg_store, "store")
+        track_port_id = "track"
+        self.msg_connect(self.trigger, track_port_id,
+                         self.cellstore, track_port_id)
+
+        drop_port_id = "drop"
+        self.msg_connect(self.trigger, drop_port_id,
+                         self.cellstore, drop_port_id)
 
 
 def main(args):
@@ -108,23 +112,46 @@ def main(args):
 
     print("done.")
 
-    for i in range(tb.msg_store.num_messages()):
-        result = pmt.to_python(tb.msg_store.get_message(i))
-        result["status"] = "FOUND"
-        result_json = json.dumps(result,
-                                 default=lambda o: o.__dict__,
-                                 indent=4)
-        break
+    results = []
+
+    if tb.cellstore.tracking_any():
+        if tb.cellstore.is_tracking0():
+            cell0 = pmt.to_python(tb.cellstore.cell0())
+            cell0["status"] = "FOUND"
+            cell0_json = json.dumps(cell0,
+                                    default=lambda o: o.__dict__,
+                                    indent=4)
+            results.append(cell0_json)
+
+        if tb.cellstore.is_tracking1():
+            cell1 = pmt.to_python(tb.cellstore.cell1())
+            cell1["status"] = "FOUND"
+            cell1_json = json.dumps(cell1,
+                                    default=lambda o: o.__dict__,
+                                    indent=4)
+            results.append(cell1_json)
+
+        if tb.cellstore.is_tracking2():
+            cell2 = pmt.to_python(tb.cellstore.cell2())
+            cell2["status"] = "FOUND"
+            cell2_json = json.dumps(cell2,
+                                    default=lambda o: o.__dict__,
+                                    indent=4)
+            results.append(cell2_json)
     else:
         result = {"status": "NOT_FOUND"}
         result_json = json.dumps(result)
+        results.append(result_json)
 
-    print(result_json)
+    for cell in results:
+        print(cell)
+
     if args.fifoname is not None:
         if not os.path.exists(args.fifoname):
             os.mkfifo(args.fifoname)
             pipeout = os.open(args.fifoname, os.O_WRONLY)
-            os.write(pipeout, str(len(result_json)) + "\n" + result_json)
+            for cell in results:
+                os.write(pipeout, str(len(cell)) + "\n" + cell)
             os.close(pipeout)
 
 

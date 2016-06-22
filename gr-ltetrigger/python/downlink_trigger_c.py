@@ -60,24 +60,35 @@ class downlink_trigger_c(gr.hier_block2):
         self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
         self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)
 
-        tracking_lost_port_id = "tracking_lost"
-        self.msg_connect(self.pss0, tracking_lost_port_id,
-                         self.mib0, tracking_lost_port_id)
-        self.msg_connect(self.pss1, tracking_lost_port_id,
-                         self.mib1, tracking_lost_port_id)
-        self.msg_connect(self.pss2, tracking_lost_port_id,
-                         self.mib2, tracking_lost_port_id)
+        pss_drop_port_id = "pss_drop"
+        self.msg_connect(self.pss0, pss_drop_port_id,
+                         self.mib0, pss_drop_port_id)
+        self.msg_connect(self.pss1, pss_drop_port_id,
+                         self.mib1, pss_drop_port_id)
+        self.msg_connect(self.pss2, pss_drop_port_id,
+                         self.mib2, pss_drop_port_id)
 
-        tracking_cell_port_id = "tracking_cell"
-        self.message_port_register_hier_in(tracking_cell_port_id)
-        self.message_port_register_hier_out(tracking_cell_port_id)
+        drop_port_id = "drop"
+        self.message_port_register_hier_in(drop_port_id)
+        self.message_port_register_hier_out(drop_port_id)
 
-        self.msg_connect(self.mib0, tracking_cell_port_id,
-                         self, tracking_cell_port_id)
-        self.msg_connect(self.mib1, tracking_cell_port_id,
-                         self, tracking_cell_port_id)
-        self.msg_connect(self.mib2, tracking_cell_port_id,
-                         self, tracking_cell_port_id)
+        self.msg_connect(self.mib0, drop_port_id,
+                         self, drop_port_id)
+        self.msg_connect(self.mib1, drop_port_id,
+                         self, drop_port_id)
+        self.msg_connect(self.mib2, drop_port_id,
+                         self, drop_port_id)
+
+        track_port_id = "track"
+        self.message_port_register_hier_in(track_port_id)
+        self.message_port_register_hier_out(track_port_id)
+
+        self.msg_connect(self.mib0, track_port_id,
+                         self, track_port_id)
+        self.msg_connect(self.mib1, track_port_id,
+                         self, track_port_id)
+        self.msg_connect(self.mib2, track_port_id,
+                         self, track_port_id)
 
     def set_psr_threshold(self, threshold):
         self.pss0.set_psr_threshold(threshold)

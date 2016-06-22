@@ -54,7 +54,9 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self.assertEqual(cell['nof_phich_resources'], "1", msg=err)
 
     def _check_nof_prb(self, cell, expected_nof_prb):
-        self.assertEqual(cell['nof_prb'], expected_nof_prb, msg="wrong nof_prb")
+        self.assertEqual(cell['nof_prb'],
+                         expected_nof_prb,
+                         msg="wrong nof_prb")
 
     def _check_nof_tx_ports(self, cell):
         self.assertEqual(cell['nof_tx_ports'], 1, msg="wrong nof_tx_ports")
@@ -63,17 +65,20 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self.assertEqual(cell['phich_len'], "Normal", msg="wrong phich_len")
 
     def test_6prb_t(self):
-        srcdir = os.getenv('srcdir') # set by gr testing framework
-        data_fname = os.path.join(srcdir, 'test_data/lte_frame_6prb_cellid_123')
-        fsrc = blocks.file_source(gr.sizeof_gr_complex, data_fname, repeat=True)
-        nsamps = int(1.92e6) # 1 sec of data
+        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        data_fname = os.path.join(srcdir,
+                                  'test_data/lte_frame_6prb_cellid_123')
+        fsrc = blocks.file_source(gr.sizeof_gr_complex,
+                                  data_fname,
+                                  repeat=True)
+        nsamps = int(1.92e6)  # 1 sec of data
         head = blocks.head(gr.sizeof_gr_complex, nsamps)
         dltrig = downlink_trigger_c(self.psr_threshold, self.exit_on_success)
         self.tb.connect(fsrc, head, dltrig)
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
-        self.tb.msg_connect(dltrig, 'tracking_cell', msgdebug, 'store')
+        self.tb.msg_connect(dltrig, 'track', msgdebug, 'store')
 
         # run enobeb_data through ltetrigger
         self.tb.run()
@@ -93,11 +98,14 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_25prb_t(self):
-        srcdir = os.getenv('srcdir') # set by gr testing framework
-        data_fname = os.path.join(srcdir, 'test_data/lte_frame_25prb_cellid_124')
-        fsrc = blocks.file_source(gr.sizeof_gr_complex, data_fname, repeat=True)
-        srate = 7.68e6 # 7.68 MHz
-        head = blocks.head(gr.sizeof_gr_complex, int(srate)) # 1 sec of data
+        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        data_fname = os.path.join(srcdir,
+                                  'test_data/lte_frame_25prb_cellid_124')
+        fsrc = blocks.file_source(gr.sizeof_gr_complex,
+                                  data_fname,
+                                  repeat=True)
+        srate = 7.68e6  # 7.68 MHz
+        head = blocks.head(gr.sizeof_gr_complex, int(srate))  # 1 sec of data
         resamp_ratio = int(srate / REQUIRED_SAMPLE_RATE)
         resampler = gr_filter.rational_resampler_ccc(1, resamp_ratio)
         dltrig = downlink_trigger_c(self.psr_threshold, self.exit_on_success)
@@ -105,7 +113,7 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
-        self.tb.msg_connect(dltrig, 'tracking_cell', msgdebug, 'store')
+        self.tb.msg_connect(dltrig, 'track', msgdebug, 'store')
 
         # run enobeb_data through ltetrigger
         self.tb.run()
@@ -125,11 +133,14 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_50prb_t(self):
-        srcdir = os.getenv('srcdir') # set by gr testing framework
-        data_fname = os.path.join(srcdir, 'test_data/lte_frame_50prb_cellid_125')
-        fsrc = blocks.file_source(gr.sizeof_gr_complex, data_fname, repeat=True)
-        srate = 15.36e6 # 15.36 MHz
-        head = blocks.head(gr.sizeof_gr_complex, int(srate)) # 1 sec of data
+        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        data_fname = os.path.join(srcdir,
+                                  'test_data/lte_frame_50prb_cellid_125')
+        fsrc = blocks.file_source(gr.sizeof_gr_complex,
+                                  data_fname,
+                                  repeat=True)
+        srate = 15.36e6  # 15.36 MHz
+        head = blocks.head(gr.sizeof_gr_complex, int(srate))  # 1 sec of data
         resamp_ratio = int(srate / REQUIRED_SAMPLE_RATE)
         resampler = gr_filter.rational_resampler_ccc(1, resamp_ratio)
         dltrig = downlink_trigger_c(self.psr_threshold, self.exit_on_success)
@@ -137,7 +148,7 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
-        self.tb.msg_connect(dltrig, 'tracking_cell', msgdebug, 'store')
+        self.tb.msg_connect(dltrig, 'track', msgdebug, 'store')
 
         # run enobeb_data through ltetrigger
         self.tb.run()
@@ -157,11 +168,14 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_100prb_t(self):
-        srcdir = os.getenv('srcdir') # set by gr testing framework
-        data_fname = os.path.join(srcdir, 'test_data/lte_frame_100prb_cellid_369')
-        fsrc = blocks.file_source(gr.sizeof_gr_complex, data_fname, repeat=True)
-        srate = 30.72e6 # 30.72 MHz
-        head = blocks.head(gr.sizeof_gr_complex, int(srate)) # 1 sec of data
+        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        data_fname = os.path.join(srcdir,
+                                  'test_data/lte_frame_100prb_cellid_369')
+        fsrc = blocks.file_source(gr.sizeof_gr_complex,
+                                  data_fname,
+                                  repeat=True)
+        srate = 30.72e6  # 30.72 MHz
+        head = blocks.head(gr.sizeof_gr_complex, int(srate))  # 1 sec of data
         resamp_ratio = int(srate / REQUIRED_SAMPLE_RATE)
         resampler = gr_filter.rational_resampler_ccc(1, resamp_ratio)
         dltrig = downlink_trigger_c(self.psr_threshold, self.exit_on_success)
@@ -169,7 +183,7 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
 
         # connect message passing interface
         msgdebug = blocks.message_debug()
-        self.tb.msg_connect(dltrig, 'tracking_cell', msgdebug, 'store')
+        self.tb.msg_connect(dltrig, 'track', msgdebug, 'store')
 
         # run enobeb_data through ltetrigger
         self.tb.run()
@@ -190,7 +204,7 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    #print("Blocked waiting for GDB attach (pid = {})".format(os.getpid()))
-    #raw_input("Press enter to continue...")
+    # print("Blocked waiting for GDB attach (pid = {})".format(os.getpid()))
+    # raw_input("Press enter to continue...")
 
     gr_unittest.run(qa_downlink_trigger_c, "qa_downlink_trigger_c.xml")

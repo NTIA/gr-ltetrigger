@@ -11,6 +11,7 @@
 #include "ltetrigger/pss.h"
 #include "ltetrigger/sss.h"
 #include "ltetrigger/mib.h"
+#include "ltetrigger/cellstore.h"
 %}
 
 %include "ltetrigger/pss.h"
@@ -21,3 +22,6 @@ GR_SWIG_BLOCK_MAGIC2(ltetrigger, sss);
 
 %include "ltetrigger/mib.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, mib);
+
+%include "ltetrigger/cellstore.h"
+GR_SWIG_BLOCK_MAGIC2(ltetrigger, cellstore);

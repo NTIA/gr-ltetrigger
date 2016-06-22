@@ -54,7 +54,7 @@ namespace gr {
       static const int full_frame_length {2 * half_frame_length};
       static const int symbol_sz {128};
 
-      static const pmt::pmt_t tracking_lost_port_id;
+      static const pmt::pmt_t pss_drop_port_id;
 
       void incr_score(tracking_t &tracking);
       void decr_score(tracking_t &tracking);

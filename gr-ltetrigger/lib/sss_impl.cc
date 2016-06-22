@@ -107,17 +107,17 @@ namespace gr {
 
       int cell_id {srslte_sync_get_cell_id(sync)};
 
-      unsigned int subframe_idx {srslte_sss_synch_subframe(sync->m0, sync->m1)};
-      if (d_subframe_idx < 0) {
-        d_subframe_idx = subframe_idx;
-      } else {
-        int expected_subframe_idx {(d_subframe_idx + 5) % 10};
-        d_subframe_idx = subframe_idx;
-        if (d_subframe_idx != expected_subframe_idx)
-          std::printf("Expected subframe index %d, but got %d\n",
-                      expected_subframe_idx,
-                      d_subframe_idx);
-      }
+      //unsigned int subframe_idx {srslte_sss_synch_subframe(sync->m0, sync->m1)};
+      //if (d_subframe_idx < 0) {
+      //  d_subframe_idx = subframe_idx;
+      //} else {
+      //  int expected_subframe_idx {(d_subframe_idx + 5) % 10};
+      //  d_subframe_idx = subframe_idx;
+      //  if (d_subframe_idx != expected_subframe_idx)
+      //    std::printf("Expected subframe index %d, but got %d\n",
+      //                expected_subframe_idx,
+      //                d_subframe_idx);
+      //}
 
       // TODO: consider using nitems_read to tag stream in pss and here
       //       so that we can see when there's been dropped frames
