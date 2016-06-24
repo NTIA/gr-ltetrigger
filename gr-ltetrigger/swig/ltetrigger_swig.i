@@ -14,6 +14,8 @@
 #include "ltetrigger/cellstore.h"
 %}
 
+%template()  std::vector<pmt::pmt_t>;
+
 %include "ltetrigger/pss.h"
 GR_SWIG_BLOCK_MAGIC2(ltetrigger, pss);
 

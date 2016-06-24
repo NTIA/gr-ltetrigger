@@ -171,7 +171,8 @@ namespace gr {
     {
       std::lock_guard<std::mutex> lock {d_mutex};
 
-      message_port_pub(drop_port_id, d_current_tracking_cell);
+      if (d_cell_published)
+        message_port_pub(drop_port_id, d_current_tracking_cell);
 
       d_cell_published = false;
       d_current_tracking_cell = pmt::PMT_NIL;

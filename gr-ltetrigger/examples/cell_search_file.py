@@ -114,25 +114,26 @@ def main(args):
 
     results = []
 
-    if tb.cellstore.tracking_any():
-        if tb.cellstore.is_tracking0():
-            cell0 = pmt.to_python(tb.cellstore.cell0())
+    if tb.cellstore.tracking():
+        cells = tb.cellstore.cells()
+        if not pmt.is_null(cells[0]):
+            cell0 = pmt.to_python(cells[0])
             cell0["status"] = "FOUND"
             cell0_json = json.dumps(cell0,
                                     default=lambda o: o.__dict__,
                                     indent=4)
             results.append(cell0_json)
 
-        if tb.cellstore.is_tracking1():
-            cell1 = pmt.to_python(tb.cellstore.cell1())
+        if not pmt.is_null(cells[1]):
+            cell1 = pmt.to_python(cells[1])
             cell1["status"] = "FOUND"
             cell1_json = json.dumps(cell1,
                                     default=lambda o: o.__dict__,
                                     indent=4)
             results.append(cell1_json)
 
-        if tb.cellstore.is_tracking2():
-            cell2 = pmt.to_python(tb.cellstore.cell2())
+        if not pmt.is_null(cells[2]):
+            cell2 = pmt.to_python(cells[2])
             cell2["status"] = "FOUND"
             cell2_json = json.dumps(cell2,
                                     default=lambda o: o.__dict__,

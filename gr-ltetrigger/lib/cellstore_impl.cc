@@ -56,66 +56,16 @@ namespace gr {
                       boost::bind(&cellstore_impl::drop_cell, this, _1));
     }
 
-    bool cellstore_impl::tracking_any()
+    bool cellstore_impl::tracking()
     {
       return is_tracking0() || is_tracking1() || is_tracking2();
     }
 
-    bool cellstore_impl::is_tracking0()
+    std::vector<pmt::pmt_t> cellstore_impl::cells()
     {
-      std::lock_guard<std::mutex> lock {d_cell0_mutex};
+      std::lock_guard<std::mutex> lock {d_mutex};
 
-      return d_cell0 != pmt::PMT_NIL;
-    }
-
-    bool cellstore_impl::is_tracking1()
-    {
-      std::lock_guard<std::mutex> lock {d_cell1_mutex};
-
-      return d_cell1 != pmt::PMT_NIL;
-    }
-
-    bool cellstore_impl::is_tracking2()
-    {
-      std::lock_guard<std::mutex> lock {d_cell2_mutex};
-
-      return d_cell2 != pmt::PMT_NIL;
-    }
-
-    pmt::pmt_t cellstore_impl::cell0()
-    {
-      pmt::pmt_t retval {pmt::PMT_NIL};
-
-      if (is_tracking0()) {
-        std::lock_guard<std::mutex> lock {d_cell0_mutex};
-        retval = d_cell0;
-      }
-
-      return retval;
-    }
-
-    pmt::pmt_t cellstore_impl::cell1()
-    {
-      pmt::pmt_t retval {pmt::PMT_NIL};
-
-      if (is_tracking1()) {
-        std::lock_guard<std::mutex> lock {d_cell1_mutex};
-        retval = d_cell1;
-      }
-
-      return retval;
-    }
-
-    pmt::pmt_t cellstore_impl::cell2()
-    {
-      pmt::pmt_t retval {pmt::PMT_NIL};
-
-      if (is_tracking2()) {
-        std::lock_guard<std::mutex> lock {d_cell2_mutex};
-        retval = d_cell2;
-      }
-
-      return retval;
+      return std::vector<pmt::pmt_t> {d_cell0, d_cell1, d_cell2};
     }
 
     void cellstore_impl::track_cell(pmt::pmt_t msg)
@@ -129,29 +79,24 @@ namespace gr {
 
       auto N_id_2 = static_cast<unsigned char>(cell_id % 3);
 
+      std::lock_guard<std::mutex> lock {d_mutex};
+
       switch (N_id_2) {
       case 0:
-      {
         assert(!is_tracking0());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell0_mutex};
         d_cell0 = msg;
         break;
-      }
       case 1:
-      {
         assert(!is_tracking1());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell1_mutex};
         d_cell1 = msg;
         break;
-      }
       case 2:
-      {
         assert(!is_tracking2());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell2_mutex};
         d_cell2 = msg;
         break;
+      default:
+        throw std::runtime_error {"track_cell switch hit default"};
       }
-      } // switch
     }
 
     void cellstore_impl::drop_cell(pmt::pmt_t msg)
@@ -161,33 +106,28 @@ namespace gr {
                                                bad_cell_id_val))};
 
       if (cell_id == pmt::to_long(bad_cell_id_val))
-        throw std::runtime_error {"Error tracking cell: bad message format"};
+        throw std::runtime_error {"Error dropping cell: bad message format"};
 
       auto N_id_2 = static_cast<unsigned char>(cell_id % 3);
 
+      std::lock_guard<std::mutex> lock {d_mutex};
+
       switch (N_id_2) {
       case 0:
-      {
         assert(is_tracking0());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell0_mutex};
         d_cell0 = pmt::PMT_NIL;
         break;
-      }
       case 1:
-      {
         assert(is_tracking1());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell1_mutex};
         d_cell1 = pmt::PMT_NIL;
         break;
-      }
       case 2:
-      {
         assert(is_tracking2());  // sanity check
-        std::lock_guard<std::mutex> lock {d_cell2_mutex};
         d_cell2 = pmt::PMT_NIL;
         break;
+      default:
+        throw std::runtime_error {"drop_cell switch hit default"};
       }
-      } // switch
     }
 
   } /* namespace ltetrigger */

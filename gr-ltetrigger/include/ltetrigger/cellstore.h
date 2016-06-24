@@ -54,25 +54,18 @@ namespace gr {
       static sptr make();
 
       /*! \brief Return true if tracking any cells, else false */
-      virtual bool tracking_any() = 0;
+      virtual bool tracking() = 0;
 
-      /*! \brief Return true if tracking a cell with N_id_2 or 0, else false */
-      virtual bool is_tracking0() = 0;
-
-      /*! \brief Return true if tracking a cell with N_id_2 or 1, else false */
-      virtual bool is_tracking1() = 0;
-
-      /*! \brief Return true if tracking a cell with N_id_2 or 2, else false */
-      virtual bool is_tracking2() = 0;
-
-      /*! \brief Return pmt dict with cell info if tracking, else PMT_NIL */
-      virtual pmt::pmt_t cell0() = 0;
-
-      /*! \brief Return pmt dict with cell info if tracking, else PMT_NIL */
-      virtual pmt::pmt_t cell1() = 0;
-
-      /*! \brief Return pmt dict with cell info if tracking, else PMT_NIL */
-      virtual pmt::pmt_t cell2() = 0;
+      /*! \brief Return std::vector of 3 PMTs
+       *
+       * \details
+       * `ltetrigger` can simultaneously track 3 cells (one for each N_id_2).
+       * This function returns a vector of 3 PMTs, where the vector index
+       * corresponds to the N_id_2 of the tracked cell. The value is PMT_NIL
+       * if no cell is currently being tracked, and a PMT dict type of cell
+       * information if a cell is being tracked.
+       */
+      virtual std::vector<pmt::pmt_t> cells() = 0;
     };
 
   } // namespace ltetrigger

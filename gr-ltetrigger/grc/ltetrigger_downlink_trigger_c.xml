@@ -51,7 +51,12 @@
        * vlen
        * optional (set to 1 for optional inputs) -->
   <source>
-    <name>tracking_cell</name>
+    <name>track</name>
+    <type>message</type>
+  </source>
+
+  <source>
+    <name>drop</name>
     <type>message</type>
   </source>
 
