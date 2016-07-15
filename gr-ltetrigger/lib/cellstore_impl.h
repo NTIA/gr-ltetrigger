@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LTETRIGGER_CELLSTORE_IMPL_H
 #define INCLUDED_LTETRIGGER_CELLSTORE_IMPL_H
 
-#include <vector>
+#include <list>
 #include <mutex>
 
 #include <ltetrigger/cellstore.h>
@@ -38,18 +38,12 @@ namespace gr {
       static const pmt::pmt_t cell_id_key;
       static const pmt::pmt_t bad_cell_id_val;
 
-      bool is_tracking0() { return !pmt::is_null(d_cell0); }
-      bool is_tracking1() { return !pmt::is_null(d_cell1); }
-      bool is_tracking2() { return !pmt::is_null(d_cell2); }
-
       std::mutex d_mutex;
-
-      pmt::pmt_t d_cell0 {pmt::PMT_NIL};
-      pmt::pmt_t d_cell1 {pmt::PMT_NIL};
-      pmt::pmt_t d_cell2 {pmt::PMT_NIL};
 
       void track_cell(pmt::pmt_t msg);
       void drop_cell(pmt::pmt_t msg);
+
+      std::list<pmt::pmt_t> d_cells;
 
     public:
       cellstore_impl();

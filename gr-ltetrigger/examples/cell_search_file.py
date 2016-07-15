@@ -115,39 +115,20 @@ def main(args):
     results = []
 
     if tb.cellstore.tracking():
-        cells = tb.cellstore.cells()
-        if not pmt.is_null(cells[0]):
-            cell0 = pmt.to_python(cells[0])
-            cell0["status"] = "FOUND"
-            cell0_json = json.dumps(cell0,
-                                    default=lambda o: o.__dict__,
-                                    indent=4)
-            results.append(cell0_json)
-
-        if not pmt.is_null(cells[1]):
-            cell1 = pmt.to_python(cells[1])
-            cell1["status"] = "FOUND"
-            cell1_json = json.dumps(cell1,
-                                    default=lambda o: o.__dict__,
-                                    indent=4)
-            results.append(cell1_json)
-
-        if not pmt.is_null(cells[2]):
-            cell2 = pmt.to_python(cells[2])
-            cell2["status"] = "FOUND"
-            cell2_json = json.dumps(cell2,
-                                    default=lambda o: o.__dict__,
-                                    indent=4)
-            results.append(cell2_json)
+        for cell in tb.cellstore.cells():
+            cell_json = pmt.to_python(cell)
+            cell_json["status"] = "FOUND"
+            cell_json = json.dumps(cell_json,
+                                   default=lambda o: o.__dict__,
+                                   indent=4)
+            results.append(cell_json)
     else:
-        result = {"status": "NOT_FOUND"}
-        result_json = json.dumps(result)
-        results.append(result_json)
+        results.append(json.dumps({"status": "NOT_FOUND"}))
 
     for cell in results:
         print(cell)
 
-    if args.fifoname is not None:
+    if args.fifoname:
         if not os.path.exists(args.fifoname):
             os.mkfifo(args.fifoname)
             pipeout = os.open(args.fifoname, os.O_WRONLY)
@@ -184,7 +165,6 @@ if __name__ == '__main__':
             errmsg = "file {} does not exist".format(fname)
             raise argparse.ArgumentTypeError(errmsg)
 
-
     parser = argparse.ArgumentParser()
     # Required
     parser.add_argument("filename", type=filetype)
@@ -197,13 +177,14 @@ if __name__ == '__main__':
     parser.add_argument("--repeat", action='store_true',
                         help="loop file until cell found or cut-off reached " +
                         "[default=%(default)s]")
-    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N", default=-1,
-                        help="stop looping after N samples " +
+    parser.add_argument("-c", "--cut-off", type=eng_int, metavar="N",
+                        default=-1, help="stop looping after N samples " +
                         "[default=%(default)s]")
     parser.add_argument("--throttle", type=eng_float, metavar="Hz",
                         help="throttle file source to lower CPU load " +
                         "[default=%(default)s]")
-    parser.add_argument("--time-out", type=eng_float, metavar="sec", default=-1,
+    parser.add_argument("--time-out", type=eng_float, metavar="sec",
+                        default=-1,
                         help="max time in seconds to perform search " +
                         "[default=%(default)s]")
     parser.add_argument("--threshold", type=eng_float, default=4,
@@ -211,7 +192,8 @@ if __name__ == '__main__':
                         "[default=%(default)s]")
     parser.add_argument("--gui", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--debug", action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument("--fifoname", default=None, required=False, help = "FIFO name to which to write output")
+    parser.add_argument("--fifoname", default=None, required=False,
+                        help="FIFO name to which to write output")
     args = parser.parse_args()
 
     if args.debug:

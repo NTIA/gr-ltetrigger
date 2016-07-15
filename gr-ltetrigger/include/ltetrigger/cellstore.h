@@ -22,6 +22,8 @@
 #ifndef INCLUDED_LTETRIGGER_CELLSTORE_H
 #define INCLUDED_LTETRIGGER_CELLSTORE_H
 
+#include <vector>
+
 #include <pmt/pmt.h>
 
 #include <ltetrigger/api.h>
@@ -56,15 +58,7 @@ namespace gr {
       /*! \brief Return true if tracking any cells, else false */
       virtual bool tracking() = 0;
 
-      /*! \brief Return std::vector of 3 PMTs
-       *
-       * \details
-       * `ltetrigger` can simultaneously track 3 cells (one for each N_id_2).
-       * This function returns a vector of 3 PMTs, where the vector index
-       * corresponds to the N_id_2 of the tracked cell. The value is PMT_NIL
-       * if no cell is currently being tracked, and a PMT dict type of cell
-       * information if a cell is being tracked.
-       */
+      /*! \brief Return any cells currently being tracked */
       virtual std::vector<pmt::pmt_t> cells() = 0;
     };
 
