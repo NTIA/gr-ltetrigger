@@ -71,6 +71,17 @@ namespace gr {
       return {d_cells.begin(), d_cells.end()};
     }
 
+    pmt::pmt_t cellstore_impl::latest_cell()
+    {
+      std::lock_guard<std::mutex> lock {d_mutex};
+
+      if (d_cells.empty())
+        return pmt::PMT_NIL;
+      else
+        return d_cells.back();
+    }
+
+
     void cellstore_impl::track_cell(pmt::pmt_t msg)
     {
       long cell_id {pmt::to_long(pmt::dict_ref(msg,

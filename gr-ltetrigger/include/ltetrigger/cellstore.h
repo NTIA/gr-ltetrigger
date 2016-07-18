@@ -60,6 +60,9 @@ namespace gr {
 
       /*! \brief Return any cells currently being tracked */
       virtual std::vector<pmt::pmt_t> cells() = 0;
+
+      /*! \brief Return the latest tracked cell or pmt::PMT_NIL */
+      virtual pmt::pmt_t latest_cell() = 0;
     };
 
   } // namespace ltetrigger

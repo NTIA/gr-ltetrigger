@@ -51,6 +51,7 @@ namespace gr {
 
       bool tracking();
       std::vector<pmt::pmt_t> cells();
+      pmt::pmt_t latest_cell();
 };
 
   } // namespace ltetrigger

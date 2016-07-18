@@ -26,8 +26,7 @@ import ltetrigger
 
 
 class downlink_trigger_c(gr.hier_block2):
-    """
-    Hierarchical block for LTE downlink detection based on srsLTE
+    """Hierarchical block for LTE downlink detection based on srsLTE
 
     This block requires input sampled at (or resampled to) 1.92 MHz
     """

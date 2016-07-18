@@ -97,15 +97,15 @@
     </param>
     <param>
       <key>formatter</key>
-      <value>None</value>
+      <value>lambda *x: str(pmt.to_python(*x)['cp_len']) if x and not pmt.is_null(*x) else None</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(528, 630)</value>
+      <value>(1008, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>6,0,1,1</value>
+      <value>10,0,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -113,11 +113,11 @@
     </param>
     <param>
       <key>id</key>
-      <value>cell_details</value>
+      <value>cell_cp_mode</value>
     </param>
     <param>
       <key>label</key>
-      <value>Cells</value>
+      <value>CP Mode</value>
     </param>
     <param>
       <key>type</key>
@@ -144,11 +144,11 @@
     </param>
     <param>
       <key>function_name</key>
-      <value>cells</value>
+      <value>latest_cell</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(368, 624)</value>
+      <value>(240, 504)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -164,7 +164,179 @@
     </param>
     <param>
       <key>value</key>
-      <value>(pmt.PMT_NIL, pmt.PMT_NIL, pmt.PMT_NIL)</value>
+      <value>pmt.PMT_NIL</value>
+    </param>
+  </block>
+  <block>
+    <key>variable_qtgui_label</key>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>cell_details_probe</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>formatter</key>
+      <value>lambda *x: int(pmt.to_python(*x)['cell_id']) if x and not pmt.is_null(*x) else None</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(456, 478)</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value>6,0,1,1</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>cell_id_label</value>
+    </param>
+    <param>
+      <key>label</key>
+      <value>Cell ID</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>raw</value>
+    </param>
+  </block>
+  <block>
+    <key>variable_qtgui_label</key>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>cell_details_probe</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>formatter</key>
+      <value>lambda *x: str(pmt.to_python(*x)['nof_phich_resources']) if x and not pmt.is_null(*x) else None</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(840, 478)</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value>9,0,1,1</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>cell_nof_phich_resources</value>
+    </param>
+    <param>
+      <key>label</key>
+      <value>PHICH Resources</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>raw</value>
+    </param>
+  </block>
+  <block>
+    <key>variable_qtgui_label</key>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>cell_details_probe</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>formatter</key>
+      <value>lambda *x: int(pmt.to_python(*x)['nof_prb']) if x and not pmt.is_null(*x) else None</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(728, 478)</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value>8,0,1,1</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>cell_nof_prb</value>
+    </param>
+    <param>
+      <key>label</key>
+      <value>PRBs</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>raw</value>
+    </param>
+  </block>
+  <block>
+    <key>variable_qtgui_label</key>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>cell_details_probe</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>formatter</key>
+      <value>lambda *x: time.strftime("%b %d %Y %H:%M%S GMT", time.gmtime(pmt.to_python(*x)['tracking_start_time'])) if x and not pmt.is_null(*x) else None</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(568, 478)</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value>7,0,1,1</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>cell_tracking_start_time_label</value>
+    </param>
+    <param>
+      <key>label</key>
+      <value>Tracking Start Time</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>raw</value>
     </param>
   </block>
   <block>
@@ -198,7 +370,10 @@
     <key>variable_qtgui_range</key>
     <param>
       <key>comment</key>
-      <value></value>
+      <value>Attempt signal demodulation
+when the PSS blocks reports
+a PSR (peak to side-lobe ratio)
+above this threshold.</value>
     </param>
     <param>
       <key>value</key>
@@ -210,7 +385,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(184, 569)</value>
+      <value>(16, 457)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -226,7 +401,7 @@
     </param>
     <param>
       <key>label</key>
-      <value>PSR Threshold</value>
+      <value>Demod Threshold (PSR)</value>
     </param>
     <param>
       <key>min_len</key>
@@ -312,11 +487,11 @@
     </param>
     <param>
       <key>id</key>
-      <value>signal_level</value>
+      <value>signal_gain</value>
     </param>
     <param>
       <key>label</key>
-      <value>Level</value>
+      <value>Signal Gain</value>
     </param>
     <param>
       <key>min_len</key>
@@ -367,7 +542,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(528, 510)</value>
+      <value>(456, 398)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -414,7 +589,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(368, 504)</value>
+      <value>(240, 400)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -508,7 +683,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(712, 145)</value>
+      <value>(776, 145)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -559,7 +734,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(456, 417)</value>
+      <value>(456, 321)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -645,7 +820,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(640, 398)</value>
+      <value>(640, 302)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -747,7 +922,7 @@
     </param>
     <param>
       <key>const</key>
-      <value>signal_level</value>
+      <value>signal_gain</value>
     </param>
     <param>
       <key>affinity</key>
@@ -857,7 +1032,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(808, 405)</value>
+      <value>(808, 309)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -908,7 +1083,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(992, 313)</value>
+      <value>(960, 345)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1014,7 +1189,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(248, 292)</value>
+      <value>(240, 292)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1136,6 +1311,37 @@
     </param>
   </block>
   <block>
+    <key>import</key>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(392, 12)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>import_pmt_0</value>
+    </param>
+    <param>
+      <key>import</key>
+      <value>import time</value>
+    </param>
+  </block>
+  <block>
     <key>ltetrigger_cellstore</key>
     <param>
       <key>alias</key>
@@ -1155,7 +1361,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1032, 561)</value>
+      <value>(1112, 65)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1190,7 +1396,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(816, 561)</value>
+      <value>(912, 65)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1261,7 +1467,7 @@
     </param>
     <param>
       <key>gui_hint</key>
-      <value>0,0,4,1</value>
+      <value>0,0,2,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1528,238 +1734,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1112, 398)</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value>2,1,1,1</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>graph_type</key>
-      <value>qtgui.NUM_GRAPH_HORIZ</value>
-    </param>
-    <param>
-      <key>id</key>
-      <value>qtgui_number_sink_0</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>color1</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor1</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label1</key>
-      <value>Noise Power</value>
-    </param>
-    <param>
-      <key>unit1</key>
-      <value>dB</value>
-    </param>
-    <param>
-      <key>color10</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor10</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label10</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit10</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color2</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor2</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label2</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit2</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color3</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor3</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label3</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit3</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color4</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor4</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label4</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit4</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color5</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor5</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label5</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit5</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color6</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor6</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label6</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit6</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color7</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor7</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label7</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit7</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color8</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor8</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label8</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit8</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color9</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor9</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label9</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit9</key>
-      <value></value>
-    </param>
-    <param>
-      <key>max</key>
-      <value>50</value>
-    </param>
-    <param>
-      <key>min</key>
-      <value>-50</value>
-    </param>
-    <param>
-      <key>name</key>
-      <value></value>
-    </param>
-    <param>
-      <key>nconnections</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>update_time</key>
-      <value>0.10</value>
-    </param>
-  </block>
-  <block>
-    <key>qtgui_number_sink</key>
-    <param>
-      <key>autoscale</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>avg</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>comment</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(1112, 222)</value>
+      <value>(1112, 241)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -1823,244 +1798,13 @@
     </param>
     <param>
       <key>label2</key>
-      <value></value>
+      <value>Noise Power</value>
     </param>
     <param>
       <key>unit2</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color3</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor3</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label3</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit3</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color4</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor4</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label4</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit4</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color5</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor5</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label5</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit5</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color6</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor6</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label6</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit6</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color7</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor7</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label7</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit7</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color8</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor8</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label8</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit8</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color9</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor9</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label9</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit9</key>
-      <value></value>
-    </param>
-    <param>
-      <key>max</key>
-      <value>50</value>
-    </param>
-    <param>
-      <key>min</key>
-      <value>-50</value>
-    </param>
-    <param>
-      <key>name</key>
-      <value></value>
-    </param>
-    <param>
-      <key>nconnections</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>update_time</key>
-      <value>0.10</value>
-    </param>
-  </block>
-  <block>
-    <key>qtgui_number_sink</key>
-    <param>
-      <key>autoscale</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>avg</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>comment</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(1112, 310)</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value>3,1,1,1</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>graph_type</key>
-      <value>qtgui.NUM_GRAPH_HORIZ</value>
-    </param>
-    <param>
-      <key>id</key>
-      <value>qtgui_number_sink_0_0_0</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>color1</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor1</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label1</key>
-      <value>SNR</value>
-    </param>
-    <param>
-      <key>unit1</key>
       <value>dB</value>
     </param>
     <param>
-      <key>color10</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor10</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label10</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit10</key>
-      <value></value>
-    </param>
-    <param>
-      <key>color2</key>
-      <value>("black", "black")</value>
-    </param>
-    <param>
-      <key>factor2</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>label2</key>
-      <value></value>
-    </param>
-    <param>
-      <key>unit2</key>
-      <value></value>
-    </param>
-    <param>
       <key>color3</key>
       <value>("black", "black")</value>
     </param>
@@ -2070,7 +1814,7 @@
     </param>
     <param>
       <key>label3</key>
-      <value></value>
+      <value>SNR</value>
     </param>
     <param>
       <key>unit3</key>
@@ -2182,11 +1926,11 @@
     </param>
     <param>
       <key>name</key>
-      <value></value>
+      <value>SNR</value>
     </param>
     <param>
       <key>nconnections</key>
-      <value>1</value>
+      <value>3</value>
     </param>
     <param>
       <key>update_time</key>
@@ -2267,15 +2011,15 @@
   </connection>
   <connection>
     <source_block_id>blocks_nlog10_ff_0_0_0</source_block_id>
-    <sink_block_id>qtgui_number_sink_0</sink_block_id>
+    <sink_block_id>qtgui_number_sink_0_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>0</sink_key>
+    <sink_key>1</sink_key>
   </connection>
   <connection>
     <source_block_id>blocks_sub_xx_0</source_block_id>
-    <sink_block_id>qtgui_number_sink_0_0_0</sink_block_id>
+    <sink_block_id>qtgui_number_sink_0_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>0</sink_key>
+    <sink_key>2</sink_key>
   </connection>
   <connection>
     <source_block_id>blocks_throttle_0</source_block_id>
