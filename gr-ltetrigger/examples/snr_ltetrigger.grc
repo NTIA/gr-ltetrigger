@@ -101,11 +101,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1008, 478)</value>
+      <value>(1016, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>10,0,1,1</value>
+      <value>9,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -148,7 +148,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(240, 504)</value>
+      <value>(248, 504)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -187,11 +187,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(456, 478)</value>
+      <value>(464, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>6,0,1,1</value>
+      <value>5,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -230,11 +230,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(840, 478)</value>
+      <value>(848, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>9,0,1,1</value>
+      <value>8,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -273,11 +273,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(728, 478)</value>
+      <value>(736, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>8,0,1,1</value>
+      <value>7,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -316,11 +316,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(568, 478)</value>
+      <value>(576, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>7,0,1,1</value>
+      <value>6,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -351,7 +351,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(104, 357)</value>
+      <value>(112, 349)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -363,7 +363,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>0.01</value>
+      <value>0.001</value>
     </param>
   </block>
   <block>
@@ -385,11 +385,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(16, 457)</value>
+      <value>(24, 417)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>4,0,1,2</value>
+      <value>4,0,6,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -413,11 +413,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>start</key>
-      <value>0</value>
+      <value>1.5</value>
     </param>
     <param>
       <key>step</key>
-      <value>0.01</value>
+      <value>0.1</value>
     </param>
     <param>
       <key>stop</key>
@@ -444,7 +444,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(104, 197)</value>
+      <value>(16, 349)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -467,7 +467,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>value</key>
-      <value>0.05</value>
+      <value>0.005</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -475,11 +475,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(176, 9)</value>
+      <value>(360, 9)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>1,1,1,1</value>
+      <value>0,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -503,15 +503,15 @@ above this threshold.</value>
     </param>
     <param>
       <key>start</key>
-      <value>0</value>
+      <value>0.00001</value>
     </param>
     <param>
       <key>step</key>
-      <value>0.0001</value>
+      <value>0.00005</value>
     </param>
     <param>
       <key>stop</key>
-      <value>0.05</value>
+      <value>0.005</value>
     </param>
     <param>
       <key>rangeType</key>
@@ -542,11 +542,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(456, 398)</value>
+      <value>(464, 398)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>5,0,1,1</value>
+      <value>4,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -589,7 +589,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(240, 400)</value>
+      <value>(248, 400)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -632,7 +632,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(64, 278)</value>
+      <value>(64, 198)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -683,7 +683,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(776, 145)</value>
+      <value>(648, 65)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -734,7 +734,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(456, 321)</value>
+      <value>(440, 329)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -777,7 +777,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(456, 241)</value>
+      <value>(440, 249)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -820,7 +820,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(640, 302)</value>
+      <value>(640, 310)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -832,7 +832,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>length</key>
-      <value>20000</value>
+      <value>1000</value>
     </param>
     <param>
       <key>max_iter</key>
@@ -848,7 +848,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>scale</key>
-      <value>1</value>
+      <value>1/1000.0</value>
     </param>
     <param>
       <key>type</key>
@@ -875,7 +875,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(640, 222)</value>
+      <value>(640, 230)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -887,7 +887,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>length</key>
-      <value>20000</value>
+      <value>1000</value>
     </param>
     <param>
       <key>max_iter</key>
@@ -903,7 +903,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>scale</key>
-      <value>1</value>
+      <value>1/1000.0</value>
     </param>
     <param>
       <key>type</key>
@@ -934,7 +934,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(416, 140)</value>
+      <value>(240, 140)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -981,7 +981,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(808, 229)</value>
+      <value>(808, 237)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1005,7 +1005,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>k</key>
-      <value>0</value>
+      <value>13.010299956639813</value>
     </param>
     <param>
       <key>n</key>
@@ -1032,7 +1032,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(808, 309)</value>
+      <value>(808, 317)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1056,7 +1056,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>k</key>
-      <value>0</value>
+      <value>13.010299956639813</value>
     </param>
     <param>
       <key>n</key>
@@ -1083,7 +1083,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(960, 345)</value>
+      <value>(960, 369)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1134,62 +1134,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(240, 140)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>id</key>
-      <value>blocks_throttle_0</value>
-    </param>
-    <param>
-      <key>ignoretag</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>samples_per_second</key>
-      <value>samp_rate</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>complex</value>
-    </param>
-    <param>
-      <key>vlen</key>
-      <value>1</value>
-    </param>
-  </block>
-  <block>
-    <key>blocks_throttle</key>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>comment</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(240, 292)</value>
+      <value>(240, 212)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1295,7 +1240,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(304, 12)</value>
+      <value>(176, 12)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1326,7 +1271,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(392, 12)</value>
+      <value>(264, 12)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1361,7 +1306,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1112, 65)</value>
+      <value>(1128, 65)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1396,7 +1341,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(912, 65)</value>
+      <value>(920, 65)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1463,7 +1408,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1112, 142)</value>
+      <value>(920, 145)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -1483,7 +1428,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>legend</key>
-      <value>False</value>
+      <value>True</value>
     </param>
     <param>
       <key>alpha1</key>
@@ -1495,7 +1440,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>label1</key>
-      <value></value>
+      <value>Signal</value>
     </param>
     <param>
       <key>width1</key>
@@ -1527,7 +1472,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>label2</key>
-      <value></value>
+      <value>Noise</value>
     </param>
     <param>
       <key>width2</key>
@@ -1543,7 +1488,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>label3</key>
-      <value></value>
+      <value>Signal+Noise</value>
     </param>
     <param>
       <key>width3</key>
@@ -1659,7 +1604,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>nconnections</key>
-      <value>1</value>
+      <value>3</value>
     </param>
     <param>
       <key>showports</key>
@@ -1699,7 +1644,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>ymax</key>
-      <value>10</value>
+      <value>-40</value>
     </param>
     <param>
       <key>ymin</key>
@@ -1734,11 +1679,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1112, 241)</value>
+      <value>(1128, 297)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>0,1,1,1</value>
+      <value>1,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1922,7 +1867,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>min</key>
-      <value>-50</value>
+      <value>-120</value>
     </param>
     <param>
       <key>name</key>
@@ -1953,7 +1898,7 @@ above this threshold.</value>
     <source_block_id>blocks_add_xx_0</source_block_id>
     <sink_block_id>qtgui_freq_sink_x_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>0</sink_key>
+    <sink_key>2</sink_key>
   </connection>
   <connection>
     <source_block_id>blocks_complex_to_mag_squared_0</source_block_id>
@@ -1992,6 +1937,12 @@ above this threshold.</value>
     <sink_key>0</sink_key>
   </connection>
   <connection>
+    <source_block_id>blocks_multiply_const_vxx_0</source_block_id>
+    <sink_block_id>qtgui_freq_sink_x_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
     <source_block_id>blocks_nlog10_ff_0_0</source_block_id>
     <sink_block_id>blocks_sub_xx_0</sink_block_id>
     <source_key>0</source_key>
@@ -2022,12 +1973,6 @@ above this threshold.</value>
     <sink_key>2</sink_key>
   </connection>
   <connection>
-    <source_block_id>blocks_throttle_0</source_block_id>
-    <sink_block_id>blocks_multiply_const_vxx_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
     <source_block_id>blocks_throttle_0_0</source_block_id>
     <sink_block_id>blocks_add_xx_0</sink_block_id>
     <source_key>0</source_key>
@@ -2040,8 +1985,14 @@ above this threshold.</value>
     <sink_key>0</sink_key>
   </connection>
   <connection>
+    <source_block_id>blocks_throttle_0_0</source_block_id>
+    <sink_block_id>qtgui_freq_sink_x_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>1</sink_key>
+  </connection>
+  <connection>
     <source_block_id>file_source</source_block_id>
-    <sink_block_id>blocks_throttle_0</sink_block_id>
+    <sink_block_id>blocks_multiply_const_vxx_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
