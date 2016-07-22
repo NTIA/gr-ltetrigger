@@ -6,11 +6,11 @@
     <key>options</key>
     <param>
       <key>author</key>
-      <value></value>
+      <value>Douglas Anderson</value>
     </param>
     <param>
       <key>window_size</key>
-      <value></value>
+      <value>1300, 700</value>
     </param>
     <param>
       <key>category</key>
@@ -22,7 +22,7 @@
     </param>
     <param>
       <key>description</key>
-      <value></value>
+      <value>Test LTE downlink detection at different SNR</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -78,7 +78,7 @@
     </param>
     <param>
       <key>title</key>
-      <value></value>
+      <value>SNR LTETrigger Demo</value>
     </param>
   </block>
   <block>
@@ -101,11 +101,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1016, 478)</value>
+      <value>(1136, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>9,1,1,1</value>
+      <value>6,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -187,11 +187,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(464, 478)</value>
+      <value>(584, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>5,1,1,1</value>
+      <value>2,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -230,11 +230,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(848, 478)</value>
+      <value>(968, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>8,1,1,1</value>
+      <value>5,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -273,11 +273,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(736, 478)</value>
+      <value>(856, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>7,1,1,1</value>
+      <value>4,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -316,11 +316,11 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(576, 478)</value>
+      <value>(696, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>6,1,1,1</value>
+      <value>3,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -389,7 +389,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>4,0,6,1</value>
+      <value>4,0,3,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -479,7 +479,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>0,1,1,1</value>
+      <value>1,0,3,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -542,11 +542,11 @@ above this threshold.</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(464, 398)</value>
+      <value>(448, 478)</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>4,1,1,1</value>
+      <value>1,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1412,7 +1412,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>0,0,2,1</value>
+      <value>0,0,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1600,7 +1600,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>name</key>
-      <value>""</value>
+      <value>Power Spectral Density</value>
     </param>
     <param>
       <key>nconnections</key>
@@ -1683,7 +1683,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>gui_hint</key>
-      <value>1,1,1,1</value>
+      <value>0,1,1,1</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1715,7 +1715,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>unit1</key>
-      <value>dB</value>
+      <value>dBm</value>
     </param>
     <param>
       <key>color10</key>
@@ -1747,7 +1747,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>unit2</key>
-      <value>dB</value>
+      <value>dBm</value>
     </param>
     <param>
       <key>color3</key>
