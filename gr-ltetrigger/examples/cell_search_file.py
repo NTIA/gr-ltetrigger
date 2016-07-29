@@ -131,10 +131,11 @@ def main(args):
     if args.fifoname:
         if not os.path.exists(args.fifoname):
             os.mkfifo(args.fifoname)
-            pipeout = os.open(args.fifoname, os.O_WRONLY)
-            for cell in results:
-                os.write(pipeout, str(len(cell)) + "\n" + cell)
-            os.close(pipeout)
+
+        pipeout = os.open(args.fifoname, os.O_WRONLY)
+        for cell in results:
+            os.write(pipeout, str(len(cell)) + "\n" + cell)
+        os.close(pipeout)
 
 
 if __name__ == '__main__':
