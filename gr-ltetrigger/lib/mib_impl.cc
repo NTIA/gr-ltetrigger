@@ -39,7 +39,7 @@ namespace gr {
     const pmt::pmt_t mib_impl::cp_type_tag_key = pmt::intern("cp_type");
 
     const pmt::pmt_t
-    mib_impl::pss_drop_port_id = pmt::intern("pss_drop");
+    mib_impl::tracking_lost_tag_key = pmt::intern("tracking_lost");
 
     const pmt::pmt_t
     mib_impl::drop_port_id = pmt::intern("drop");
@@ -77,10 +77,6 @@ namespace gr {
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(half_frame_length);
 
-      message_port_register_in(pss_drop_port_id);
-      set_msg_handler(pss_drop_port_id,
-                      boost::bind(&mib_impl::pss_drop_handler, this, _1));
-
       message_port_register_out(track_port_id);
       message_port_register_out(drop_port_id);
     }
@@ -102,7 +98,20 @@ namespace gr {
       const cf_t *in {static_cast<const cf_t *>(input_items[0])};
       cf_t *out {static_cast<cf_t *>(output_items[0])};
 
-      std::lock_guard<std::mutex> lock {d_mutex};
+      get_tags_in_window(d_tracking_lost_tags, 0, 0, 1, tracking_lost_tag_key);
+
+      if (!d_tracking_lost_tags.empty()) {
+        if (d_cell_published)
+          message_port_pub(drop_port_id, d_current_tracking_cell);
+
+        d_cell_published = false;
+        d_current_tracking_cell = pmt::PMT_NIL;
+        srslte_ue_mib_reset(&d_mib);
+
+        consume_each(half_frame_length);
+        d_tracking_lost_tags.clear();
+        return 0;
+      }
 
       if (d_cell_published) {
         consume_each(half_frame_length);
@@ -112,11 +121,9 @@ namespace gr {
       get_tags_in_window(d_cell_id_tags, 0, 0, 1, cell_id_tag_key);
       get_tags_in_window(d_cp_type_tags, 0, 0, 1, cp_type_tag_key);
 
-      // sanity check
-      if (d_cell_id_tags.size() != 1 || d_cp_type_tags.size() != 1) {
-        consume_each(half_frame_length);
-        return 0;
-      }
+      // sanity check - if this trips it's likely you're setting psr_threshold
+      //                too low and sending junk through SSS - use >= 1.5
+      assert(d_cell_id_tags.size() == 1 && d_cp_type_tags.size() == 1);
 
       unsigned int cell_id = pmt::to_long(d_cell_id_tags[0].value);
       srslte_cp_t cp;
@@ -164,19 +171,6 @@ namespace gr {
 
       // Tell runtime system how many output items we produced.
       return noutput_items;
-    }
-
-    void
-    mib_impl::pss_drop_handler(pmt::pmt_t msg)
-    {
-      std::lock_guard<std::mutex> lock {d_mutex};
-
-      if (d_cell_published)
-        message_port_pub(drop_port_id, d_current_tracking_cell);
-
-      d_cell_published = false;
-      d_current_tracking_cell = pmt::PMT_NIL;
-      srslte_ue_mib_reset(&d_mib);
     }
 
     pmt::pmt_t

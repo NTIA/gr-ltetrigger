@@ -37,7 +37,7 @@ namespace gr {
 
     // initialize static variable
     const pmt::pmt_t
-    pss_impl::pss_drop_port_id = pmt::intern("pss_drop");
+    pss_impl::tracking_lost_tag_key = pmt::intern("tracking_lost");
 
     pss::sptr
     pss::make(int N_id_2,
@@ -46,10 +46,11 @@ namespace gr {
               int track_every)
     {
       return gnuradio::get_initial_sptr(new pss_impl {N_id_2,
-                                                      psr_threshold,
-                                                      track_after,
-                                                      track_every});
+            psr_threshold,
+            track_after,
+            track_every});
     }
+
     /*
      * private constructor
      */
@@ -79,7 +80,6 @@ namespace gr {
 
       set_history(half_frame_length);
       set_output_multiple(half_frame_length);
-      message_port_register_out(pss_drop_port_id);
     }
 
     /*
@@ -137,14 +137,23 @@ namespace gr {
       tracking.score--;
 
       if (tracking)
-        tracking.countdown = 0; // force resync
+        tracking.timer = 0; // resync immediately
 
       if (tracking && tracking.score == 0) {
         // signal cell dropped
+
         tracking.stop();
+
         srslte_pss_synch_reset(&d_pss);
-        d_psr_max = 0;
-        message_port_pub(pss_drop_port_id, pmt::PMT_NIL);
+        std::memset(d_psr_data, 0, moving_avg_sz);
+        d_psr_i = 0;
+
+        std::memset(d_channel_estimation_buffer, 0, SRSLTE_PSS_LEN);
+        std::memset(d_cfo_data, 0, moving_avg_sz);
+        d_cfo.last_freq = 0;
+        d_cfo_i = 0;
+
+        d_tracking_lost = true;  // signal tracking_lost tag be sent
       }
     }
 
@@ -157,15 +166,15 @@ namespace gr {
       const cf_t *in {&(static_cast<const cf_t *>(input_items[0])[history()-1])};
       cf_t *out {static_cast<cf_t *>(output_items[0])}; // output stream
 
-      if (!d_tracking || d_tracking.countdown == 0) {
-        d_tracking.countdown = d_track_every_n_frames;
+      if (!d_tracking || d_tracking.timer == 0) {
+        d_tracking.timer = d_track_every_n_frames;
         d_peak_pos = srslte_pss_synch_find_pss(&d_pss,
                                                const_cast<cf_t *>(in),
                                                &d_psr);
 
         d_psr_data[d_psr_i++ % moving_avg_sz] = d_psr;
       } else {
-        d_tracking.countdown--;
+        d_tracking.timer--;
       }
 
       if (d_psr > d_psr_threshold)
@@ -176,7 +185,7 @@ namespace gr {
       if (d_psr > d_psr_max)
         d_psr_max = d_psr;
 
-      if (d_tracking) {
+      if (d_tracking || d_tracking_lost) {
         int frame_start {d_peak_pos - slot_length};
         d_peak_pos = slot_length;
 
@@ -189,19 +198,24 @@ namespace gr {
 
         consume_each(nconsume);
 
-        // estimate CFO
-        float cfo {srslte_pss_synch_cfo_compute(&d_pss,
-                                                &out[slot_length - symbol_sz])};
-        d_cfo_data[d_cfo_i++ % moving_avg_sz] = cfo;
+        if (d_tracking) {
+          // estimate CFO
+          size_t pss_start = slot_length - symbol_sz;
+          float cfo {srslte_pss_synch_cfo_compute(&d_pss, &out[pss_start])};
+          d_cfo_data[d_cfo_i++ % moving_avg_sz] = cfo;
 
-        // correct CFO in place
-        srslte_cfo_correct(&d_cfo, out, out, -mean_cfo() / symbol_sz);
+          // correct CFO in place
+          srslte_cfo_correct(&d_cfo, out, out, -mean_cfo() / symbol_sz);
 
-        if (srslte_pss_synch_chest(&d_pss,
-                                   &out[slot_length - symbol_sz],
-                                   d_channel_estimation_buffer))
-          throw std::runtime_error("Error computing channel estimation");
-
+          if (srslte_pss_synch_chest(&d_pss,
+                                     &out[slot_length - symbol_sz],
+                                     d_channel_estimation_buffer))
+            throw std::runtime_error("Error computing channel estimation");
+        } else {
+          // tracking lost - force downstream blocks to reset state
+          add_item_tag(0, nitems_written(0), tracking_lost_tag_key, pmt::PMT_NIL);
+          d_tracking_lost = false;
+        }
       } else {
         // nothing to see, move along
         consume_each(half_frame_length); // drop the current half frame

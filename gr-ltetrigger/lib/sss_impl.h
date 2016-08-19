@@ -21,6 +21,8 @@
 #ifndef INCLUDED_LTETRIGGER_SSS_IMPL_H
 #define INCLUDED_LTETRIGGER_SSS_IMPL_H
 
+#include <vector>
+
 #include <pmt/pmt.h>
 
 #include <srslte/srslte.h>
@@ -46,6 +48,9 @@ namespace gr {
 
       static const pmt::pmt_t cell_id_tag_key;
       static const pmt::pmt_t cp_type_tag_key;
+      static const pmt::pmt_t tracking_lost_tag_key;
+
+      std::vector<tag_t> d_tracking_lost_tags;
 
     public:
       sss_impl(int N_id_2);

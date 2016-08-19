@@ -59,14 +59,6 @@ class downlink_trigger_c(gr.hier_block2):
         self.connect(self, self.pss1, self.sss1, self.mib1, self.tag1)
         self.connect(self, self.pss2, self.sss2, self.mib2, self.tag2)
 
-        pss_drop_port_id = "pss_drop"
-        self.msg_connect(self.pss0, pss_drop_port_id,
-                         self.mib0, pss_drop_port_id)
-        self.msg_connect(self.pss1, pss_drop_port_id,
-                         self.mib1, pss_drop_port_id)
-        self.msg_connect(self.pss2, pss_drop_port_id,
-                         self.mib2, pss_drop_port_id)
-
         drop_port_id = "drop"
         self.message_port_register_hier_in(drop_port_id)
         self.message_port_register_hier_out(drop_port_id)

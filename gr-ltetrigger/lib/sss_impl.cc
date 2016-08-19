@@ -36,7 +36,11 @@ namespace gr {
 
     // initialize static variables
     const pmt::pmt_t sss_impl::cell_id_tag_key = pmt::intern("cell_id");
+
     const pmt::pmt_t sss_impl::cp_type_tag_key = pmt::intern("cp_type");
+
+    const pmt::pmt_t
+    sss_impl::tracking_lost_tag_key = pmt::intern("tracking_lost");
 
     sss::sptr
     sss::make(int N_id_2)
@@ -54,6 +58,7 @@ namespace gr {
         d_N_id_2 {N_id_2}
     {
       srslte_use_standard_symbol_size(true);
+      set_tag_propagation_policy(TPP_ALL_TO_ALL);
 
       if (srslte_sync_init(&d_sync, half_frame_length, max_offset, symbol_sz))
         throw std::runtime_error {"Error initializing SSS SYNC"};
@@ -82,6 +87,17 @@ namespace gr {
     {
       const cf_t *in {static_cast<const cf_t *>(input_items[0])};
       cf_t *out {static_cast<cf_t *>(output_items[0])};
+
+      get_tags_in_window(d_tracking_lost_tags, 0, 0, 1, tracking_lost_tag_key);
+
+      if (!d_tracking_lost_tags.empty()) {
+        srslte_sync_reset(&d_sync);
+        d_subframe_idx = -1;
+        d_tracking_lost_tags.clear();
+
+        std::copy(in, &in[half_frame_length], out);
+        return half_frame_length;
+      }
 
       srslte_sync_t *sync {&d_sync};
 

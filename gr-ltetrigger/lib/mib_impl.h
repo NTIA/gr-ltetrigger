@@ -37,7 +37,6 @@ namespace gr {
     class mib_impl : public mib
     {
     private:
-      void pss_drop_handler(pmt::pmt_t msg);
       pmt::pmt_t pack_cell(const srslte_cell_t &cell, const int &sfn) const;
 
       static const int slot_length {960};
@@ -47,19 +46,19 @@ namespace gr {
 
       static const pmt::pmt_t cell_id_tag_key;
       static const pmt::pmt_t cp_type_tag_key;
+      static const pmt::pmt_t tracking_lost_tag_key;
 
       static const pmt::pmt_t drop_port_id;
-      static const pmt::pmt_t pss_drop_port_id;
       static const pmt::pmt_t track_port_id;
 
       pmt::pmt_t d_current_tracking_cell {pmt::PMT_NIL};
 
-      std::mutex d_mutex;
       bool d_cell_published;
 
       srslte_cell_t d_cell;
       srslte_ue_mib_t d_mib;
 
+      std::vector<tag_t> d_tracking_lost_tags;
       std::vector<tag_t> d_cell_id_tags;
       std::vector<tag_t> d_cp_type_tags;
 
