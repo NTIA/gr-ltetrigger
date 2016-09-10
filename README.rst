@@ -81,3 +81,13 @@ Quick Start
           'phich_len': 'Normal',
           'sfn_offset': 0L,
           'tracking_start_time': 1464123775L}
+
+Support
+-------
+Douglas Anderson | NTIA/Institute for Telecommunication Sciences | danderson@bldrdoc.its.gov
+
+Legal
+-----
+Copyright NTIA/Institute for Telecommunication Sciences. Released under GPL 3 - see `LICENSE`_.
+
+.. _LICENSE: LICENSE.txt
