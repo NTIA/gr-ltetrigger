@@ -27,7 +27,7 @@ Building
              $ make && make test
              $ sudo make install
 
-#. Build and install LTETrigger:
+#. Build and install gr-ltetrigger:
 
    .. code:: bash
 
