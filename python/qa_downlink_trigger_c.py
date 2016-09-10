@@ -65,9 +65,9 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self.assertEqual(cell['phich_len'], "Normal", msg="wrong phich_len")
 
     def test_6prb_t(self):
-        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        srcdir = os.path.dirname(os.getenv('srcdir').rstrip('/'))  # set by gr testing framework
         data_fname = os.path.join(srcdir,
-                                  'test_data/lte_frame_6prb_cellid_123')
+                                  'test_frames/lte_frame_6prb_cellid_123')
         fsrc = blocks.file_source(gr.sizeof_gr_complex,
                                   data_fname,
                                   repeat=True)
@@ -98,9 +98,9 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_25prb_t(self):
-        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        srcdir = os.path.dirname(os.getenv('srcdir').rstrip('/'))  # set by gr testing framework
         data_fname = os.path.join(srcdir,
-                                  'test_data/lte_frame_25prb_cellid_124')
+                                  'test_frames/lte_frame_25prb_cellid_124')
         fsrc = blocks.file_source(gr.sizeof_gr_complex,
                                   data_fname,
                                   repeat=True)
@@ -133,9 +133,9 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_50prb_t(self):
-        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        srcdir = os.path.dirname(os.getenv('srcdir').rstrip('/'))  # set by gr testing framework
         data_fname = os.path.join(srcdir,
-                                  'test_data/lte_frame_50prb_cellid_125')
+                                  'test_frames/lte_frame_50prb_cellid_125')
         fsrc = blocks.file_source(gr.sizeof_gr_complex,
                                   data_fname,
                                   repeat=True)
@@ -168,9 +168,9 @@ class qa_downlink_trigger_c(gr_unittest.TestCase):
         self._check_phich_len(cell)
 
     def test_100prb_t(self):
-        srcdir = os.getenv('srcdir')  # set by gr testing framework
+        srcdir = os.path.dirname(os.getenv('srcdir').rstrip('/'))  # set by gr testing framework
         data_fname = os.path.join(srcdir,
-                                  'test_data/lte_frame_100prb_cellid_369')
+                                  'test_frames/lte_frame_100prb_cellid_369')
         fsrc = blocks.file_source(gr.sizeof_gr_complex,
                                   data_fname,
                                   repeat=True)
