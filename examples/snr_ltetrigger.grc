@@ -78,7 +78,7 @@
     </param>
     <param>
       <key>title</key>
-      <value>SNR LTETrigger Demo</value>
+      <value>gr-ltetrigger SNR Demo</value>
     </param>
   </block>
   <block>
@@ -1189,7 +1189,7 @@ above this threshold.</value>
     </param>
     <param>
       <key>file</key>
-      <value>/home/dja/dev/ltetrigger/gr-ltetrigger/python/test_data/lte_frame_6prb_cellid_123</value>
+      <value>/home/dja/dev/gr-ltetrigger/test_frames/lte_frame_6prb_cellid_123</value>
     </param>
     <param>
       <key>_coordinate</key>

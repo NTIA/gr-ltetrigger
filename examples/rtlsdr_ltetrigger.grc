@@ -78,7 +78,7 @@
     </param>
     <param>
       <key>title</key>
-      <value>RTL-SDR LTETrigger</value>
+      <value>gr-ltetrigger RTL-SDR Demo</value>
     </param>
   </block>
   <block>
