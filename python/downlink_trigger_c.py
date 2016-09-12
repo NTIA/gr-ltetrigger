@@ -1,6 +1,10 @@
 from gnuradio import gr, blocks
 
-import ltetrigger
+try:
+    import ltetrigger
+except ImportError:
+    # unittest
+    import ltetrigger_swig as ltetrigger
 
 
 MIN_PSR_THRESHOLD = 1.5  # experimentially, lower than this leads to crashes
