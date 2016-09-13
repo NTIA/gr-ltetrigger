@@ -57,7 +57,7 @@ namespace gr {
       static const pmt::pmt_t tracking_lost_tag_key;
 
       void incr_score(tracking_t &tracking);
-      void decr_score(tracking_t &tracking);
+      void reset_score(tracking_t &tracking);
 
       bool d_tracking_lost {false};
 

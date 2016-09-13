@@ -127,34 +127,28 @@ namespace gr {
     }
 
     void
-    pss_impl::decr_score(tracking_t &tracking)
+    pss_impl::reset_score(tracking_t &tracking)
     {
       //if (d_N_id_2 == 2) std::printf("%d ", tracking.score);
 
       if (tracking.score == 0)
         return;
 
-      tracking.score--;
+      tracking.score = 0;
+      tracking.timer = 0; // resync immediately
 
-      if (tracking)
-        tracking.timer = 0; // resync immediately
+      tracking.stop();
 
-      if (tracking && tracking.score == 0) {
-        // signal cell dropped
+      srslte_pss_synch_reset(&d_pss);
+      std::memset(d_psr_data, 0, moving_avg_sz);
+      d_psr_i = 0;
 
-        tracking.stop();
+      std::memset(d_channel_estimation_buffer, 0, SRSLTE_PSS_LEN);
+      std::memset(d_cfo_data, 0, moving_avg_sz);
+      d_cfo.last_freq = 0;
+      d_cfo_i = 0;
 
-        srslte_pss_synch_reset(&d_pss);
-        std::memset(d_psr_data, 0, moving_avg_sz);
-        d_psr_i = 0;
-
-        std::memset(d_channel_estimation_buffer, 0, SRSLTE_PSS_LEN);
-        std::memset(d_cfo_data, 0, moving_avg_sz);
-        d_cfo.last_freq = 0;
-        d_cfo_i = 0;
-
-        d_tracking_lost = true;  // signal tracking_lost tag be sent
-      }
+      d_tracking_lost = true;  // signal tracking_lost tag be sent
     }
 
     int
@@ -177,15 +171,17 @@ namespace gr {
         d_tracking.timer--;
       }
 
-      if (d_psr > d_psr_threshold)
+      bool psr_over_threshold {d_psr > d_psr_threshold};
+
+      if (psr_over_threshold)
         incr_score(d_tracking);
       else
-        decr_score(d_tracking);
+        reset_score(d_tracking);
 
       if (d_psr > d_psr_max)
         d_psr_max = d_psr;
 
-      if (d_tracking || d_tracking_lost) {
+      if (psr_over_threshold || d_tracking_lost) {
         int frame_start {d_peak_pos - slot_length};
         d_peak_pos = slot_length;
 
