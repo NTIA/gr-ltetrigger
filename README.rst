@@ -84,7 +84,7 @@ Quick Start
 
 Support
 -------
-Douglas Anderson | NTIA/Institute for Telecommunication Sciences | danderson@bldrdoc.its.gov
+Douglas Anderson | NTIA/Institute for Telecommunication Sciences | danderson@ntia.doc.gov
 
 Legal
 -----
