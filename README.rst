@@ -4,6 +4,18 @@ gr-ltetrigger
 gr-ltetrigger is a set of utilities for sensing LTE. It is built using GNU
 Radio and srsLTE.
 
+Screenshots
+-----------
+
+.. image:: docs/gr_ltetrigger_rtlsdr_demo.png
+   :alt:   GRC example showing LTE downlink parameters using RTL-SDR
+   :align: center
+
+.. image:: docs/gr_ltetrigger_snr_demo.png
+   :alt:   GRC example showing cell detection algorithm performance by SNR
+   :align: center
+
+
 Building
 --------
 
