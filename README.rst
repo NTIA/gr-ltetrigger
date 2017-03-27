@@ -23,8 +23,7 @@ Building
 
    .. code:: bash
 
-             $ sudo apt-get install swig
-             $ sudo apt install gnuradio-dev
+             $ sudo apt install gnuradio-dev swig
 
 #. Build and install srsLTE. There is a naming collision between srsLTE
    and a requirement of GNU Radio, which we must fix before building:
