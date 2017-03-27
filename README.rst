@@ -19,11 +19,11 @@ Screenshots
 Building
 --------
 
-#. Install GNU Radio (example assumes Ubuntu 16.04, adjust as needed)
+#. Install SWIG and GNU Radio (example assumes Ubuntu 16.04, adjust as needed)
 
    .. code:: bash
 
-             $ sudo apt install gnuradio-dev
+             $ sudo apt install gnuradio-dev swig
 
 #. Build and install srsLTE. There is a naming collision between srsLTE
    and a requirement of GNU Radio, which we must fix before building:
