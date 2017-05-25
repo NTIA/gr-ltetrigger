@@ -23,7 +23,7 @@ Building
 
    .. code:: bash
 
-             $ sudo apt install gnuradio-dev swig fftw-dev gr-osmosdr gnuradio-companion
+             $ sudo apt install gnuradio-dev swig fftw-dev gr-osmosdr
 
 #. Build and install srsLTE. There is a naming collision between srsLTE
    and a requirement of GNU Radio, which we must fix before building:
