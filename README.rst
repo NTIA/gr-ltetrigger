@@ -101,6 +101,6 @@ Douglas Anderson | NTIA/Institute for Telecommunication Sciences | danderson@nti
 
 Legal
 -----
-Copyright NTIA/Institute for Telecommunication Sciences. See `LICENSE`_.
+See `LICENSE`_.
 
 .. _LICENSE: LICENSE.txt
