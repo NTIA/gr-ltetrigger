@@ -71,7 +71,11 @@ namespace gr {
       d_cell.cp = SRSLTE_CP_NORM;
       d_cell.id = 0;
 
-      if (srslte_ue_mib_init(&d_mib, d_cell))
+      int rf_nof_rx_ant = 1;    // FIXME: take as block input
+      int buffer_sz = 3 * SRSLTE_SF_LEN_PRB(d_cell.nof_prb);
+      d_sf_buffer.resize(rf_nof_rx_ant, std::vector<cf_t>(buffer_sz));
+
+      if (srslte_ue_mib_init(&d_mib, (cf_t **)d_sf_buffer.data(), d_cell.nof_prb))
         throw std::runtime_error {"Error initializing MIB"};
 
       set_tag_propagation_policy(TPP_DONT);
@@ -145,7 +149,7 @@ namespace gr {
         d_cell.id = cell_id;
         d_cell.cp = cp;
 
-        if (srslte_ue_mib_init(&d_mib, d_cell)) {
+        if (srslte_ue_mib_init(&d_mib, (cf_t **)d_sf_buffer.data(), d_cell.nof_prb)) {
           // SSS block passed us non-sense
           consume_each(half_frame_length);
           return 0;
@@ -153,7 +157,6 @@ namespace gr {
       }
 
       int ret {srslte_ue_mib_decode(&d_mib,
-                                    const_cast<cf_t *>(in),
                                     d_bch_payload,
                                     &d_cell.nof_ports,
                                     &d_sfn_offset)};

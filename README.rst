@@ -19,21 +19,26 @@ Screenshots
 Building
 --------
 
-#. Install SWIG, GNU Radio, GNU Radio Companion, fftw and gr-osmosdr (example assumes Ubuntu 16.04, adjust as needed)
+#. Install SWIG, GNU Radio, GNU Radio Companion, fftw and gr-osmosdr (example
+   assumes Ubuntu 16.04, adjust as needed)
 
    .. code:: bash
 
-             $ sudo apt install gnuradio-dev swig fftw-dev gr-osmosdr
+             $ sudo apt install gnuradio-dev swig fftw-dev gr-osmosdr libuhd-dev
 
-#. Build and install srsLTE. There is a naming collision between srsLTE
-   and a requirement of GNU Radio, which we must fix before building:
+#. Install the dependencies of srsLTE. See https://github.com/srslte/srslte for
+   a command for Ubuntu.
+
+#. Build and install srsLTE. There is a naming collision between srsLTE and a
+   requirement of GNU Radio (log4cpp), which we must fix before building:
 
    .. code:: bash
 
              $ git clone https://github.com/srslte/srslte
              $ cd srslte
-             $ grep -R -l " DEBUG(" . |xargs sed -i 's/ DEBUG(/ SRSLTE_DEBUG(/g'
-             $ find -name ue_cell_search.c |xargs sed -i 's/DEBUG/SRSLTE_DEBUG/g'
+             $ grep -R -l " DEBUG(" . |xargs sed -i 's/ DEBUG(/ DEBUG_(/g'
+             $ grep -R -l " ERROR(" . |xargs sed -i 's/ ERROR(/ ERROR_(/g'
+             $ find -name ue_cell_search.c |xargs sed -i 's/DEBUG/DEBUG_/g'
              $ mkdir build; cd build
              $ cmake ../
              $ make && make test

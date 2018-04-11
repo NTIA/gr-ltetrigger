@@ -58,6 +58,8 @@ namespace gr {
       srslte_cell_t d_cell;
       srslte_ue_mib_t d_mib;
 
+      std::vector<std::vector<cf_t>> d_sf_buffer;
+
       std::vector<tag_t> d_tracking_lost_tags;
       std::vector<tag_t> d_cell_id_tags;
       std::vector<tag_t> d_cp_type_tags;

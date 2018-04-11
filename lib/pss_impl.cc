@@ -69,10 +69,10 @@ namespace gr {
       srslte_use_standard_symbol_size(true);
       //srslte_verbose = SRSLTE_VERBOSE_DEBUG;
 
-      if (srslte_pss_synch_init(&d_pss, half_frame_length))
+      if (srslte_pss_init(&d_pss, half_frame_length))
         throw std::runtime_error {"Error initializing PSS"};
 
-      if (srslte_pss_synch_set_N_id_2(&d_pss, N_id_2))
+      if (srslte_pss_set_N_id_2(&d_pss, N_id_2))
         throw std::runtime_error {"Error initializing PSS N_id_2"};
 
       if (srslte_cfo_init(&d_cfo, half_frame_length))
@@ -87,7 +87,7 @@ namespace gr {
      */
     pss_impl::~pss_impl()
     {
-      srslte_pss_synch_free(&d_pss);
+      srslte_pss_free(&d_pss);
       srslte_cfo_free(&d_cfo);
     }
 
@@ -122,7 +122,7 @@ namespace gr {
 
       if (!tracking && tracking.score == max_score) {
         tracking.start();
-        srslte_pss_synch_reset(&d_pss); // reset convolution avg
+        srslte_pss_reset(&d_pss); // reset convolution avg
       }
     }
 
@@ -139,7 +139,7 @@ namespace gr {
 
       tracking.stop();
 
-      srslte_pss_synch_reset(&d_pss);
+      srslte_pss_reset(&d_pss);
       std::memset(d_psr_data, 0, moving_avg_sz);
       d_psr_i = 0;
 
@@ -162,9 +162,9 @@ namespace gr {
 
       if (!d_tracking || d_tracking.timer == 0) {
         d_tracking.timer = d_track_every_n_frames;
-        d_peak_pos = srslte_pss_synch_find_pss(&d_pss,
-                                               const_cast<cf_t *>(in),
-                                               &d_psr);
+        d_peak_pos = srslte_pss_find_pss(&d_pss,
+                                         const_cast<cf_t *>(in),
+                                         &d_psr);
 
         d_psr_data[d_psr_i++ % moving_avg_sz] = d_psr;
       } else {
@@ -197,15 +197,15 @@ namespace gr {
         if (d_tracking) {
           // estimate CFO
           size_t pss_start = slot_length - symbol_sz;
-          float cfo {srslte_pss_synch_cfo_compute(&d_pss, &out[pss_start])};
+          float cfo {srslte_pss_cfo_compute(&d_pss, &out[pss_start])};
           d_cfo_data[d_cfo_i++ % moving_avg_sz] = cfo;
 
           // correct CFO in place
           srslte_cfo_correct(&d_cfo, out, out, -mean_cfo() / symbol_sz);
 
-          if (srslte_pss_synch_chest(&d_pss,
-                                     &out[slot_length - symbol_sz],
-                                     d_channel_estimation_buffer))
+          if (srslte_pss_chest(&d_pss,
+                               &out[slot_length - symbol_sz],
+                               d_channel_estimation_buffer))
             throw std::runtime_error("Error computing channel estimation");
         } else {
           // tracking lost - force downstream blocks to reset state

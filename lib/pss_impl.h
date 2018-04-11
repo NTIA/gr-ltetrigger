@@ -63,7 +63,7 @@ namespace gr {
 
       float compute_moving_avg(const float data[], size_t npts) const;
 
-      srslte_pss_synch_t d_pss;
+      srslte_pss_t d_pss;
       float d_psr_data[moving_avg_sz] {0.0};
       size_t d_psr_i {0};
       float d_psr {0};

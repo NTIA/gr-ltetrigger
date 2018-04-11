@@ -66,7 +66,7 @@ namespace gr {
       if (srslte_sync_set_N_id_2(&d_sync, N_id_2))
         throw std::runtime_error {"Error initializing SSS SYNC N_id_2"};
 
-      if (srslte_sss_synch_set_N_id_2(&d_sync.sss, N_id_2))
+      if (srslte_sss_set_N_id_2(&d_sync.sss, N_id_2))
         throw std::runtime_error {"Error initializing SSS N_id_2"};
 
       set_output_multiple(half_frame_length);
@@ -109,13 +109,13 @@ namespace gr {
 
       unsigned int sss_idx {slot_length - 2 * symbol_sz - sync->cp_len};
 
-      srslte_sss_synch_m0m1_partial(&sync->sss,
+      srslte_sss_m0m1_partial(&sync->sss,
                                     const_cast<cf_t *>(&in[sss_idx]),
                                     1, NULL,
                                     &sync->m0, &sync->m0_value,
                                     &sync->m1, &sync->m1_value);
 
-      int retval = srslte_sss_synch_N_id_1(&sync->sss, sync->m0, sync->m1);
+      int retval = srslte_sss_N_id_1(&sync->sss, sync->m0, sync->m1);
       if (retval == SRSLTE_ERROR)
         return half_frame_length; // mib block ignores input with no tag
       else
@@ -123,7 +123,7 @@ namespace gr {
 
       int cell_id {srslte_sync_get_cell_id(sync)};
 
-      //unsigned int subframe_idx {srslte_sss_synch_subframe(sync->m0, sync->m1)};
+      //unsigned int subframe_idx {srslte_sss_subframe(sync->m0, sync->m1)};
       //if (d_subframe_idx < 0) {
       //  d_subframe_idx = subframe_idx;
       //} else {
