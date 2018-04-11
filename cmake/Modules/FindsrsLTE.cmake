@@ -21,13 +21,13 @@ FIND_PATH(
             ${SRSLTE_SRCDIR}/srslte/include
             ${PC_SRSLTE_INCLUDEDIR}
             ${CMAKE_INSTALL_PREFIX}/include
-    PATHS   /usr/local/include 
-            /usr/include 
+    PATHS   /usr/local/include
+            /usr/include
 )
 
 FIND_LIBRARY(
     SRSLTE_LIBRARY
-    NAMES   srslte
+    NAMES   srslte_common
     HINTS   $ENV{SRSLTE_DIR}/lib
             ${SRSLTE_BUILDDIR}/srslte/lib
             ${PC_SRSLTE_LIBDIR}
@@ -41,7 +41,7 @@ FIND_LIBRARY(
 
 FIND_LIBRARY(
     SRSLTE_LIBRARY_RF
-    NAMES   srslte_rf 
+    NAMES   srslte_rf
     HINTS   $ENV{SRSLTE_DIR}/lib
             ${SRSLTE_BUILDDIR}/srslte/lib
             ${PC_SRSLTE_LIBDIR}
@@ -53,9 +53,10 @@ FIND_LIBRARY(
             /usr/lib64
 )
 
-IF(DEFINED SRSLTE_SRCDIR) 
-    set(SRSLTE_INCLUDE_DIRS ${SRSLTE_SRCDIR}/srslte/include 
-                            ${SRSLTE_SRCDIR}/cuhd/include 
+
+IF(DEFINED SRSLTE_SRCDIR)
+    set(SRSLTE_INCLUDE_DIRS ${SRSLTE_SRCDIR}/srslte/include
+                            ${SRSLTE_SRCDIR}/cuhd/include
                             ${SRSLTE_SRCDIR}/common/include)
 ENDIF(DEFINED SRSLTE_SRCDIR)
 
@@ -68,4 +69,3 @@ message(STATUS "SRSLTE INCLUDE DIRS: " ${SRSLTE_INCLUDE_DIRS})
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SRSLTE DEFAULT_MSG SRSLTE_LIBRARIES SRSLTE_INCLUDE_DIRS)
 MARK_AS_ADVANCED(SRSLTE_LIBRARIES SRSLTE_INCLUDE_DIRS)
-
