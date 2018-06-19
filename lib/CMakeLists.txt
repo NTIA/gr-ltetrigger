@@ -30,6 +30,7 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
   ${SRSLTE_LIBRARY_DIRS}
   )
+
 list(APPEND ltetrigger_sources
     pss_impl.cc
     sss_impl.cc
@@ -47,7 +48,9 @@ target_link_libraries(
   gnuradio-ltetrigger
   ${Boost_LIBRARIES}
   ${GNURADIO_ALL_LIBRARIES}
+  ${FFT_LIBRARIES}
   ${SRSLTE_LIBRARY}
+  ${SRSLTE_LIBRARY_PHY}
   )
 set_target_properties(gnuradio-ltetrigger PROPERTIES DEFINE_SYMBOL "gnuradio_ltetrigger_EXPORTS")
 

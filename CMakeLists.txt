@@ -123,6 +123,18 @@ find_package(Gnuradio "3.7.2" REQUIRED)
 if(NOT CPPUNIT_FOUND)
     message(FATAL_ERROR "CppUnit required to compile ltetrigger")
 endif()
+# FFT
+find_package(FFTW3F REQUIRED)
+if(FFTW3F_FOUND)
+	include_directories(${FFTW3F_INCLUDE_DIRS})
+	link_directories(${FFTW3F_LIBRARY_DIRS})
+	if(BUILD_STATIC)
+		set(FFT_LIBRARIES "${FFTW3F_STATIC_LIBRARIES}")
+	else(BUILD_STATIC)
+		set(FFT_LIBRARIES "${FFTW3F_LIBRARIES}")
+	endif(BUILD_STATIC)
+	message(STATUS "FFT_LIBRARIES: " ${FFT_LIBRARIES})
+endif(FFTW3F_FOUND)
 
 ########################################################################
 # Setup doxygen option
