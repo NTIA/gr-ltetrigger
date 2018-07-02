@@ -40,6 +40,20 @@ FIND_LIBRARY(
 )
 
 FIND_LIBRARY(
+    SRSLTE_LIBRARY_PHY
+    NAMES   srslte_phy
+    HINTS   $ENV{SRSLTE_DIR}/lib
+            ${SRSLTE_BUILDDIR}/srslte/lib
+            ${PC_SRSLTE_LIBDIR}
+            ${CMAKE_INSTALL_PREFIX}/lib
+            ${CMAKE_INSTALL_PREFIX}/lib64
+    PATHS   /usr/local/lib
+            /usr/local/lib64
+            /usr/lib
+            /usr/lib64
+)
+
+FIND_LIBRARY(
     SRSLTE_LIBRARY_RF
     NAMES   srslte_rf
     HINTS   $ENV{SRSLTE_DIR}/lib
@@ -61,7 +75,8 @@ IF(DEFINED SRSLTE_SRCDIR)
 ENDIF(DEFINED SRSLTE_SRCDIR)
 
 SET(SRSLTE_LIBRARIES    ${SRSLTE_LIBRARY_RF}
-                        ${SRSLTE_LIBRARY})
+                        ${SRSLTE_LIBRARY}
+                        ${SRSLTE_LIBRARY_PHY})
 
 message(STATUS "SRSLTE LIBRARIES: " ${SRSLTE_LIBRARIES})
 message(STATUS "SRSLTE INCLUDE DIRS: " ${SRSLTE_INCLUDE_DIRS})
