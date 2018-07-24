@@ -100,8 +100,10 @@ namespace gr {
                            gr_vector_void_star &output_items)
     {
       const cf_t *in {static_cast<const cf_t *>(input_items[0])};
+      cf_t *input = (cf_t *)input_items[0];
       cf_t *out {static_cast<cf_t *>(output_items[0])};
-
+      std::vector<cf_t> v(input, input + noutput_items);
+      d_sf_buffer[0] = v;
       get_tags_in_window(d_tracking_lost_tags, 0, 0, 1, tracking_lost_tag_key);
 
       if (!d_tracking_lost_tags.empty()) {
@@ -154,8 +156,9 @@ namespace gr {
           consume_each(half_frame_length);
           return 0;
         }
+        srslte_ue_mib_set_cell(&d_mib, d_cell);
       }
-
+      srslte_pbch_decode_reset(&d_mib.pbch);
       int ret {srslte_ue_mib_decode(&d_mib,
                                     d_bch_payload,
                                     &d_cell.nof_ports,
