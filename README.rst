@@ -36,6 +36,7 @@ Building
 
              $ git clone https://github.com/srslte/srslte
              $ cd srslte
+             $ git checkout tags/release_18_06_1  # newer releases may work
              $ grep -R -l " DEBUG(" . |xargs sed -i 's/ DEBUG(/ DEBUG_(/g'
              $ grep -R -l " ERROR(" . |xargs sed -i 's/ ERROR(/ ERROR_(/g'
              $ find -name ue_cell_search.c |xargs sed -i 's/DEBUG/DEBUG_/g'
