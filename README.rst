@@ -1,6 +1,8 @@
 gr-ltetrigger
 =============
 
+__Note: this repository is currently unmaintained and unsupported__
+
 gr-ltetrigger is a set of utilities for sensing LTE. It is built using GNU
 Radio and srsLTE.
 
